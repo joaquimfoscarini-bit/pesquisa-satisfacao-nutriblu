@@ -8,23 +8,34 @@
 <title>Pesquisa de Satisfação | NutriBlu</title>
 <style>
 :root{
-  --green:#1F4E3D; --green-2:#2B6A53; --orange:#E08A2E; --cream:#FBF8F1; --ink:#1B2B25; --muted:#5E6F67;
+  --green:#1F4E3D; --green-2:#2B6A53; --green-3:#3E8267; --orange:#E08A2E; --orange-2:#F2A649; --cream:#FBF8F1; --ink:#1B2B25; --muted:#5E6F67;
   --line:#E6E0D2; --card:#FFFFFF; --ok:#1F7A4D; --ok2:#6BAF3F; --warn:#E08A2E; --bad:#C5432F;
-  --radius:18px;
+  --radius:20px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.45}
 body{min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
-.top{background:var(--green);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 20px 44px;position:relative}
-.top .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px;font-size:18px}
-.top .brand i{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--orange)}
-.top .unit{opacity:.85;font-size:13px;margin-top:2px}
-.wrap{max-width:520px;margin:-28px auto 0;padding:0 16px 40px;position:relative}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:0 8px 24px -14px rgba(31,78,61,.35);margin-bottom:14px}
-h1{font-size:22px;line-height:1.2;margin:0 0 6px;color:var(--green)}
+.top{background:linear-gradient(155deg,var(--green) 0%,var(--green-3) 100%);color:#fff;padding:calc(22px + env(safe-area-inset-top)) 20px 64px;position:relative;overflow:hidden;text-align:center}
+.top-decor{position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:
+    radial-gradient(120px 120px at 88% 8%, rgba(224,138,46,.35), transparent 70%),
+    radial-gradient(160px 160px at 6% 92%, rgba(255,255,255,.12), transparent 70%),
+    radial-gradient(90px 90px at 100% 70%, rgba(255,255,255,.10), transparent 70%);
+}
+.logo-wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px}
+.logo-img{height:44px;width:auto;display:block;filter:drop-shadow(0 2px 6px rgba(0,0,0,.15))}
+.logo-fallback{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.3px;font-size:21px}
+.logo-fallback i{display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--orange)}
+.unit-pill{position:relative;z-index:1;display:inline-block;margin-top:12px;padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(2px);font-size:13.5px;font-weight:600;letter-spacing:.2px}
+.wrap{max-width:520px;margin:-40px auto 0;padding:0 16px 40px;position:relative}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 20px;box-shadow:0 14px 32px -16px rgba(31,78,61,.4);margin-bottom:14px}
+.badge-icon{width:54px;height:54px;border-radius:16px;background:linear-gradient(155deg,var(--orange-2),var(--orange));display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:14px;box-shadow:0 8px 18px -8px rgba(224,138,46,.6)}
+.eyebrow{display:inline-flex;align-items:center;gap:6px;background:#EAF3EE;color:var(--green);padding:6px 12px;border-radius:999px;font-weight:700;font-size:12.5px;margin-bottom:12px;letter-spacing:.2px}
+h1{font-size:24px;line-height:1.2;margin:0 0 8px;color:var(--green);letter-spacing:-.2px}
 h2{font-size:19px;line-height:1.25;margin:0 0 14px;color:var(--green)}
 p{margin:0 0 12px}
 .muted{color:var(--muted);font-size:14px}
+.sub{font-size:13px;color:var(--muted);font-weight:600;margin:-4px 0 14px;text-transform:uppercase;letter-spacing:.4px}
 .tabs{display:flex;background:#EFE9DA;border-radius:14px;padding:4px;gap:4px;margin-bottom:14px}
 .tabs button{flex:1;border:0;background:transparent;padding:11px 8px;border-radius:11px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;position:relative}
 .tabs button.on{background:#fff;color:var(--green);box-shadow:0 2px 8px -3px rgba(0,0,0,.2)}
@@ -76,9 +87,13 @@ textarea{min-height:110px;resize:vertical}
 </head>
 <body>
 <header class="top">
+  <div class="top-decor" aria-hidden="true"></div>
   <div class="wrap" style="margin:0 auto;padding:0">
-    <div class="brand"><i></i> NutriBlu</div>
-    <div class="unit" id="unitName">Pesquisa de satisfação</div>
+    <div class="logo-wrap">
+      <img src="logo.png" alt="NutriBlu" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="logo-fallback" style="display:none"><i></i> NutriBlu</div>
+      <div class="unit-pill" id="unitName">Pesquisa de satisfação</div>
+    </div>
   </div>
 </header>
 <main class="wrap" id="view"><div class="spin" aria-label="Carregando"></div></main>
@@ -138,10 +153,12 @@ function authView(mode, msg){
   const days = state.unit.window_days;
   view(`
   <div class="card">
-    <h1>${isReg ? "Vamos começar!" : "Bem-vindo de volta"}</h1>
+    ${isReg ? `<div class="eyebrow">🎁 Concorra a prêmios</div>` : ""}
+    <h1>${isReg ? "Cadastre-se" : "Bem-vindo de volta"}</h1>
+    ${isReg ? `<div class="sub">Somente no primeiro acesso</div>` : ""}
     <p class="muted">${isReg
-      ? `Conte como foi sua refeição <b>1 vez por dia durante ${days} dias</b> e concorra ao sorteio.`
-      : "Entre com sua matrícula e seu PIN para responder ou ver os retornos da gestão."}</p>
+      ? `Participe da nossa pesquisa de satisfação <b>uma vez por dia</b> e concorra a prêmios. Quanto mais participar, mais chances de ganhar!`
+      : "Entre com sua matrícula e sua senha para responder ou ver os retornos da gestão."}</p>
     <div class="tabs" role="tablist">
       <button class="${isReg?"on":""}" onclick="authView('register')">Primeiro acesso</button>
       <button class="${!isReg?"on":""}" onclick="authView('login')">Já tenho cadastro</button>
@@ -150,9 +167,9 @@ function authView(mode, msg){
       ${isReg ? `<label for="name">Nome completo</label><input id="name" type="text" autocomplete="name" maxlength="80" placeholder="Como você se chama?">` : ""}
       <label for="mat">Matrícula</label>
       <input id="mat" type="text" inputmode="text" autocomplete="username" maxlength="20" placeholder="Número da sua matrícula">
-      <label for="pin">${isReg ? "Crie um PIN (4 a 6 números)" : "PIN"}</label>
+      <label for="pin">${isReg ? "Crie uma senha (4 a 6 números)" : "Senha"}</label>
       <input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="${isReg?"new-password":"current-password"}" placeholder="••••">
-      ${isReg ? `<div class="hint">O PIN protege as respostas da gestão aos seus comentários. Anote para entrar nos próximos dias.</div>
+      ${isReg ? `<div class="hint">A senha protege as respostas da gestão aos seus comentários. Anote para entrar nos próximos dias.</div>
       <label class="check"><input id="consent" type="checkbox">
         <span>Concordo em participar do sorteio e autorizo o uso do meu nome e matrícula pela NutriBlu apenas para esta pesquisa e para o sorteio (LGPD).</span></label>` : ""}
       <div id="msg">${errBox(msg)}</div>
