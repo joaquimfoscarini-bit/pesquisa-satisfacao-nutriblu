@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1F4E3D">
+<title>Pesquisa de Satisfação | NutriBlu</title>
+<style>
+:root{
+  --green:#1F4E3D; --green-2:#2B6A53; --orange:#E08A2E; --cream:#FBF8F1; --ink:#1B2B25; --muted:#5E6F67;
+  --line:#E6E0D2; --card:#FFFFFF; --ok:#1F7A4D; --ok2:#6BAF3F; --warn:#E08A2E; --bad:#C5432F;
+  --radius:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.45}
+body{min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+.top{background:var(--green);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 20px 44px;position:relative}
+.top .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px;font-size:18px}
+.top .brand i{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--orange)}
+.top .unit{opacity:.85;font-size:13px;margin-top:2px}
+.wrap{max-width:520px;margin:-28px auto 0;padding:0 16px 40px;position:relative}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:0 8px 24px -14px rgba(31,78,61,.35);margin-bottom:14px}
+h1{font-size:22px;line-height:1.2;margin:0 0 6px;color:var(--green)}
+h2{font-size:19px;line-height:1.25;margin:0 0 14px;color:var(--green)}
+p{margin:0 0 12px}
+.muted{color:var(--muted);font-size:14px}
+.tabs{display:flex;background:#EFE9DA;border-radius:14px;padding:4px;gap:4px;margin-bottom:14px}
+.tabs button{flex:1;border:0;background:transparent;padding:11px 8px;border-radius:11px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;position:relative}
+.tabs button.on{background:#fff;color:var(--green);box-shadow:0 2px 8px -3px rgba(0,0,0,.2)}
+.badge{display:inline-block;min-width:20px;padding:1px 6px;margin-left:6px;border-radius:10px;background:var(--orange);color:#fff;font-size:12px;font-weight:700}
+label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+input[type=text],input[type=password],input[type=tel],textarea{width:100%;padding:14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;background:#fff;color:var(--ink);outline:none}
+input:focus,textarea:focus{border-color:var(--green-2);box-shadow:0 0 0 3px rgba(43,106,83,.15)}
+textarea{min-height:110px;resize:vertical}
+.hint{font-size:12.5px;color:var(--muted);margin-top:5px}
+.btn{width:100%;min-height:56px;border:0;border-radius:14px;background:var(--green);color:#fff;font:inherit;font-weight:700;font-size:17px;cursor:pointer;margin-top:18px;transition:transform .05s,opacity .2s}
+.btn:active{transform:scale(.99)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.alt{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+.link{background:none;border:0;color:var(--green-2);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer;padding:8px}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13.5px;color:var(--muted)}
+.check input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--green)}
+.err{background:#FDECE8;border:1px solid #F3C2B8;color:#8A2A1A;padding:12px 14px;border-radius:12px;margin-top:14px;font-size:14px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{border:2px solid var(--line);background:#fff;border-radius:16px;padding:16px 8px 14px;text-align:center;cursor:pointer;font:inherit;color:var(--ink);transition:all .15s;position:relative}
+.opt .e{font-size:42px;line-height:1;display:block;margin-bottom:8px;filter:grayscale(.55);transition:filter .15s,transform .15s}
+.opt .t{font-weight:700;font-size:14.5px;display:block}
+.opt:hover .e{filter:none}
+.opt.sel{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,#fff)}
+.opt.sel .e{filter:none;transform:scale(1.12)}
+.opt.sel::after{content:"✓";position:absolute;top:8px;right:10px;color:var(--c);font-weight:800}
+.hero{text-align:center;padding:8px 0 4px}
+.hero .big{font-size:56px;line-height:1}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#EAF3EE;color:var(--green);padding:7px 12px;border-radius:999px;font-weight:600;font-size:13.5px}
+.stats{display:flex;gap:10px;margin-top:16px}
+.stat{flex:1;background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.stat b{display:block;font-size:24px;color:var(--green)}
+.stat span{font-size:12px;color:var(--muted)}
+.item{border-top:1px solid var(--line);padding:16px 0}
+.item:first-child{border-top:0;padding-top:4px}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12.5px;padding:4px 10px;border-radius:999px;color:#fff;background:var(--c)}
+.mine{background:var(--cream);border-radius:12px;padding:12px 14px;font-size:15px;word-wrap:break-word}
+.reply{margin:10px 0 0 14px;border-left:4px solid var(--green-2);background:#EAF3EE;border-radius:0 12px 12px 0;padding:12px 14px;font-size:15px}
+.reply small{display:block;color:var(--green);font-weight:700;margin-bottom:4px}
+.reply.new{border-left-color:var(--orange);background:#FFF3E2}
+.wait{margin:10px 0 0 14px;font-size:13.5px;color:var(--muted);font-style:italic}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:8px}
+.spin{width:34px;height:34px;border:4px solid #DCE8E1;border-top-color:var(--green);border-radius:50%;animation:s 1s linear infinite;margin:40px auto}
+@keyframes s{to{transform:rotate(360deg)}}
+.pop{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap" style="margin:0 auto;padding:0">
+    <div class="brand"><i></i> NutriBlu</div>
+    <div class="unit" id="unitName">Pesquisa de satisfação</div>
+  </div>
+</header>
+<main class="wrap" id="view"><div class="spin" aria-label="Carregando"></div></main>
+
+<script>
+const SB_URL = "https://yfbmpvmavjwuedphyrsa.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYm1wdm1hdmp3dWVkcGh5cnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2MTQ0MjYsImV4cCI6MjEwNjE5MDQyNn0.2clDzH9PT4IwkUYDVc6VHH3h8Gq2mWKKw1e3d-zeaeA";
+
+const RATINGS = [
+  {v:4, t:"Muito satisfeito",   e:"😄", c:"#1F7A4D"},
+  {v:3, t:"Satisfeito",         e:"🙂", c:"#6BAF3F"},
+  {v:2, t:"Insatisfeito",       e:"🙁", c:"#E08A2E"},
+  {v:1, t:"Muito insatisfeito", e:"😠", c:"#C5432F"},
+];
+const R = v => RATINGS.find(r => r.v === v);
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtDate = d => { const [y,m,day] = String(d).slice(0,10).split("-"); return `${day}/${m}/${y}`; };
+const fmtDT = iso => new Date(iso).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+
+const slug = (new URLSearchParams(location.search).get("u") || "").toLowerCase().trim();
+const TK = "ns_token_" + slug;
+const state = { unit:null, status:null, tab:"survey", rating:null, comments:null, justAnswered:false };
+
+async function api(fn, args = {}) {
+  const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json", apikey:SB_KEY, Authorization:"Bearer "+SB_KEY },
+    body: JSON.stringify(args)
+  });
+  const txt = await res.text();
+  let data = null; try { data = txt ? JSON.parse(txt) : null; } catch(e){}
+  if (!res.ok) throw new Error((data && data.message) || "Não foi possível concluir. Verifique sua conexão e tente novamente.");
+  return data;
+}
+const token = () => { try { return localStorage.getItem(TK); } catch(e){ return null; } };
+const setToken = t => { try { t ? localStorage.setItem(TK,t) : localStorage.removeItem(TK); } catch(e){} };
+
+function view(html){ $("#view").innerHTML = html; window.scrollTo({top:0}); }
+function errBox(msg){ return msg ? `<div class="err" role="alert">${esc(msg)}</div>` : ""; }
+
+/* ---------- Boot ---------- */
+async function boot(){
+  if (!slug) return view(`<div class="card"><h1>Link incompleto</h1><p class="muted">Escaneie novamente o QR Code da sua unidade para acessar a pesquisa.</p></div>`);
+  try {
+    state.unit = await api("get_unit",{p_slug:slug});
+  } catch(e){ return view(`<div class="card"><h1>Sem conexão</h1><p class="muted">${esc(e.message)}</p><button class="btn" onclick="boot()">Tentar de novo</button></div>`); }
+  if (!state.unit.found) return view(`<div class="card"><h1>Unidade não encontrada</h1><p class="muted">Escaneie novamente o QR Code da sua unidade.</p></div>`);
+  $("#unitName").textContent = state.unit.name;
+  if (token()) { try { await loadHome(); return; } catch(e){ setToken(null); } }
+  authView("register");
+}
+
+/* ---------- Auth ---------- */
+function authView(mode, msg){
+  const isReg = mode === "register";
+  const days = state.unit.window_days;
+  view(`
+  <div class="card">
+    <h1>${isReg ? "Vamos começar!" : "Bem-vindo de volta"}</h1>
+    <p class="muted">${isReg
+      ? `Conte como foi sua refeição <b>1 vez por dia durante ${days} dias</b> e concorra ao sorteio.`
+      : "Entre com sua matrícula e seu PIN para responder ou ver os retornos da gestão."}</p>
+    <div class="tabs" role="tablist">
+      <button class="${isReg?"on":""}" onclick="authView('register')">Primeiro acesso</button>
+      <button class="${!isReg?"on":""}" onclick="authView('login')">Já tenho cadastro</button>
+    </div>
+    <form id="f" novalidate>
+      ${isReg ? `<label for="name">Nome completo</label><input id="name" type="text" autocomplete="name" maxlength="80" placeholder="Como você se chama?">` : ""}
+      <label for="mat">Matrícula</label>
+      <input id="mat" type="text" inputmode="text" autocomplete="username" maxlength="20" placeholder="Número da sua matrícula">
+      <label for="pin">${isReg ? "Crie um PIN (4 a 6 números)" : "PIN"}</label>
+      <input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="${isReg?"new-password":"current-password"}" placeholder="••••">
+      ${isReg ? `<div class="hint">O PIN protege as respostas da gestão aos seus comentários. Anote para entrar nos próximos dias.</div>
+      <label class="check"><input id="consent" type="checkbox">
+        <span>Concordo em participar do sorteio e autorizo o uso do meu nome e matrícula pela NutriBlu apenas para esta pesquisa e para o sorteio (LGPD).</span></label>` : ""}
+      <div id="msg">${errBox(msg)}</div>
+      <button class="btn" id="go" type="submit">${isReg ? "Cadastrar e começar" : "Entrar"}</button>
+    </form>
+  </div>
+  <p class="foot">Suas respostas ajudam a melhorar o cardápio da unidade.</p>`);
+  $("#f").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const btn = $("#go"); btn.disabled = true; btn.textContent = "Aguarde...";
+    try {
+      let out;
+      if (isReg) {
+        out = await api("register_participant",{p_slug:slug,p_name:$("#name").value,p_matricula:$("#mat").value,p_pin:$("#pin").value,p_consent:$("#consent").checked});
+        setToken(out.token);
+      } else {
+        out = await api("login_participant",{p_slug:slug,p_matricula:$("#mat").value,p_pin:$("#pin").value});
+        if (!out.ok) throw new Error(out.message);
+        setToken(out.token);
+      }
+      await loadHome();
+    } catch(e){
+      $("#msg").innerHTML = errBox(e.message);
+      btn.disabled = false; btn.textContent = isReg ? "Cadastrar e começar" : "Entrar";
+    }
+  });
+}
+
+/* ---------- Home ---------- */
+async function loadHome(){
+  state.status = await api("my_status",{p_token:token()});
+  state.rating = null; state.justAnswered = false;
+  renderHome();
+}
+function logout(){ setToken(null); authView("login"); }
+
+function renderHome(){
+  const s = state.status;
+  const unread = s.unread_replies;
+  view(`
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div><h1 style="margin:0">Olá, ${esc(s.name.split(" ")[0])}!</h1>
+      <span class="pill">${s.window_open ? `⏳ ${s.days_left} ${s.days_left===1?"dia":"dias"} de participação` : "Período encerrado"}</span></div>
+      <button class="link" onclick="logout()">Sair</button>
+    </div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="${state.tab==="survey"?"on":""}" onclick="setTab('survey')">Pesquisa</button>
+    <button class="${state.tab==="comments"?"on":""}" onclick="setTab('comments')">Meus comentários${unread>0?`<span class="badge">${unread}</span>`:""}</button>
+  </div>
+  <div id="tab"></div>`);
+  state.tab === "survey" ? surveyTab() : commentsTab();
+}
+function setTab(t){ state.tab = t; renderHome(); }
+
+function surveyTab(){
+  const s = state.status;
+  if (!s.window_open) {
+    $("#tab").innerHTML = `<div class="card hero"><div class="big">🙏</div><h2 style="margin-top:12px">Obrigado por participar!</h2>
+      <p class="muted">Seu período de participação terminou. Você respondeu <b>${s.total_responses}</b> ${s.total_responses===1?"vez":"vezes"}. Veja em <b>Meus comentários</b> se a gestão respondeu você.</p></div>`;
+    return;
+  }
+  if (s.answered_today || state.justAnswered) {
+    $("#tab").innerHTML = `<div class="card hero pop"><div class="big">✅</div><h2 style="margin-top:12px">Resposta de hoje registrada</h2>
+      <p class="muted">Obrigado! Volte amanhã para responder de novo${s.days_left>0?` — você ainda tem ${s.days_left} ${s.days_left===1?"dia":"dias"}`:""}.</p>
+      <div class="stats"><div class="stat"><b>${s.total_responses}</b><span>respostas suas</span></div><div class="stat"><b>${s.total_responses}</b><span>${s.total_responses===1?"chance":"chances"} no sorteio</span></div></div></div>`;
+    return;
+  }
+  $("#tab").innerHTML = `
+  <div class="card">
+    <h2>Como estava sua refeição hoje?</h2>
+    <div class="opts" role="radiogroup" aria-label="Avaliação da refeição">
+      ${RATINGS.map(r => `<button type="button" class="opt" role="radio" aria-checked="false" style="--c:${r.c}" data-v="${r.v}"><span class="e">${r.e}</span><span class="t">${r.t}</span></button>`).join("")}
+    </div>
+    <label for="cm">Quer nos contar mais? <span class="muted" style="font-weight:400">(opcional)</span></label>
+    <textarea id="cm" maxlength="1000" placeholder="Elogio, sugestão ou problema — a gestão lê e responde."></textarea>
+    <div class="hint" id="cnt">0/1000</div>
+    <div id="msg"></div>
+    <button class="btn" id="send" disabled>Enviar resposta</button>
+  </div>`;
+  document.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
+    state.rating = +b.dataset.v;
+    document.querySelectorAll(".opt").forEach(x => { const on = x===b; x.classList.toggle("sel",on); x.setAttribute("aria-checked",on); });
+    $("#send").disabled = false;
+  }));
+  $("#cm").addEventListener("input", e => $("#cnt").textContent = e.target.value.length + "/1000");
+  $("#send").addEventListener("click", async () => {
+    const btn = $("#send"); btn.disabled = true; btn.textContent = "Enviando...";
+    try {
+      await api("submit_response",{p_token:token(),p_rating:state.rating,p_comment:$("#cm").value});
+      state.justAnswered = true;
+      state.status = await api("my_status",{p_token:token()});
+      state.comments = null;
+      renderHome();
+    } catch(e){
+      if (/Sessão expirada/.test(e.message)) { setToken(null); return authView("login", e.message); }
+      $("#msg").innerHTML = errBox(e.message);
+      btn.disabled = false; btn.textContent = "Enviar resposta";
+    }
+  });
+}
+
+async function commentsTab(){
+  $("#tab").innerHTML = `<div class="spin"></div>`;
+  try {
+    const list = await api("my_comments",{p_token:token()});
+    const hadUnread = state.status.unread_replies > 0;
+    if (!list.length) {
+      $("#tab").innerHTML = `<div class="card hero"><div class="big">💬</div><h2 style="margin-top:12px">Nenhum comentário ainda</h2><p class="muted">Quando você deixar um comentário na pesquisa, a resposta da gestão aparece aqui.</p></div>`;
+      return;
+    }
+    $("#tab").innerHTML = `<div class="card">${list.map(it => {
+      const r = R(it.rating);
+      return `<div class="item">
+        <div class="meta"><span>${fmtDate(it.date)}</span><span class="chip" style="--c:${r.c}">${r.e} ${r.t}</span></div>
+        <div class="mine">${esc(it.comment)}</div>
+        ${it.replies.length
+          ? it.replies.map(rp => `<div class="reply ${rp.unread?"new":""}"><small>Resposta da gestão · ${fmtDT(rp.created_at)}${rp.unread?" · NOVA":""}</small>${esc(rp.message)}</div>`).join("")
+          : `<div class="wait">Aguardando resposta da gestão…</div>`}
+      </div>`;
+    }).join("")}</div>`;
+    if (hadUnread) {
+      await api("mark_replies_read",{p_token:token()});
+      state.status.unread_replies = 0;
+      const tb = document.querySelector(".tabs .badge"); if (tb) tb.remove();
+    }
+  } catch(e){
+    if (/Sessão expirada/.test(e.message)) { setToken(null); return authView("login", e.message); }
+    $("#tab").innerHTML = `<div class="card">${errBox(e.message)}</div>`;
+  }
+}
+
+boot();
+</script>
+</body>
+</html>
