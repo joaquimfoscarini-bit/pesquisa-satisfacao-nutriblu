@@ -169,7 +169,7 @@ function authView(mode, msg){
       <input id="mat" type="text" inputmode="text" autocomplete="username" maxlength="20" placeholder="Número da sua matrícula">
       <label for="pin">${isReg ? "Crie uma senha (4 a 6 números)" : "Senha"}</label>
       <input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="${isReg?"new-password":"current-password"}" placeholder="••••">
-      ${isReg ? `<div class="hint">A senha protege as respostas da gestão aos seus comentários. Anote para entrar nos próximos dias.</div>
+      ${isReg ? `<div class="hint">Guarde bem sua senha: é com ela que você entra nos próximos dias.</div>
       <label class="check"><input id="consent" type="checkbox">
         <span>Concordo em participar do sorteio e autorizo o uso do meu nome e matrícula pela NutriBlu apenas para esta pesquisa e para o sorteio (LGPD).</span></label>` : ""}
       <div id="msg">${errBox(msg)}</div>
