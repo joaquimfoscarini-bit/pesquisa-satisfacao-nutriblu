@@ -146,6 +146,13 @@ async function boot(){
 }
 
 /* ---------- Auth ---------- */
+function authTabs(mode){
+  return `<div class="tabs" role="tablist">
+    <button class="${mode==='register'?"on":""}" onclick="authView('register')">Primeiro acesso</button>
+    <button class="${mode==='anon'?"on":""}" onclick="anonView()">Sem cadastro</button>
+    <button class="${mode==='login'?"on":""}" onclick="authView('login')">Já tenho cadastro</button>
+  </div>`;
+}
 function authView(mode, msg){
   const isReg = mode === "register";
   const days = state.unit.window_days;
@@ -157,10 +164,7 @@ function authView(mode, msg){
     <p class="muted">${isReg
       ? `Participe da nossa pesquisa de satisfação <b>uma vez por dia</b> e concorra a prêmios. Quanto mais participar, mais chances de ganhar!`
       : "Entre com sua matrícula e sua senha para responder ou ver os retornos da gestão."}</p>
-    <div class="tabs" role="tablist">
-      <button class="${isReg?"on":""}" onclick="authView('register')">Primeiro acesso</button>
-      <button class="${!isReg?"on":""}" onclick="authView('login')">Já tenho cadastro</button>
-    </div>
+    ${authTabs(mode)}
     <form id="f" novalidate>
       ${isReg ? `<label for="name">Nome completo</label><input id="name" type="text" autocomplete="name" maxlength="80" placeholder="Como você se chama?">` : ""}
       <label for="mat">Matrícula</label>
@@ -174,8 +178,7 @@ function authView(mode, msg){
       <button class="btn" id="go" type="submit">${isReg ? "Cadastrar e começar" : "Entrar"}</button>
     </form>
   </div>
-  <p class="foot">Suas respostas ajudam a melhorar o cardápio da unidade.<br>
-  <button type="button" class="link" onclick="anonView()">Prefiro responder sem me cadastrar</button></p>`);
+  <p class="foot">Suas respostas ajudam a melhorar o cardápio da unidade.</p>`);
   $("#f").addEventListener("submit", async ev => {
     ev.preventDefault();
     const btn = $("#go"); btn.disabled = true; btn.textContent = "Aguarde...";
@@ -204,7 +207,8 @@ function anonView(msg){
   <div class="card">
     <h1>Responder sem cadastro</h1>
     <p class="muted">Sua resposta ajuda a melhorar o cardápio, mas <b>não conta para o sorteio</b> — só quem se cadastra concorre aos prêmios.</p>
-    <h2 style="margin-top:18px">Como estava sua refeição hoje?</h2>
+    ${authTabs('anon')}
+    <h2>Como estava sua refeição hoje?</h2>
     <div class="opts" role="radiogroup" aria-label="Avaliação da refeição">
       ${RATINGS.map(r => `<button type="button" class="opt" role="radio" aria-checked="false" style="--c:${r.c}" data-v="${r.v}"><span class="e">${r.e}</span><span class="t">${r.t}</span></button>`).join("")}
     </div>
@@ -213,8 +217,7 @@ function anonView(msg){
     <div class="hint" id="cnt">0/1000</div>
     <div id="msg">${errBox(msg)}</div>
     <button class="btn" id="send" disabled>Enviar resposta</button>
-  </div>
-  <p class="foot"><button type="button" class="link" onclick="authView('register')">Voltar</button></p>`);
+  </div>`);
   document.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
     state.rating = +b.dataset.v;
     document.querySelectorAll(".opt").forEach(x => { const on = x===b; x.classList.toggle("sel",on); x.setAttribute("aria-checked",on); });
