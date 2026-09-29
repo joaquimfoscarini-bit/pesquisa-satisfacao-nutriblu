@@ -174,7 +174,8 @@ function authView(mode, msg){
       <button class="btn" id="go" type="submit">${isReg ? "Cadastrar e começar" : "Entrar"}</button>
     </form>
   </div>
-  <p class="foot">Suas respostas ajudam a melhorar o cardápio da unidade.</p>`);
+  <p class="foot">Suas respostas ajudam a melhorar o cardápio da unidade.<br>
+  <button type="button" class="link" onclick="anonView()">Prefiro responder sem me cadastrar</button></p>`);
   $("#f").addEventListener("submit", async ev => {
     ev.preventDefault();
     const btn = $("#go"); btn.disabled = true; btn.textContent = "Aguarde...";
@@ -194,6 +195,47 @@ function authView(mode, msg){
       btn.disabled = false; btn.textContent = isReg ? "Cadastrar e começar" : "Entrar";
     }
   });
+}
+
+/* ---------- Anonymous (no registration, no raffle) ---------- */
+function anonView(msg){
+  state.rating = null;
+  view(`
+  <div class="card">
+    <h1>Responder sem cadastro</h1>
+    <p class="muted">Sua resposta ajuda a melhorar o cardápio, mas <b>não conta para o sorteio</b> — só quem se cadastra concorre aos prêmios.</p>
+    <h2 style="margin-top:18px">Como estava sua refeição hoje?</h2>
+    <div class="opts" role="radiogroup" aria-label="Avaliação da refeição">
+      ${RATINGS.map(r => `<button type="button" class="opt" role="radio" aria-checked="false" style="--c:${r.c}" data-v="${r.v}"><span class="e">${r.e}</span><span class="t">${r.t}</span></button>`).join("")}
+    </div>
+    <label for="cm">Quer nos contar mais? <span class="muted" style="font-weight:400">(opcional)</span></label>
+    <textarea id="cm" maxlength="1000" placeholder="Elogio, sugestão ou problema — a gestão lê."></textarea>
+    <div class="hint" id="cnt">0/1000</div>
+    <div id="msg">${errBox(msg)}</div>
+    <button class="btn" id="send" disabled>Enviar resposta</button>
+  </div>
+  <p class="foot"><button type="button" class="link" onclick="authView('register')">Voltar</button></p>`);
+  document.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
+    state.rating = +b.dataset.v;
+    document.querySelectorAll(".opt").forEach(x => { const on = x===b; x.classList.toggle("sel",on); x.setAttribute("aria-checked",on); });
+    $("#send").disabled = false;
+  }));
+  $("#cm").addEventListener("input", e => $("#cnt").textContent = e.target.value.length + "/1000");
+  $("#send").addEventListener("click", async () => {
+    const btn = $("#send"); btn.disabled = true; btn.textContent = "Enviando...";
+    try {
+      await api("submit_anonymous_response",{p_slug:slug,p_rating:state.rating,p_comment:$("#cm").value});
+      anonThanks();
+    } catch(e){
+      $("#msg").innerHTML = errBox(e.message);
+      btn.disabled = false; btn.textContent = "Enviar resposta";
+    }
+  });
+}
+function anonThanks(){
+  view(`<div class="card hero pop"><div class="big">🙏</div><h2 style="margin-top:12px">Obrigado pela resposta!</h2>
+    <p class="muted">Sua opinião foi registrada. Como você respondeu sem se cadastrar, não participa do sorteio desta vez.</p>
+    <button class="btn alt" style="margin-top:8px" onclick="authView('register')">Voltar ao início</button></div>`);
 }
 
 /* ---------- Home ---------- */

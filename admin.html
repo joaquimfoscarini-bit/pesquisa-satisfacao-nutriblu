@@ -189,7 +189,7 @@ async function tabDash(){
   const adhesion=p.active?Math.round(100*d.answered_today/p.active):0;
   $("#body").innerHTML=`
   <div class="grid kpis">
-    <div class="card kpi"><div class="l">Respostas no período</div><div class="v">${k.total}</div><div class="s">${k.respondents} participantes diferentes</div></div>
+    <div class="card kpi"><div class="l">Respostas no período</div><div class="v">${k.total}</div><div class="s">${k.respondents} participantes diferentes${k.anonymous?` · ${k.anonymous} sem cadastro`:""}</div></div>
     <div class="card kpi ${cls}"><div class="l">Satisfação</div><div class="v">${pct(k.csat)}</div><div class="s">Satisfeito + Muito satisfeito</div></div>
     <div class="card kpi"><div class="l">Nota média</div><div class="v">${num2(k.avg_score)}<span style="font-size:16px;color:var(--muted)"> / 4</span></div><div class="s">1 = muito insatisfeito · 4 = muito satisfeito</div></div>
     <div class="card kpi"><div class="l">Adesão hoje</div><div class="v">${adhesion}%</div><div class="s">${d.answered_today} de ${p.active} participantes ativos</div></div>
@@ -222,7 +222,7 @@ async function tabComments(){
       <div class="f"><label>Avaliação</label><select id="cr"><option value="">Todas</option>${RATINGS.map(r=>`<option value="${r.v}">${r.e} ${r.t}</option>`).join("")}</select></div>
       <div class="muted f" style="margin-left:auto">${list.length} comentário${list.length===1?"":"s"}</div></div>
     ${list.length?list.map(c=>{const r=R(c.rating);return`<div class="cm" id="cm-${c.id}">
-      <div class="top"><div class="who"><b>${esc(c.name)}</b><span>Mat. ${esc(c.matricula)} · ${esc(c.unit)} · ${fd(c.date)}</span></div><span class="rchip" style="--c:${r.c}">${r.e} ${r.t}</span></div>
+      <div class="top"><div class="who"><b>${esc(c.name)}</b><span>${c.anonymous?"Sem cadastro":"Mat. "+esc(c.matricula)} · ${esc(c.unit)} · ${fd(c.date)}</span></div><span class="rchip" style="--c:${r.c}">${r.e} ${r.t}</span></div>
       <div class="bubble">${esc(c.comment)}</div>
       ${c.replies.map(x=>`<div class="rep"><small>Resposta enviada · ${fdt(x.created_at)} ${x.read?"· ✓ lida":"· não lida"}</small>${esc(x.message)}</div>`).join("")}
       <div class="rf"><textarea id="rt-${c.id}" maxlength="1000" placeholder="Escreva a resposta que o participante verá na pesquisa..."></textarea><button class="btn sm" onclick="sendReply('${c.id}')">Responder</button></div></div>`}).join(""):`<div class="empty">Nenhum comentário para este filtro. 🎉</div>`}</div>`;
