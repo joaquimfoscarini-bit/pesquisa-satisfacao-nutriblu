@@ -156,12 +156,13 @@ function authView(mode, msg){
   const isReg = mode === "register";
   const days = state.unit.window_days;
   view(`
+  <button type="button" class="btn alt" style="margin-top:0;margin-bottom:14px" onclick="anonView()">Participar sem cadastro</button>
   <div class="card">
     ${isReg ? `<div class="tag"><span class="ic">🎁</span>Concorra a prêmios</div>` : ""}
     <h1>${isReg ? "Cadastre-se" : "Bem-vindo de volta"}</h1>
     ${isReg ? `<div class="sub">Somente no primeiro acesso</div>` : ""}
     <p class="muted">${isReg
-      ? `Participe da nossa pesquisa de satisfação <b>uma vez por dia</b> e concorra a prêmios. Quanto mais participar, mais chances de ganhar!`
+      ? `Para concorrer a prêmios, cadastre-se e participe <b>uma vez por dia</b>. Quanto mais participar, mais chances de ganhar!`
       : "Entre com sua matrícula e sua senha para responder ou ver os retornos da gestão."}</p>
     ${authTabs(mode)}
     <form id="f" novalidate>
@@ -177,7 +178,6 @@ function authView(mode, msg){
       <button class="btn" id="go" type="submit">${isReg ? "Cadastrar e começar" : "Entrar"}</button>
     </form>
   </div>
-  <button type="button" class="btn alt" onclick="anonView()">Participar sem cadastro</button>
   <p class="foot">Suas respostas ajudam a melhorar o cardápio da unidade.</p>`);
   $("#f").addEventListener("submit", async ev => {
     ev.preventDefault();
