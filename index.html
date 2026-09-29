@@ -156,7 +156,7 @@ function authView(mode, msg){
   const isReg = mode === "register";
   const days = state.unit.window_days;
   view(`
-  <button type="button" class="btn alt" style="margin-top:0;margin-bottom:14px" onclick="anonView()">Participar sem cadastro</button>
+  <button type="button" class="btn alt" style="margin-top:26px;margin-bottom:14px" onclick="anonView()">Participar sem cadastro</button>
   <div class="card">
     ${isReg ? `<div class="tag"><span class="ic">🎁</span>Concorra a prêmios</div>` : ""}
     <h1>${isReg ? "Cadastre-se" : "Bem-vindo de volta"}</h1>
