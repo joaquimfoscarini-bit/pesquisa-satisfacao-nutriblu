@@ -149,7 +149,6 @@ async function boot(){
 function authTabs(mode){
   return `<div class="tabs" role="tablist">
     <button class="${mode==='register'?"on":""}" onclick="authView('register')">Primeiro acesso</button>
-    <button class="${mode==='anon'?"on":""}" onclick="anonView()">Sem cadastro</button>
     <button class="${mode==='login'?"on":""}" onclick="authView('login')">Já tenho cadastro</button>
   </div>`;
 }
@@ -178,6 +177,7 @@ function authView(mode, msg){
       <button class="btn" id="go" type="submit">${isReg ? "Cadastrar e começar" : "Entrar"}</button>
     </form>
   </div>
+  <button type="button" class="btn alt" onclick="anonView()">Participar sem cadastro</button>
   <p class="foot">Suas respostas ajudam a melhorar o cardápio da unidade.</p>`);
   $("#f").addEventListener("submit", async ev => {
     ev.preventDefault();
@@ -207,7 +207,6 @@ function anonView(msg){
   <div class="card">
     <h1>Responder sem cadastro</h1>
     <p class="muted">Sua resposta ajuda a melhorar o cardápio, mas <b>não conta para o sorteio</b> — só quem se cadastra concorre aos prêmios.</p>
-    ${authTabs('anon')}
     <h2>Como estava sua refeição hoje?</h2>
     <div class="opts" role="radiogroup" aria-label="Avaliação da refeição">
       ${RATINGS.map(r => `<button type="button" class="opt" role="radio" aria-checked="false" style="--c:${r.c}" data-v="${r.v}"><span class="e">${r.e}</span><span class="t">${r.t}</span></button>`).join("")}
@@ -217,7 +216,8 @@ function anonView(msg){
     <div class="hint" id="cnt">0/1000</div>
     <div id="msg">${errBox(msg)}</div>
     <button class="btn" id="send" disabled>Enviar resposta</button>
-  </div>`);
+  </div>
+  <p class="foot"><button type="button" class="link" onclick="authView('register')">Voltar</button></p>`);
   document.querySelectorAll(".opt").forEach(b => b.addEventListener("click", () => {
     state.rating = +b.dataset.v;
     document.querySelectorAll(".opt").forEach(x => { const on = x===b; x.classList.toggle("sel",on); x.setAttribute("aria-checked",on); });
