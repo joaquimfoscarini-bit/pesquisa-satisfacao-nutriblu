@@ -5,45 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Gestão · Pesquisa de Satisfação | NutriBlu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,680;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
-:root{--green:#1F4E3D;--green-2:#2B6A53;--orange:#E08A2E;--cream:#FBF8F1;--ink:#1B2B25;--muted:#5E6F67;--line:#E6E0D2;--card:#fff;--ok:#1F7A4D;--ok2:#6BAF3F;--warn:#E08A2E;--bad:#C5432F}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.45}
-.hdr{background:var(--green);color:#fff;position:sticky;top:0;z-index:20}
-.hdr .in{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.brand{font-weight:800;font-size:18px;display:flex;align-items:center;gap:9px}
-.brand i{width:12px;height:12px;border-radius:50%;background:var(--orange);display:inline-block}
-.brand small{font-weight:500;opacity:.8;font-size:13px}
-nav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
-nav button{background:transparent;border:0;color:#DCEBE3;font:inherit;font-weight:600;padding:9px 14px;border-radius:10px;cursor:pointer}
-nav button.on{background:rgba(255,255,255,.16);color:#fff}
-nav button:hover{background:rgba(255,255,255,.1)}
+:root{
+  --green:#1F4E3D; --green-2:#2B6A53; --green-3:#3E8267; --orange:#E08A2E; --orange-2:#F2A649; --butter:#F6C15C;
+  --cream:#FBF6EA; --ink:#22301C; --muted:#63705B;
+  --line:#E9E0C8; --card:#FFFFFF; --ok:#1F7A4D; --ok2:#6BAF3F; --warn:#E08A2E; --bad:#C5432F;
+  --serif:"Fraunces",Georgia,serif;
+  --radius:20px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Inter",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.45}
+h1,h2,h3{font-family:var(--serif);color:var(--green);margin:0 0 8px;text-wrap:balance}
+h1{font-weight:680;font-size:27px;line-height:1.1;letter-spacing:-.3px}
+h2{font-weight:680;font-size:19px}
+.top{background:linear-gradient(180deg,#20553F 0%,var(--green) 62%,#193F30 100%);color:#fff;padding:calc(18px + env(safe-area-inset-top)) 20px 20px;position:relative}
+.top .in{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.logo-wrap{display:flex;align-items:center;gap:12px}
+.logo-img{height:40px;width:auto;display:block}
+.logo-fallback{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.3px;font-size:18px;color:#fff}
+.logo-fallback i{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--orange)}
+.unit-pill{font-size:11.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:2px}
+.out{background:transparent;border:1.5px solid rgba(255,255,255,.5);color:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer}
+.out:hover{background:rgba(255,255,255,.12)}
+main{max-width:1200px;margin:-16px auto 0;padding:0 20px 40px;position:relative}
+.navrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+nav{display:flex;background:#EFE9DA;border-radius:14px;padding:4px;gap:4px;flex-wrap:wrap;flex:1}
+nav button{background:transparent;border:0;padding:11px 16px;border-radius:11px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap}
+nav button.on{background:#fff;color:var(--green);box-shadow:0 2px 8px -3px rgba(0,0,0,.2)}
 .badge{background:var(--orange);color:#fff;border-radius:10px;padding:1px 7px;font-size:12px;margin-left:6px}
-.out{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:10px;padding:8px 12px;font:inherit;cursor:pointer}
-main{max-width:1200px;margin:0 auto;padding:20px}
-.filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:18px}
-.filters label,.f label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-select,input[type=text],input[type=password],input[type=date],input[type=number],textarea{font:inherit;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);max-width:100%}
+.filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:18px;box-shadow:0 20px 40px -30px rgba(20,45,35,.35)}
+.filters label,.f label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+select,input[type=text],input[type=password],input[type=date],input[type=number],textarea{font:inherit;padding:12px 13px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);max-width:100%}
 select:focus,input:focus,textarea:focus{outline:none;border-color:var(--green-2);box-shadow:0 0 0 3px rgba(43,106,83,.15)}
 textarea{width:100%;min-height:74px}
-.chips{display:flex;gap:6px}
-.chip-b{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip-b{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
 .chip-b.on{background:var(--green);border-color:var(--green);color:#fff}
-.btn{background:var(--green);color:#fff;border:0;border-radius:11px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}
-.btn:hover{background:var(--green-2)}
-.btn.alt{background:#fff;color:var(--green);border:1.5px solid var(--green)}
-.btn.or{background:var(--orange)}
-.btn.sm{padding:7px 12px;font-size:13px}
+.btn{background:linear-gradient(155deg,var(--green-3),var(--green));color:#fff;border:0;border-radius:14px;padding:12px 18px;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 10px 20px -10px rgba(31,78,61,.55);transition:transform .05s,opacity .2s}
+.btn:active{transform:scale(.99)}
+.btn:hover{filter:brightness(1.04)}
+.btn.alt{background:transparent;color:var(--green);border:1.5px solid var(--green);box-shadow:none}
+.btn.or{background:linear-gradient(155deg,var(--orange-2),var(--orange));box-shadow:0 10px 20px -10px rgba(224,138,46,.55)}
+.btn.sm{padding:9px 14px;font-size:13.5px;border-radius:12px}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 .grid{display:grid;gap:14px}
 .kpis{grid-template-columns:repeat(3,1fr);margin-bottom:18px}
 .g2{grid-template-columns:2fr 1fr}
-.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 8px 22px -16px rgba(31,78,61,.4)}
-.card h3{margin:0 0 12px;font-size:15px;color:var(--green)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:0 20px 40px -28px rgba(20,45,35,.4)}
+.card h3{margin:0 0 12px;font-size:16px;color:var(--green)}
 .kpi .l{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
-.kpi .v{font-size:34px;font-weight:800;color:var(--green);line-height:1.15;margin:4px 0}
+.kpi .v{font-family:var(--serif);font-weight:680;font-size:32px;color:var(--green);line-height:1.15;margin:6px 0}
 .kpi .s{font-size:13px;color:var(--muted)}
 .kpi.ok .v{color:var(--ok)}.kpi.mid .v{color:var(--warn)}.kpi.bad .v{color:var(--bad)}
 .kpi .s b{color:var(--orange)}
@@ -56,7 +72,7 @@ tr:last-child td{border-bottom:0}
 .scroll{overflow:auto}
 .rchip{display:inline-flex;gap:6px;align-items:center;font-weight:700;font-size:12.5px;padding:4px 10px;border-radius:999px;color:#fff;background:var(--c);white-space:nowrap}
 .cm{border-top:1px solid var(--line);padding:16px 0}.cm:first-child{border-top:0}
-.cm .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.cm .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;background:none;color:inherit;padding:0}
 .cm .who b{font-size:15px}.cm .who span{color:var(--muted);font-size:13px;margin-left:6px}
 .bubble{background:var(--cream);border-radius:12px;padding:12px 14px;word-wrap:break-word;white-space:pre-wrap}
 .rep{margin:8px 0 0 18px;border-left:4px solid var(--green-2);background:#EAF3EE;border-radius:0 12px 12px 0;padding:10px 13px;white-space:pre-wrap}
@@ -66,29 +82,29 @@ tr:last-child td{border-bottom:0}
 .empty{text-align:center;color:var(--muted);padding:34px 10px}
 .f{margin-bottom:12px}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
-.win{display:flex;align-items:center;gap:14px;padding:14px;border-radius:14px;background:#FFF3E2;border:2px solid var(--orange);margin-bottom:10px}
+.win{display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;background:#FFF3E2;border:2px solid var(--orange);margin-bottom:10px}
 .win.sup{background:#F4F1E8;border-color:var(--line)}
 .win .m{font-size:34px}
 .win b{font-size:19px;color:var(--green)}
 .win small{display:block;color:var(--muted)}
-.shuffle{font-size:30px;font-weight:800;color:var(--green);text-align:center;padding:26px;background:#EAF3EE;border-radius:14px;min-height:96px}
+.shuffle{font-family:var(--serif);font-size:30px;font-weight:680;color:var(--green);text-align:center;padding:26px;background:#EAF3EE;border-radius:16px;min-height:96px}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 18px;border-radius:12px;z-index:100;box-shadow:0 10px 30px -10px rgba(0,0,0,.4);font-weight:600}
 .toast.err{background:var(--bad)}
 .mask{position:fixed;inset:0;background:rgba(15,30,24,.55);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
-.dlg{background:#fff;border-radius:18px;max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:22px}
-.dlg h3{margin:0 0 12px;color:var(--green);font-size:18px}
+.dlg{background:#fff;border-radius:var(--radius);max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:24px}
+.dlg h3{margin:0 0 12px;color:var(--green);font-size:19px}
 .dlg .act{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
 .spin{width:34px;height:34px;border:4px solid #DCE8E1;border-top-color:var(--green);border-radius:50%;animation:s 1s linear infinite;margin:50px auto}
 @keyframes s{to{transform:rotate(360deg)}}
-.login{max-width:380px;margin:12vh auto;padding:0 16px}
-.err{background:#FDECE8;border:1px solid #F3C2B8;color:#8A2A1A;padding:10px 12px;border-radius:10px;margin-top:12px;font-size:14px}
+.wrap{max-width:400px;margin:-16px auto 0;padding:0 16px 40px;position:relative}
+.err{background:#FDECE8;border:1px solid #F3C2B8;color:#8A2A1A;padding:12px 14px;border-radius:12px;margin-top:14px;font-size:14px}
 .muted{color:var(--muted)}
-.unit{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;background:#fff}
+.unit{border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;background:#fff}
 .unit .h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .tag{font-size:12px;background:#EAF3EE;color:var(--green);padding:3px 9px;border-radius:999px;font-weight:700}
 .tag.off{background:#F3E1DC;color:var(--bad)}
 @media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
-@media(max-width:560px){.kpis{grid-template-columns:1fr}main{padding:14px}.kpi .v{font-size:30px}}
+@media(max-width:560px){.kpis{grid-template-columns:1fr}main{padding:0 14px 30px}.kpi .v{font-size:28px}}
 </style>
 </head>
 <body>
@@ -122,13 +138,30 @@ function dialog(html){const m=document.createElement("div");m.className="mask";m
 const unitArg=()=>S.unit||null;
 
 /* ---------- Login / shell ---------- */
+function topHeader(sub){
+  return `<header class="top"><div class="in">
+    <div class="logo-wrap">
+      <img src="logo-white.png?v=3" alt="NutriBlu Gastronomia Empresarial" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="logo-fallback" style="display:none"><i></i>NutriBlu</div>
+    </div>
+    ${sub||""}
+  </div></header>`;
+}
 function loginView(msg){
-  $("#root").innerHTML=`<div class="login"><div class="card">
-    <div class="brand" style="color:var(--green);margin-bottom:4px"><i></i>NutriBlu</div>
-    <h3 style="font-size:20px;margin:0 0 4px">Gestão da Pesquisa de Satisfação</h3>
-    <p class="muted" style="margin:0 0 14px">Acesso restrito à gestão.</p>
-    <form id="lf"><div class="f"><label>Senha de acesso</label><input id="pw" type="password" style="width:100%" autocomplete="current-password" autofocus></div>
-    <button class="btn" style="width:100%" id="lb">Entrar</button><div id="lm">${msg?`<div class="err">${esc(msg)}</div>`:""}</div></form></div></div>`;
+  $("#root").innerHTML=`${topHeader()}
+  <div class="wrap">
+    <div class="card">
+      <h1>Acesso da gestão</h1>
+      <div class="unit-pill" style="color:var(--muted);margin-bottom:14px">Pesquisa de satisfação</div>
+      <p class="muted">Entre com a senha para gerenciar a pesquisa.</p>
+      <form id="lf" novalidate>
+        <label for="pw">Senha de acesso</label>
+        <input id="pw" type="password" style="width:100%" autocomplete="current-password" autofocus>
+        <div id="lm">${msg?`<div class="err">${esc(msg)}</div>`:""}</div>
+        <button class="btn" style="width:100%;margin-top:18px" id="lb">Entrar</button>
+      </form>
+    </div>
+  </div>`;
   $("#lf").addEventListener("submit",async e=>{
     e.preventDefault();const b=$("#lb");b.disabled=true;
     try{const o=await api("admin_login",{p_pass:$("#pw").value});
@@ -141,10 +174,11 @@ function logout(expired){S.token=null;sessionStorage.removeItem("ns_admin");logi
 
 const TABS=[["dash","Dashboard"],["comments","Comentários"],["raffle","Sorteio"],["people","Participantes"],["units","Unidades"]];
 function shell(){
-  $("#root").innerHTML=`<div class="hdr"><div class="in">
-    <div class="brand"><i></i>NutriBlu <small>Pesquisa de Satisfação</small></div>
-    <nav id="nav"></nav><button class="out" onclick="logout()">Sair</button></div></div>
-    <main><div id="flt"></div><div id="body"></div></main>`;
+  $("#root").innerHTML=`${topHeader(`<div class="unit-pill">Gestão da pesquisa de satisfação</div>`)}
+    <main>
+      <div class="navrow"><nav id="nav"></nav><button class="out" onclick="logout()">Sair</button></div>
+      <div id="flt"></div><div id="body"></div>
+    </main>`;
   renderNav();
 }
 function renderNav(){
