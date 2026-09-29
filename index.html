@@ -210,8 +210,7 @@ function renderHome(){
   view(`
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-      <div><h1 style="margin:0">Olá, ${esc(s.name.split(" ")[0])}!</h1>
-      <span class="pill">${s.window_open ? `⏳ ${s.days_left} ${s.days_left===1?"dia":"dias"} de participação` : "Período encerrado"}</span></div>
+      <h1 style="margin:0">Olá, ${esc(s.name.split(" ")[0])}!</h1>
       <button class="link" onclick="logout()">Sair</button>
     </div>
   </div>
