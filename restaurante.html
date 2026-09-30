@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1F4E3D">
+<title>Pesquisa Restaurante | NutriBlu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,680;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1F4E3D; --green-2:#2B6A53; --green-3:#3E8267; --orange:#E08A2E; --orange-2:#F2A649; --butter:#F6C15C;
+  --cream:#FBF6EA; --ink:#22301C; --muted:#63705B;
+  --line:#E9E0C8; --card:#FFFFFF;
+  --serif:"Fraunces",Georgia,serif;
+  --radius:20px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Inter",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.45}
+body{min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+.top{background:linear-gradient(180deg,#20553F 0%,var(--green) 62%,#193F30 100%);color:#fff;padding:calc(21px + env(safe-area-inset-top)) 20px 28px;position:relative;text-align:center}
+.logo-wrap{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px}
+.logo-img{width:min(167px,48vw);height:auto;display:block}
+.logo-fallback{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.3px;font-size:21px;color:#fff}
+.logo-fallback i{display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--orange)}
+.unit-pill{position:relative;z-index:1;display:block;font-size:12.5px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.wrap{max-width:520px;margin:-22px auto 0;padding:0 16px 40px;position:relative}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px 22px 24px;box-shadow:0 20px 40px -22px rgba(20,45,35,.45);margin-bottom:14px;position:relative}
+.tag{display:inline-flex;align-items:center;gap:9px;background:#F7EFDD;color:#8A5A17;padding:7px 14px 7px 8px;border-radius:999px;font-weight:700;font-size:12.5px;letter-spacing:.15px;margin-bottom:16px}
+.tag .ic{width:22px;height:22px;flex:none;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:12px}
+h1{font-family:var(--serif);font-weight:680;font-size:24px;line-height:1.15;margin:0 0 8px;color:var(--green);letter-spacing:-.3px;text-wrap:balance}
+p{margin:0 0 12px}
+.muted{color:var(--muted);font-size:14px}
+.sub{font-size:12px;color:var(--muted);font-weight:700;margin:-4px 0 14px;text-transform:uppercase;letter-spacing:.6px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:16px;text-align:left;cursor:pointer;font:inherit;font-weight:600;font-size:15px;color:var(--ink);transition:border-color .15s}
+.opt:hover{border-color:var(--green-2)}
+.opt.sel{border-color:var(--green-2);background:#EAF3EE;color:var(--green);box-shadow:0 0 0 2px var(--green-2) inset}
+textarea{width:100%;padding:14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;background:#fff;color:var(--ink);outline:none;min-height:120px;resize:vertical}
+textarea:focus{border-color:var(--green-2);box-shadow:0 0 0 3px rgba(43,106,83,.15)}
+.hint{font-size:12.5px;color:var(--muted);margin-top:5px}
+.btn{width:100%;min-height:56px;border:0;border-radius:14px;background:linear-gradient(155deg,var(--green-3),var(--green));color:#fff;font:inherit;font-weight:700;font-size:17px;cursor:pointer;margin-top:18px;transition:transform .05s,opacity .2s;box-shadow:0 10px 20px -10px rgba(31,78,61,.55)}
+.btn:active{transform:scale(.99)}
+.btn[disabled]{opacity:.4;cursor:not-allowed;box-shadow:none}
+.link{background:none;border:0;color:var(--green-2);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer;padding:8px 0}
+.err{background:#FDECE8;border:1px solid #F3C2B8;color:#8A2A1A;padding:12px 14px;border-radius:12px;margin-top:14px;font-size:14px}
+.hero{text-align:center;padding:8px 0 4px}
+.hero .big{font-size:52px;line-height:1}
+.progress{display:flex;gap:6px;margin-bottom:18px}
+.progress i{flex:1;height:6px;border-radius:3px;background:var(--line);display:block}
+.progress i.done{background:var(--green)}
+.progress i.on{background:var(--orange)}
+.foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:8px}
+.spin{width:34px;height:34px;border:4px solid #DCE8E1;border-top-color:var(--green);border-radius:50%;animation:s 1s linear infinite;margin:40px auto}
+@keyframes s{to{transform:rotate(360deg)}}
+.pop{animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap" style="margin:0 auto;padding:0">
+    <div class="logo-wrap">
+      <img src="logo-white.png?v=3" alt="NutriBlu Gastronomia Empresarial" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="logo-fallback" style="display:none"><i></i> NutriBlu</div>
+      <div class="unit-pill" id="unitPill">Pesquisa Restaurante</div>
+    </div>
+  </div>
+</header>
+<main class="wrap" id="view"><div class="spin" aria-label="Carregando"></div></main>
+
+<script>
+const SB_URL = "https://yfbmpvmavjwuedphyrsa.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYm1wdm1hdmp3dWVkcGh5cnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2MTQ0MjYsImV4cCI6MjEwNjE5MDQyNn0.2clDzH9PT4IwkUYDVc6VHH3h8Gq2mWKKw1e3d-zeaeA";
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtDate = d => { const [y,m,day] = String(d).slice(0,10).split("-"); return `${day}/${m}`; };
+
+const slug = (new URLSearchParams(location.search).get("s") || "").toLowerCase().trim();
+const DK = "nb_device_" + slug;
+const DONE = "nb_done_" + slug;
+const state = { survey:null, step:1, turno:null, freq:null, sugestao:"" };
+
+async function api(fn, args = {}) {
+  const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json", apikey:SB_KEY, Authorization:"Bearer "+SB_KEY },
+    body: JSON.stringify(args)
+  });
+  const txt = await res.text();
+  let data = null; try { data = txt ? JSON.parse(txt) : null; } catch(e){}
+  if (!res.ok) throw new Error((data && data.message) || "Não foi possível concluir. Verifique sua conexão e tente novamente.");
+  return data;
+}
+function deviceToken(){
+  try {
+    let t = localStorage.getItem(DK);
+    if (!t) { t = (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(36).slice(2))); localStorage.setItem(DK, t); }
+    return t;
+  } catch(e){ return "no-storage-"+Date.now(); }
+}
+function alreadyDone(){ try { return localStorage.getItem(DONE) === "1"; } catch(e){ return false; } }
+function markDone(){ try { localStorage.setItem(DONE, "1"); } catch(e){} }
+
+function view(html){ $("#view").innerHTML = html; window.scrollTo({top:0}); }
+function errBox(msg){ return msg ? `<div class="err" role="alert">${esc(msg)}</div>` : ""; }
+
+function progress(){
+  const dots = [1,2,3].map(n => {
+    const cls = state.step>n ? "done" : state.step===n ? "on" : "";
+    return `<i class="${cls}"></i>`;
+  }).join("");
+  return `<div class="progress">${dots}</div>`;
+}
+
+async function boot(){
+  if (!slug) return view(`<div class="card"><h1>Link incompleto</h1><p class="muted">Escaneie novamente o QR Code para acessar a pesquisa.</p></div>`);
+  try {
+    state.survey = await api("get_custom_survey",{p_slug:slug});
+  } catch(e){ return view(`<div class="card"><h1>Sem conexão</h1><p class="muted">${esc(e.message)}</p><button class="btn" onclick="boot()">Tentar de novo</button></div>`); }
+  if (!state.survey.found) return view(`<div class="card"><h1>Pesquisa não encontrada</h1><p class="muted">Escaneie novamente o QR Code da sua unidade.</p></div>`);
+  $("#unitPill").textContent = "Pesquisa Restaurante · " + state.survey.client_unit;
+  if (!state.survey.open) return renderClosed();
+  if (alreadyDone()) return renderAlreadyAnswered();
+  renderIntro();
+}
+
+function renderClosed(){
+  view(`<div class="card hero"><div class="big">⏳</div><h1 style="margin-top:12px">Pesquisa encerrada</h1>
+    <p class="muted">O período desta pesquisa já terminou. Obrigado pelo interesse!</p></div>`);
+}
+
+function renderAlreadyAnswered(){
+  view(`<div class="card hero"><div class="big">✅</div><h1 style="margin-top:12px">Você já respondeu esta pesquisa</h1>
+    <p class="muted">Obrigado por participar! Cada celular pode responder só uma vez, para manter o resultado confiável.</p></div>
+    <p class="foot">Pesquisa válida até ${fmtDate(state.survey.closes_at)}</p>`);
+}
+
+function renderIntro(){
+  view(`
+  <div class="card">
+    ${progress()}
+    <div class="tag"><span class="ic">🤝</span>Sua opinião importa</div>
+    <h1>Vamos juntos fazer do nosso restaurante um lugar melhor</h1>
+    <p class="muted" style="margin-bottom:22px">Cada resposta ajuda a gestão a decidir o que muda por aqui. São só 3 perguntas rápidas, sem cadastro — você faz parte dessa mudança.</p>
+    <div class="sub">Pergunta 1 de 3</div>
+    <p style="font-weight:700;font-size:17px;color:var(--green);margin:0 0 14px">Em qual turno você trabalha?</p>
+    <div class="opts" id="opts1"></div>
+    <button class="btn" id="go1" disabled>Continuar</button>
+  </div>`);
+  const OPTS = ["1º Turno","2º Turno","3º Turno","Horário Administrativo"];
+  $("#opts1").innerHTML = OPTS.map(o => `<button type="button" class="opt" data-v="${esc(o)}">${esc(o)}</button>`).join("");
+  document.querySelectorAll("#opts1 .opt").forEach(b => b.addEventListener("click", () => {
+    state.turno = b.dataset.v;
+    document.querySelectorAll("#opts1 .opt").forEach(x => x.classList.toggle("sel", x===b));
+    $("#go1").disabled = false;
+  }));
+  $("#go1").addEventListener("click", () => { state.step = 2; renderStep2(); });
+}
+
+function renderStep2(){
+  view(`
+  <div class="card">
+    ${progress()}
+    <button type="button" class="link" style="margin:-6px 0 10px;display:block" id="back1">&larr; Voltar</button>
+    <div class="sub">Pergunta 2 de 3</div>
+    <h1>Você costuma almoçar no restaurante da empresa?</h1>
+    <div class="opts" id="opts2" style="margin-top:14px"></div>
+    <button class="btn" id="go2" disabled>Continuar</button>
+  </div>`);
+  const OPTS = ["Sim, todos os dias","Sim, algumas vezes na semana","Raramente","Não utilizo o restaurante"];
+  $("#opts2").innerHTML = OPTS.map(o => `<button type="button" class="opt" data-v="${esc(o)}">${esc(o)}</button>`).join("");
+  document.querySelectorAll("#opts2 .opt").forEach(b => b.addEventListener("click", () => {
+    state.freq = b.dataset.v;
+    document.querySelectorAll("#opts2 .opt").forEach(x => x.classList.toggle("sel", x===b));
+    $("#go2").disabled = false;
+  }));
+  $("#back1").addEventListener("click", () => { state.step = 1; renderIntro(); });
+  $("#go2").addEventListener("click", () => { state.step = 3; renderStep3(); });
+}
+
+function renderStep3(msg){
+  view(`
+  <div class="card">
+    ${progress()}
+    <button type="button" class="link" style="margin:-6px 0 10px;display:block" id="back2">&larr; Voltar</button>
+    <div class="sub">Pergunta 3 de 3</div>
+    <h1>Alguma sugestão de melhoria?</h1>
+    <p class="muted">Elogio, crítica ou ideia — a gestão lê. <span style="font-weight:400">(opcional)</span></p>
+    <textarea id="sug" maxlength="1000" placeholder="Escreva aqui...">${esc(state.sugestao)}</textarea>
+    <div class="hint" id="cnt">${state.sugestao.length}/1000</div>
+    <div id="msg">${errBox(msg)}</div>
+    <button class="btn" id="send">Enviar respostas</button>
+  </div>`);
+  $("#sug").addEventListener("input", e => { state.sugestao = e.target.value; $("#cnt").textContent = e.target.value.length + "/1000"; });
+  $("#back2").addEventListener("click", () => { state.step = 2; renderStep2(); });
+  $("#send").addEventListener("click", async () => {
+    const btn = $("#send"); btn.disabled = true; btn.textContent = "Enviando...";
+    try {
+      await api("submit_custom_survey_response",{p_slug:slug,p_device_token:deviceToken(),p_turno:state.turno,p_frequencia:state.freq,p_sugestao:state.sugestao});
+      markDone();
+      renderThanks();
+    } catch(e){
+      if (/já respondeu/.test(e.message)) { markDone(); return renderAlreadyAnswered(); }
+      $("#msg").innerHTML = errBox(e.message);
+      btn.disabled = false; btn.textContent = "Enviar respostas";
+    }
+  });
+}
+
+function renderThanks(){
+  view(`
+  <div class="card hero pop">
+    <div class="big">🙏</div>
+    <h1 style="margin-top:12px">Obrigado por fazer parte dessa mudança!</h1>
+    <p class="muted">Sua resposta foi registrada e vai ajudar a gestão a melhorar o restaurante da unidade ${esc(state.survey.client_unit)}.</p>
+  </div>
+  <p class="foot">Pesquisa válida até ${fmtDate(state.survey.closes_at)} · uma resposta por celular</p>`);
+}
+
+boot();
+</script>
+</body>
+</html>
