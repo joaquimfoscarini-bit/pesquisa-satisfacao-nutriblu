@@ -114,7 +114,15 @@ const fmtDT = iso => new Date(iso).toLocaleString("pt-BR",{day:"2-digit",month:"
 
 const slug = (new URLSearchParams(location.search).get("u") || "").toLowerCase().trim();
 const TK = "ns_token_" + slug;
+const CODE_MONTH_KEY = "ns_code_month";
+const CODE_VAL_KEY = "ns_code_val";
 const state = { unit:null, status:null, tab:"survey", rating:null, comments:null, justAnswered:false };
+
+const curMonth = () => { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); };
+const codeOk = () => { try { return localStorage.getItem(CODE_MONTH_KEY) === curMonth() && !!localStorage.getItem(CODE_VAL_KEY); } catch(e){ return false; } };
+const savedCode = () => { try { return localStorage.getItem(CODE_VAL_KEY) || ""; } catch(e){ return ""; } };
+const setCodeOk = c => { try { localStorage.setItem(CODE_MONTH_KEY, curMonth()); localStorage.setItem(CODE_VAL_KEY, c); } catch(e){} };
+const clearCode = () => { try { localStorage.removeItem(CODE_MONTH_KEY); localStorage.removeItem(CODE_VAL_KEY); } catch(e){} };
 
 async function api(fn, args = {}) {
   const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
@@ -141,8 +149,44 @@ async function boot(){
   } catch(e){ return view(`<div class="card"><h1>Sem conexão</h1><p class="muted">${esc(e.message)}</p><button class="btn" onclick="boot()">Tentar de novo</button></div>`); }
   if (!state.unit.found) return view(`<div class="card"><h1>Unidade não encontrada</h1><p class="muted">Escaneie novamente o QR Code da sua unidade.</p></div>`);
   $("#unitName").textContent = state.unit.name;
+  if (!codeOk()) return codeGateView();
+  continueBoot();
+}
+async function continueBoot(){
   if (token()) { try { await loadHome(); return; } catch(e){ setToken(null); } }
   authView("register");
+}
+
+/* ---------- Código de acesso mensal (impresso no cartaz da unidade) ---------- */
+function codeGateView(msg){
+  view(`
+  <div class="card">
+    <div class="tag"><span class="ic">🔒</span>Acesso restrito</div>
+    <h1>Código do cartaz</h1>
+    <p class="muted">Para continuar, digite o código de acesso deste mês. Ele está impresso no cartaz ao lado do QR Code, na sua unidade.</p>
+    <form id="cf" novalidate>
+      <label for="code">Código de acesso</label>
+      <input id="code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" style="letter-spacing:6px;font-size:22px;text-align:center;font-weight:700">
+      <div id="cmsg">${errBox(msg)}</div>
+      <button class="btn" id="cgo" type="submit">Continuar</button>
+    </form>
+  </div>
+  <p class="foot">Não achou o código? Fale com a gestão da sua unidade.</p>`);
+  $("#code").focus();
+  $("#cf").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const btn = $("#cgo"); btn.disabled = true; btn.textContent = "Verificando...";
+    const c = $("#code").value.trim();
+    try {
+      const ok = await api("verify_access_code",{p_code:c});
+      if (!ok) throw new Error("Código incorreto. Confira o cartaz da sua unidade.");
+      setCodeOk(c);
+      continueBoot();
+    } catch(e){
+      $("#cmsg").innerHTML = errBox(e.message);
+      btn.disabled = false; btn.textContent = "Continuar";
+    }
+  });
 }
 
 /* ---------- Auth ---------- */
@@ -185,7 +229,7 @@ function authView(mode, msg){
     try {
       let out;
       if (isReg) {
-        out = await api("register_participant",{p_slug:slug,p_name:$("#name").value,p_matricula:$("#mat").value,p_pin:$("#pin").value,p_consent:$("#consent").checked});
+        out = await api("register_participant",{p_slug:slug,p_name:$("#name").value,p_matricula:$("#mat").value,p_pin:$("#pin").value,p_consent:$("#consent").checked,p_code:savedCode()});
         setToken(out.token);
       } else {
         out = await api("login_participant",{p_slug:slug,p_matricula:$("#mat").value,p_pin:$("#pin").value});
@@ -194,6 +238,7 @@ function authView(mode, msg){
       }
       await loadHome();
     } catch(e){
+      if (/Código de acesso inválido/.test(e.message)) { clearCode(); return codeGateView(e.message); }
       $("#msg").innerHTML = errBox(e.message);
       btn.disabled = false; btn.textContent = isReg ? "Cadastrar e começar" : "Entrar";
     }
@@ -227,9 +272,10 @@ function anonView(msg){
   $("#send").addEventListener("click", async () => {
     const btn = $("#send"); btn.disabled = true; btn.textContent = "Enviando...";
     try {
-      await api("submit_anonymous_response",{p_slug:slug,p_rating:state.rating,p_comment:$("#cm").value});
+      await api("submit_anonymous_response",{p_slug:slug,p_rating:state.rating,p_comment:$("#cm").value,p_code:savedCode()});
       anonThanks();
     } catch(e){
+      if (/Código de acesso inválido/.test(e.message)) { clearCode(); return codeGateView(e.message); }
       $("#msg").innerHTML = errBox(e.message);
       btn.disabled = false; btn.textContent = "Enviar resposta";
     }
