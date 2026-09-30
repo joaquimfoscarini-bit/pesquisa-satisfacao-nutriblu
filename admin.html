@@ -172,7 +172,7 @@ function loginView(msg){
 }
 function logout(expired){S.token=null;sessionStorage.removeItem("ns_admin");loginView(expired?"Sessão expirada. Entre novamente.":"")}
 
-const TABS=[["dash","Dashboard"],["comments","Comentários"],["raffle","Sorteio"],["people","Participantes"],["units","Unidades"]];
+const TABS=[["dash","Dashboard"],["comments","Comentários"],["raffle","Sorteio"],["people","Participantes"],["units","Unidades"],["custom","Pesquisas personalizadas"]];
 function shell(){
   $("#root").innerHTML=`${topHeader(`<div class="unit-pill">Gestão da pesquisa de satisfação</div>`)}
     <main>
@@ -207,7 +207,7 @@ async function boot(){
 }
 function render(){
   renderNav();filtersBar();
-  const fn={dash:tabDash,comments:tabComments,raffle:tabRaffle,people:tabPeople,units:tabUnits}[S.tab];
+  const fn={dash:tabDash,comments:tabComments,raffle:tabRaffle,people:tabPeople,units:tabUnits,custom:tabCustom}[S.tab];
   $("#body").innerHTML=`<div class="spin"></div>`;
   fn().catch(e=>{$("#body").innerHTML=`<div class="err">${esc(e.message)}</div>`});
 }
@@ -337,7 +337,7 @@ async function tabPeople(){
 }
 
 /* ---------- Unidades ---------- */
-const linkFor=s=>`https://joaquimfoscarini-bit.github.io/pesquisa-satisfacao-nutriblu/?u=${s}`;
+const linkFor=s=>`https://satisfacaonutriblu.com.br/?u=${s}`;
 async function tabUnits(){
   S.units=await A("admin_list_units");
   const cc=await A("admin_access_code").catch(()=>null);
@@ -432,6 +432,53 @@ function openQR(id){
   m.querySelector("#x").onclick=()=>m.remove();
   m.querySelector("#dl").onclick=()=>cv.toBlob(b=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`qr-pesquisa-${u.slug}.png`;a.click()});
   m.querySelector("#pr").onclick=()=>{const w=window.open("");if(!w)return toast("Libere pop-ups para imprimir.",1);w.document.write(`<title>QR ${esc(u.name)}</title><style>@page{margin:0}body{margin:0}img{width:100%;display:block}</style><img src="${cv.toDataURL("image/png")}" onload="setTimeout(()=>print(),200)">`);w.document.close()};
+}
+
+/* ---------- Pesquisas personalizadas (ex.: Cremer Têxtil) ---------- */
+const customLinkFor=s=>`https://satisfacaonutriblu.com.br/restaurante.html?s=${s}`;
+async function tabCustom(){
+  const list=await A("admin_list_custom_surveys");
+  $("#body").innerHTML=`<div class="card" style="margin-bottom:14px">
+    <h3>Pesquisas personalizadas</h3>
+    <p class="muted" style="font-size:13.5px">Pesquisas sob medida feitas para um cliente específico (ex.: restaurante da Cremer Têxtil), fora do fluxo diário das unidades.</p>
+  </div>
+  ${list.length?list.map(s=>{
+    const today=iso(0),status=!s.active?"pausada":(today<s.opens_at?"agendada":(today>s.closes_at?"encerrada":"em andamento"));
+    const col={pausada:"var(--bad)",agendada:"var(--warn)",encerrada:"var(--muted)","em andamento":"var(--ok)"}[status];
+    return `<div class="unit"><div class="h"><div><b style="font-size:17px">${esc(s.title)}</b> <span class="tag" style="background:${col}22;color:${col}">${status}</span></div>
+      <div class="muted" style="font-size:13px">${esc(s.client_unit)} · ${fd(s.opens_at)} a ${fd(s.closes_at)}</div></div>
+      <div class="muted" style="font-size:13px;margin-bottom:10px">${s.total} resposta${s.total===1?"":"s"} · ${s.comments} sugestõe${s.comments===1?"":"s"}</div>
+      <div class="muted" style="font-size:12.5px;margin-bottom:10px;word-break:break-all">🔗 ${esc(customLinkFor(s.slug))}</div>
+      <div class="row" style="gap:8px">
+        <button class="btn sm" onclick="customResults('${esc(s.slug)}')">Ver resultados</button>
+        <button class="btn alt sm" onclick="customCopyLink('${esc(s.slug)}')">Copiar link</button>
+        <button class="btn alt sm" onclick="customExtendDlg('${esc(s.slug)}','${s.closes_at}')">Renovar período</button>
+        <button class="btn alt sm" onclick="customToggle('${esc(s.slug)}',${!s.active})">${s.active?"Pausar":"Reativar"}</button>
+      </div></div>`;
+  }).join(""):`<div class="empty">Nenhuma pesquisa personalizada criada ainda. Peça para a equipe técnica montar uma para o próximo cliente.</div>`}`;
+}
+function customCopyLink(slug){navigator.clipboard?.writeText(customLinkFor(slug));toast("Link copiado")}
+async function customToggle(slug,next){
+  try{await A("admin_custom_survey_toggle",{p_slug:slug,p_active:next});toast(next?"Pesquisa reativada ✓":"Pesquisa pausada ✓");tabCustom()}catch(e){toast(e.message,1)}
+}
+function customExtendDlg(slug,cur){
+  const m=dialog(`<h3>Renovar período</h3><p class="muted" style="font-size:14px">Define uma nova data de encerramento e reativa a pesquisa, se estiver pausada ou encerrada.</p><div class="f"><label>Nova data de encerramento</label><input type="date" id="ed" value="${cur}"></div><div class="act"><button class="btn alt" id="x">Cancelar</button><button class="btn" id="ok">Renovar</button></div>`);
+  m.querySelector("#x").onclick=()=>m.remove();
+  m.querySelector("#ok").onclick=async()=>{try{await A("admin_custom_survey_extend",{p_slug:slug,p_closes_at:m.querySelector("#ed").value});toast("Período renovado ✓");m.remove();tabCustom()}catch(e){toast(e.message,1)}}
+}
+async function customResults(slug){
+  const d=await A("admin_custom_survey_results",{p_slug:slug});
+  const byTurno=d.by_turno||{},byFreq=d.by_frequencia||{},coms=d.comentarios||[];
+  const bars=(obj)=>{const entries=Object.entries(obj),max=Math.max(1,...entries.map(([,n])=>n));
+    return entries.length?entries.map(([k,n])=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0"><div style="flex:1;font-size:13.5px">${esc(k)}</div><div class="bar" style="flex:2"><i style="width:${Math.round(100*n/max)}%;background:var(--green-2)"></i></div><b style="width:30px;text-align:right">${n}</b></div>`).join(""):`<div class="muted" style="font-size:13.5px">Sem respostas ainda.</div>`};
+  const m=dialog(`<h3>${esc(d.survey.title)}</h3>
+    <div class="muted" style="font-size:13.5px;margin-bottom:14px">${esc(d.survey.client_unit)} · ${fd(d.survey.opens_at)} a ${fd(d.survey.closes_at)} · <b style="color:var(--green)">${d.total} respostas</b></div>
+    <h3 style="font-size:15px">Turno de trabalho</h3>${bars(byTurno)}
+    <h3 style="font-size:15px;margin-top:16px">Frequência no restaurante</h3>${bars(byFreq)}
+    <h3 style="font-size:15px;margin-top:16px">Sugestões (${coms.length})</h3>
+    <div style="max-height:240px;overflow:auto">${coms.length?coms.map(c=>`<div class="cm"><div class="top"><span class="muted" style="font-size:12.5px">${fdt(c.data)}</span></div><div class="bubble">${esc(c.texto)}</div></div>`).join(""):`<div class="muted" style="font-size:13.5px">Nenhuma sugestão escrita ainda.</div>`}</div>
+    <div class="act"><button class="btn alt" id="x">Fechar</button></div>`);
+  m.querySelector("#x").onclick=()=>m.remove();
 }
 
 if(S.token){boot()}else loginView();
