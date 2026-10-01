@@ -514,17 +514,15 @@ async function customDashboard(meta,list){
     <div class="card kpi"><div class="l">Período</div><div class="v">${elapsed}/${totalDays}</div><div class="s">${status==="em andamento"?`${remaining} dia${remaining===1?"":"s"} restante${remaining===1?"":"s"}`:status==="agendada"?"ainda não começou":"período encerrado"}</div></div>
     <div class="card kpi"><div class="l">Atualizado</div><div class="v" style="font-size:20px">${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</div><div class="s">dados em tempo real · <a href="#" onclick="event.preventDefault();render()" style="color:var(--green);font-weight:600">atualizar</a></div></div>
   </div>
+  <div class="card" style="margin-bottom:14px"><h3>Respostas por dia</h3><div style="height:260px"><canvas id="ccDaily"></canvas></div></div>
   <div class="grid g2" style="margin-bottom:14px">
-    <div class="card"><h3>Respostas por dia</h3><div style="height:260px"><canvas id="ccDaily"></canvas></div></div>
     <div class="card"><h3>Turno de trabalho</h3>${bars(byTurno,"var(--green-2)")}</div>
-  </div>
-  <div class="grid g2" style="margin-bottom:14px">
     <div class="card"><h3>Frequência no restaurante</h3>${bars(byFreq,"var(--orange)")}</div>
-    <div class="card"><h3>Sugestões de melhoria (${coms.length})</h3>
-      <div style="max-height:320px;overflow:auto">${coms.length?coms.map(c=>`<div class="cm"><div class="top"><span class="muted" style="font-size:12.5px">${fdt(c.data)}</span></div><div class="bubble">${esc(c.texto)}</div></div>`).join(""):`<div class="muted" style="font-size:13.5px;padding:10px 0">Nenhuma sugestão escrita ainda.</div>`}</div>
-    </div>
   </div>
-  ${others.length?`<div class="card"><h3>Outras pesquisas</h3>${others.map(s=>{const st=customStatus(s),c2=customStatusColor[st];return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)"><div><b>${esc(s.title)}</b> <span class="tag" style="background:${c2}22;color:${c2};margin-left:6px">${st}</span><div class="muted" style="font-size:13px">${esc(s.client_unit)} · ${s.total} resposta${s.total===1?"":"s"}</div></div><button class="btn alt sm" onclick="customOpen('${esc(s.slug)}')">Abrir</button></div>`}).join("")}</div>`:""}`;
+  ${others.length?`<div class="card" style="margin-bottom:14px"><h3>Outras pesquisas</h3>${others.map(s=>{const st=customStatus(s),c2=customStatusColor[st];return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)"><div><b>${esc(s.title)}</b> <span class="tag" style="background:${c2}22;color:${c2};margin-left:6px">${st}</span><div class="muted" style="font-size:13px">${esc(s.client_unit)} · ${s.total} resposta${s.total===1?"":"s"}</div></div><button class="btn alt sm" onclick="customOpen('${esc(s.slug)}')">Abrir</button></div>`}).join("")}</div>`:""}
+  <div class="card"><h3>Sugestões de melhoria (${coms.length})</h3>
+    ${coms.length?`<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">${coms.map(c=>`<div style="border:1px solid var(--line);border-radius:14px;padding:14px"><div class="muted" style="font-size:12px;margin-bottom:8px">${fdt(c.data)}</div><div class="bubble">${esc(c.texto)}</div></div>`).join("")}</div>`:`<div class="muted" style="font-size:13.5px;padding:10px 0">Nenhuma sugestão escrita ainda.</div>`}
+  </div>`;
   const days=daily.map(x=>fd(x.date).slice(0,5));
   S.charts.ccDaily=new Chart($("#ccDaily"),{type:"bar",data:{labels:days.length?days:["—"],datasets:[{label:"Respostas",data:daily.length?daily.map(x=>x.count):[0],backgroundColor:"rgba(31,78,61,.55)",borderRadius:6}]},options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:"#EEE8D9"}},x:{grid:{display:false}}},plugins:{legend:{display:false}}}});
 }
