@@ -436,49 +436,97 @@ function openQR(id){
 
 /* ---------- Pesquisas personalizadas (ex.: Cremer Têxtil) ---------- */
 const customLinkFor=s=>`https://satisfacaonutriblu.com.br/restaurante.html?s=${s}`;
+function customStatus(s){const today=iso(0);return !s.active?"pausada":(today<s.opens_at?"agendada":(today>s.closes_at?"encerrada":"em andamento"))}
+const customStatusColor={pausada:"var(--bad)",agendada:"var(--warn)",encerrada:"var(--muted)","em andamento":"var(--ok)"};
 async function tabCustom(){
   const list=await A("admin_list_custom_surveys");
+  S.customList=list;
+  if(S.customView===undefined){const running=list.find(s=>customStatus(s)==="em andamento");S.customView=running?running.slug:null}
+  if(S.customView){
+    const s=list.find(x=>x.slug===S.customView);
+    if(!s){S.customView=null;return tabCustom()}
+    return customDashboard(s,list);
+  }
+  customListView(list);
+}
+function customListView(list){
   $("#body").innerHTML=`<div class="card" style="margin-bottom:14px">
     <h3>Pesquisas personalizadas</h3>
-    <p class="muted" style="font-size:13.5px">Pesquisas sob medida feitas para um cliente específico (ex.: restaurante da Cremer Têxtil), fora do fluxo diário das unidades.</p>
+    <p class="muted" style="font-size:13.5px">Pesquisas sob medida feitas para um cliente específico (ex.: restaurante da Cremer Têxtil), fora do fluxo diário das unidades. Abra o dashboard de cada uma para acompanhar em tempo real.</p>
   </div>
   ${list.length?list.map(s=>{
-    const today=iso(0),status=!s.active?"pausada":(today<s.opens_at?"agendada":(today>s.closes_at?"encerrada":"em andamento"));
-    const col={pausada:"var(--bad)",agendada:"var(--warn)",encerrada:"var(--muted)","em andamento":"var(--ok)"}[status];
+    const status=customStatus(s),col=customStatusColor[status];
     return `<div class="unit"><div class="h"><div><b style="font-size:17px">${esc(s.title)}</b> <span class="tag" style="background:${col}22;color:${col}">${status}</span></div>
       <div class="muted" style="font-size:13px">${esc(s.client_unit)} · ${fd(s.opens_at)} a ${fd(s.closes_at)}</div></div>
       <div class="muted" style="font-size:13px;margin-bottom:10px">${s.total} resposta${s.total===1?"":"s"} · ${s.comments} sugestõe${s.comments===1?"":"s"}</div>
       <div class="muted" style="font-size:12.5px;margin-bottom:10px;word-break:break-all">🔗 ${esc(customLinkFor(s.slug))}</div>
       <div class="row" style="gap:8px">
-        <button class="btn sm" onclick="customResults('${esc(s.slug)}')">Ver resultados</button>
+        <button class="btn sm" onclick="customOpen('${esc(s.slug)}')">📊 Ver dashboard</button>
         <button class="btn alt sm" onclick="customCopyLink('${esc(s.slug)}')">Copiar link</button>
         <button class="btn alt sm" onclick="customExtendDlg('${esc(s.slug)}','${s.closes_at}')">Renovar período</button>
         <button class="btn alt sm" onclick="customToggle('${esc(s.slug)}',${!s.active})">${s.active?"Pausar":"Reativar"}</button>
       </div></div>`;
   }).join(""):`<div class="empty">Nenhuma pesquisa personalizada criada ainda. Peça para a equipe técnica montar uma para o próximo cliente.</div>`}`;
 }
+function customOpen(slug){S.customView=slug;render()}
+function customBack(){S.customView=null;render()}
 function customCopyLink(slug){navigator.clipboard?.writeText(customLinkFor(slug));toast("Link copiado")}
 async function customToggle(slug,next){
-  try{await A("admin_custom_survey_toggle",{p_slug:slug,p_active:next});toast(next?"Pesquisa reativada ✓":"Pesquisa pausada ✓");tabCustom()}catch(e){toast(e.message,1)}
+  try{await A("admin_custom_survey_toggle",{p_slug:slug,p_active:next});toast(next?"Pesquisa reativada ✓":"Pesquisa pausada ✓");render()}catch(e){toast(e.message,1)}
 }
 function customExtendDlg(slug,cur){
   const m=dialog(`<h3>Renovar período</h3><p class="muted" style="font-size:14px">Define uma nova data de encerramento e reativa a pesquisa, se estiver pausada ou encerrada.</p><div class="f"><label>Nova data de encerramento</label><input type="date" id="ed" value="${cur}"></div><div class="act"><button class="btn alt" id="x">Cancelar</button><button class="btn" id="ok">Renovar</button></div>`);
   m.querySelector("#x").onclick=()=>m.remove();
-  m.querySelector("#ok").onclick=async()=>{try{await A("admin_custom_survey_extend",{p_slug:slug,p_closes_at:m.querySelector("#ed").value});toast("Período renovado ✓");m.remove();tabCustom()}catch(e){toast(e.message,1)}}
+  m.querySelector("#ok").onclick=async()=>{try{await A("admin_custom_survey_extend",{p_slug:slug,p_closes_at:m.querySelector("#ed").value});toast("Período renovado ✓");m.remove();render()}catch(e){toast(e.message,1)}}
 }
-async function customResults(slug){
-  const d=await A("admin_custom_survey_results",{p_slug:slug});
-  const byTurno=d.by_turno||{},byFreq=d.by_frequencia||{},coms=d.comentarios||[];
-  const bars=(obj)=>{const entries=Object.entries(obj),max=Math.max(1,...entries.map(([,n])=>n));
-    return entries.length?entries.map(([k,n])=>`<div style="display:flex;align-items:center;gap:10px;margin:6px 0"><div style="flex:1;font-size:13.5px">${esc(k)}</div><div class="bar" style="flex:2"><i style="width:${Math.round(100*n/max)}%;background:var(--green-2)"></i></div><b style="width:30px;text-align:right">${n}</b></div>`).join(""):`<div class="muted" style="font-size:13.5px">Sem respostas ainda.</div>`};
-  const m=dialog(`<h3>${esc(d.survey.title)}</h3>
-    <div class="muted" style="font-size:13.5px;margin-bottom:14px">${esc(d.survey.client_unit)} · ${fd(d.survey.opens_at)} a ${fd(d.survey.closes_at)} · <b style="color:var(--green)">${d.total} respostas</b></div>
-    <h3 style="font-size:15px">Turno de trabalho</h3>${bars(byTurno)}
-    <h3 style="font-size:15px;margin-top:16px">Frequência no restaurante</h3>${bars(byFreq)}
-    <h3 style="font-size:15px;margin-top:16px">Sugestões (${coms.length})</h3>
-    <div style="max-height:240px;overflow:auto">${coms.length?coms.map(c=>`<div class="cm"><div class="top"><span class="muted" style="font-size:12.5px">${fdt(c.data)}</span></div><div class="bubble">${esc(c.texto)}</div></div>`).join(""):`<div class="muted" style="font-size:13.5px">Nenhuma sugestão escrita ainda.</div>`}</div>
-    <div class="act"><button class="btn alt" id="x">Fechar</button></div>`);
-  m.querySelector("#x").onclick=()=>m.remove();
+async function customDashboard(meta,list){
+  killCharts();
+  const d=await A("admin_custom_survey_results",{p_slug:meta.slug});
+  const sv=d.survey,status=customStatus(sv),col=customStatusColor[status];
+  const today=iso(0);
+  const totalDays=Math.max(1,Math.round((new Date(sv.closes_at)-new Date(sv.opens_at))/86400000)+1);
+  const elapsed=Math.min(totalDays,Math.max(0,Math.round((new Date(today)-new Date(sv.opens_at))/86400000)+1));
+  const remaining=Math.max(0,totalDays-elapsed);
+  const avgDay=elapsed>0?(d.total/elapsed):0;
+  const byTurno=d.by_turno||{},byFreq=d.by_frequencia||{},coms=d.comentarios||[],daily=d.daily||[];
+  const bars=(obj,color)=>{const entries=Object.entries(obj).sort((a,b)=>b[1]-a[1]),max=Math.max(1,...entries.map(([,n])=>n)),tot=entries.reduce((a,[,n])=>a+n,0);
+    return entries.length?entries.map(([k,n])=>`<div style="display:flex;align-items:center;gap:10px;margin:7px 0"><div style="flex:1.4;font-size:13.5px">${esc(k)}</div><div class="bar" style="flex:2"><i style="width:${Math.round(100*n/max)}%;background:${color}"></i></div><b style="width:76px;text-align:right">${n} <span class="muted" style="font-weight:500">(${tot?Math.round(100*n/tot):0}%)</span></b></div>`).join(""):`<div class="muted" style="font-size:13.5px">Sem respostas ainda.</div>`};
+  const others=list.filter(x=>x.slug!==meta.slug);
+  $("#body").innerHTML=`
+  <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:14px">
+    <button class="btn alt sm" onclick="customBack()">← Todas as pesquisas</button>
+    <div class="row" style="gap:8px">
+      <button class="btn alt sm" onclick="customCopyLink('${esc(meta.slug)}')">Copiar link</button>
+      <button class="btn alt sm" onclick="customExtendDlg('${esc(meta.slug)}','${sv.closes_at}')">Renovar período</button>
+      <button class="btn alt sm" onclick="customToggle('${esc(meta.slug)}',${!sv.active})">${sv.active?"Pausar":"Reativar"}</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><h1 style="font-size:22px;margin-bottom:4px">${esc(sv.title)}</h1><div class="muted">${esc(sv.client_unit)} · ${fd(sv.opens_at)} a ${fd(sv.closes_at)}</div></div>
+      <span class="tag" style="background:${col}22;color:${col};font-size:13px;padding:5px 12px">${status}</span>
+    </div>
+  </div>
+  <div class="grid kpis" style="margin-bottom:14px">
+    <div class="card kpi"><div class="l">Respostas</div><div class="v">${d.total}</div><div class="s">${d.unique_devices} dispositivo${d.unique_devices===1?"":"s"} diferente${d.unique_devices===1?"":"s"}</div></div>
+    <div class="card kpi"><div class="l">Sugestões escritas</div><div class="v">${coms.length}</div><div class="s">${d.total?Math.round(100*coms.length/d.total):0}% das respostas</div></div>
+    <div class="card kpi"><div class="l">Média por dia</div><div class="v">${num2(avgDay)}</div><div class="s">respostas/dia em ${elapsed} dia${elapsed===1?"":"s"} corridos</div></div>
+    <div class="card kpi"><div class="l">Período</div><div class="v">${elapsed}/${totalDays}</div><div class="s">${status==="em andamento"?`${remaining} dia${remaining===1?"":"s"} restante${remaining===1?"":"s"}`:status==="agendada"?"ainda não começou":"período encerrado"}</div></div>
+    <div class="card kpi"><div class="l">Atualizado</div><div class="v" style="font-size:20px">${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</div><div class="s">dados em tempo real · <a href="#" onclick="event.preventDefault();render()" style="color:var(--green);font-weight:600">atualizar</a></div></div>
+  </div>
+  <div class="grid g2" style="margin-bottom:14px">
+    <div class="card"><h3>Respostas por dia</h3><div style="height:260px"><canvas id="ccDaily"></canvas></div></div>
+    <div class="card"><h3>Turno de trabalho</h3>${bars(byTurno,"var(--green-2)")}</div>
+  </div>
+  <div class="grid g2" style="margin-bottom:14px">
+    <div class="card"><h3>Frequência no restaurante</h3>${bars(byFreq,"var(--orange)")}</div>
+    <div class="card"><h3>Sugestões de melhoria (${coms.length})</h3>
+      <div style="max-height:320px;overflow:auto">${coms.length?coms.map(c=>`<div class="cm"><div class="top"><span class="muted" style="font-size:12.5px">${fdt(c.data)}</span></div><div class="bubble">${esc(c.texto)}</div></div>`).join(""):`<div class="muted" style="font-size:13.5px;padding:10px 0">Nenhuma sugestão escrita ainda.</div>`}</div>
+    </div>
+  </div>
+  ${others.length?`<div class="card"><h3>Outras pesquisas</h3>${others.map(s=>{const st=customStatus(s),c2=customStatusColor[st];return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)"><div><b>${esc(s.title)}</b> <span class="tag" style="background:${c2}22;color:${c2};margin-left:6px">${st}</span><div class="muted" style="font-size:13px">${esc(s.client_unit)} · ${s.total} resposta${s.total===1?"":"s"}</div></div><button class="btn alt sm" onclick="customOpen('${esc(s.slug)}')">Abrir</button></div>`}).join("")}</div>`:""}`;
+  const days=daily.map(x=>fd(x.date).slice(0,5));
+  S.charts.ccDaily=new Chart($("#ccDaily"),{type:"bar",data:{labels:days.length?days:["—"],datasets:[{label:"Respostas",data:daily.length?daily.map(x=>x.count):[0],backgroundColor:"rgba(31,78,61,.55)",borderRadius:6}]},options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:"#EEE8D9"}},x:{grid:{display:false}}},plugins:{legend:{display:false}}}});
 }
 
 if(S.token){boot()}else loginView();
