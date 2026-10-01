@@ -100,6 +100,13 @@ tr:last-child td{border-bottom:0}
 .err{background:#FDECE8;border:1px solid #F3C2B8;color:#8A2A1A;padding:12px 14px;border-radius:12px;margin-top:14px;font-size:14px}
 .muted{color:var(--muted)}
 .unit{border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;background:#fff}
+.statm{background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.statm .l{font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--muted)}
+.statm .v{font-family:var(--serif);font-weight:680;font-size:20px;color:var(--green);line-height:1.2;margin:2px 0}
+.statm .s{font-size:11px;color:var(--muted)}
+.statrow{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+@media(max-width:900px){.statrow{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.statrow{grid-template-columns:1fr 1fr}}
 .unit .h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .tag{font-size:12px;background:#EAF3EE;color:var(--green);padding:3px 9px;border-radius:999px;font-weight:700}
 .tag.off{background:#F3E1DC;color:var(--bad)}
@@ -501,23 +508,23 @@ async function customDashboard(meta,list){
       <button class="btn alt sm" onclick="customToggle('${esc(meta.slug)}',${!sv.active})">${sv.active?"Pausar":"Reativar"}</button>
     </div>
   </div>
-  <div class="card" style="margin-bottom:14px">
-    <div class="row" style="justify-content:space-between;align-items:flex-start">
-      <div><h1 style="font-size:22px;margin-bottom:4px">${esc(sv.title)}</h1><div class="muted">${esc(sv.client_unit)} · ${fd(sv.opens_at)} a ${fd(sv.closes_at)}</div></div>
-      <span class="tag" style="background:${col}22;color:${col};font-size:13px;padding:5px 12px">${status}</span>
+  <div class="card" style="margin-bottom:14px;padding:16px 18px">
+    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px">
+      <div><h1 style="font-size:19px;margin-bottom:2px">${esc(sv.title)}</h1><div class="muted" style="font-size:13px">${esc(sv.client_unit)} · ${fd(sv.opens_at)} a ${fd(sv.closes_at)}</div></div>
+      <span class="tag" style="background:${col}22;color:${col};font-size:12.5px;padding:4px 10px;white-space:nowrap">${status}</span>
+    </div>
+    <div class="statrow">
+      <div class="statm"><div class="l">Respostas</div><div class="v">${d.total}</div><div class="s">${d.unique_devices} dispositivo${d.unique_devices===1?"":"s"}</div></div>
+      <div class="statm"><div class="l">Sugestões</div><div class="v">${coms.length}</div><div class="s">${d.total?Math.round(100*coms.length/d.total):0}% das respostas</div></div>
+      <div class="statm"><div class="l">Média/dia</div><div class="v">${num2(avgDay)}</div><div class="s">em ${elapsed} dia${elapsed===1?"":"s"}</div></div>
+      <div class="statm"><div class="l">Período</div><div class="v">${elapsed}/${totalDays}</div><div class="s">${status==="em andamento"?`${remaining} dia${remaining===1?"":"s"} restante${remaining===1?"":"s"}`:status==="agendada"?"não começou":"encerrado"}</div></div>
+      <div class="statm"><div class="l">Atualizado</div><div class="v" style="font-size:17px">${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</div><div class="s"><a href="#" onclick="event.preventDefault();render()" style="color:var(--green);font-weight:600">atualizar ↻</a></div></div>
     </div>
   </div>
-  <div class="grid kpis" style="margin-bottom:14px">
-    <div class="card kpi"><div class="l">Respostas</div><div class="v">${d.total}</div><div class="s">${d.unique_devices} dispositivo${d.unique_devices===1?"":"s"} diferente${d.unique_devices===1?"":"s"}</div></div>
-    <div class="card kpi"><div class="l">Sugestões escritas</div><div class="v">${coms.length}</div><div class="s">${d.total?Math.round(100*coms.length/d.total):0}% das respostas</div></div>
-    <div class="card kpi"><div class="l">Média por dia</div><div class="v">${num2(avgDay)}</div><div class="s">respostas/dia em ${elapsed} dia${elapsed===1?"":"s"} corridos</div></div>
-    <div class="card kpi"><div class="l">Período</div><div class="v">${elapsed}/${totalDays}</div><div class="s">${status==="em andamento"?`${remaining} dia${remaining===1?"":"s"} restante${remaining===1?"":"s"}`:status==="agendada"?"ainda não começou":"período encerrado"}</div></div>
-    <div class="card kpi"><div class="l">Atualizado</div><div class="v" style="font-size:20px">${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</div><div class="s">dados em tempo real · <a href="#" onclick="event.preventDefault();render()" style="color:var(--green);font-weight:600">atualizar</a></div></div>
-  </div>
-  <div class="card" style="margin-bottom:14px"><h3>Respostas por dia</h3><div style="height:260px"><canvas id="ccDaily"></canvas></div></div>
+  <div class="card" style="margin-bottom:14px;padding:16px 18px"><h3 style="margin-bottom:8px">Respostas por dia</h3><div style="height:210px"><canvas id="ccDaily"></canvas></div></div>
   <div class="grid g2" style="margin-bottom:14px">
-    <div class="card"><h3>Turno de trabalho</h3>${bars(byTurno,"var(--green-2)")}</div>
-    <div class="card"><h3>Frequência no restaurante</h3>${bars(byFreq,"var(--orange)")}</div>
+    <div class="card" style="padding:16px 18px"><h3 style="margin-bottom:8px">Turno de trabalho</h3>${bars(byTurno,"var(--green-2)")}</div>
+    <div class="card" style="padding:16px 18px"><h3 style="margin-bottom:8px">Frequência no restaurante</h3>${bars(byFreq,"var(--orange)")}</div>
   </div>
   ${others.length?`<div class="card" style="margin-bottom:14px"><h3>Outras pesquisas</h3>${others.map(s=>{const st=customStatus(s),c2=customStatusColor[st];return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)"><div><b>${esc(s.title)}</b> <span class="tag" style="background:${c2}22;color:${c2};margin-left:6px">${st}</span><div class="muted" style="font-size:13px">${esc(s.client_unit)} · ${s.total} resposta${s.total===1?"":"s"}</div></div><button class="btn alt sm" onclick="customOpen('${esc(s.slug)}')">Abrir</button></div>`}).join("")}</div>`:""}
   <div class="card"><h3>Sugestões de melhoria (${coms.length})</h3>
