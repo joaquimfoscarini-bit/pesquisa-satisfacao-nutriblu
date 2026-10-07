@@ -56,6 +56,7 @@ textarea{width:100%;min-height:74px}
 .grid{display:grid;gap:14px}
 .kpis{grid-template-columns:repeat(3,1fr);margin-bottom:18px}
 .g2{grid-template-columns:2fr 1fr}
+.g2eq{grid-template-columns:1fr 1fr}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:0 20px 40px -28px rgba(20,45,35,.4)}
 .card h3{margin:0 0 12px;font-size:16px;color:var(--green)}
 .kpi .l{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
@@ -110,7 +111,7 @@ tr:last-child td{border-bottom:0}
 .unit .h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .tag{font-size:12px;background:#EAF3EE;color:var(--green);padding:3px 9px;border-radius:999px;font-weight:700}
 .tag.off{background:#F3E1DC;color:var(--bad)}
-@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.g2,.g2eq{grid-template-columns:1fr}}
 @media(max-width:560px){.kpis{grid-template-columns:1fr}main{padding:0 14px 30px}.kpi .v{font-size:28px}}
 </style>
 </head>
@@ -486,6 +487,41 @@ function customExtendDlg(slug,cur){
   m.querySelector("#x").onclick=()=>m.remove();
   m.querySelector("#ok").onclick=async()=>{try{await A("admin_custom_survey_extend",{p_slug:slug,p_closes_at:m.querySelector("#ed").value});toast("Período renovado ✓");m.remove();render()}catch(e){toast(e.message,1)}}
 }
+const TEMAS={
+  "Proteina e carne (qtd/qualidade)":{n:"Proteína e carne (quantidade e qualidade)",s:"Proteína/carne"},
+  "Tempero e sabor":{n:"Tempero e sabor",s:"Tempero/sabor"},
+  "Salada":{n:"Salada",s:"Salada"},
+  "Ponto de coccao (cru/duro/queimado)":{n:"Ponto de cocção (cru, duro ou queimado)",s:"Ponto de cocção"},
+  "Lanche e cafe da manha":{n:"Lanche e café da manhã",s:"Lanche/café"},
+  "Variedade e repeticao do cardapio":{n:"Variedade do cardápio",s:"Variedade"},
+  "Sopa e feijao":{n:"Sopa e feijão",s:"Sopa/feijão"},
+  "Higiene e seguranca alimentar":{n:"Higiene e segurança alimentar",s:"Higiene"},
+  "Sobremesa e doces":{n:"Sobremesa",s:"Sobremesa"},
+  "Temperatura da comida (fria)":{n:"Temperatura da comida (fria)",s:"Temperatura"},
+  "Melhoria geral (sem detalhe)":{n:"Outras sugestões gerais",s:"Geral"},
+  "Atendimento e servico":{n:"Atendimento e serviço",s:"Atendimento"},
+  "Estrutura e limpeza do ambiente":{n:"Estrutura e limpeza do ambiente",s:"Estrutura"}
+};
+const TURNOS=["1º Turno","2º Turno","3º Turno","Horário Administrativo"];
+const FREQS=["Sim, todos os dias","Sim, algumas vezes na semana","Raramente","Não utilizo o restaurante"];
+const ELOGIO="Elogios e pontos positivos";
+function custStats(coms){
+  const cnt={};coms.forEach(c=>(c.tags||[]).forEach(t=>{if(t!==ELOGIO)cnt[t]=(cnt[t]||0)+1}));
+  const ranking=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+  return ranking;
+}
+function custComments(){
+  const f=S.cust,q=f.q.trim().toLowerCase();
+  const list=S.custComs.filter(c=>(!f.turno||c.turno===f.turno)&&(!f.tag||(c.tags||[]).includes(f.tag))&&(!f.crit||c.critico)&&(!f.papel||c.origem==="manual")&&(!q||String(c.texto).toLowerCase().includes(q)));
+  $("#cmCount").textContent=list.length===S.custComs.length?`${list.length} comentários`:`${list.length} de ${S.custComs.length} comentários`;
+  const by={};list.forEach(c=>{(by[c.turno||"Sem turno"]=by[c.turno||"Sem turno"]||[]).push(c)});
+  const order=[...TURNOS,"Sem turno"].filter(t=>by[t]);
+  $("#cmList").innerHTML=list.length?order.map(t=>`<div style="margin-top:18px"><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px"><h3 style="margin:0">${esc(t)}</h3><span class="muted" style="font-size:13px">${by[t].length} comentário${by[t].length===1?"":"s"}</span></div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${by[t].map(c=>`<div style="border:1px solid ${c.critico?"var(--bad)":"var(--line)"};background:${c.critico?"#FDECE8":"#fff"};border-radius:14px;padding:14px"><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px"><span class="muted" style="font-size:12px">${fd(c.data)}</span>${c.origem==="manual"?`<span class="tag" style="background:#FBE8CF;color:#5C3C10">(M) Papel</span>`:""}${c.critico?`<span class="tag" style="background:var(--bad);color:#fff">Alerta de higiene</span>`:""}<span class="muted" style="font-size:12px">· ${esc(c.frequencia||"")}</span></div><div class="bubble">${esc(c.texto)}</div>${(c.tags||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">${c.tags.map(t=>`<span class="tag" style="font-size:11px;font-weight:600">${esc((TEMAS[t]||{}).s||(t===ELOGIO?"Elogio":t))}</span>`).join("")}</div>`:""}</div>`).join("")}</div></div>`).join(""):`<div class="empty">Nenhum comentário com esses filtros.</div>`;
+  document.querySelectorAll("#cmTurnos .chip-b").forEach(b=>b.classList.toggle("on",b.dataset.v===f.turno));
+  $("#cmCrit").classList.toggle("on",f.crit);$("#cmPapel").classList.toggle("on",f.papel);
+}
+function custFilter(k,v){S.cust[k]=v;custComments()}
+function custShowCrit(){S.cust={turno:"",tag:"",crit:true,papel:false,q:""};$("#cmQ").value="";$("#cmTag").value="";custComments();$("#cmBox").scrollIntoView({behavior:"smooth"})}
 async function customDashboard(meta,list){
   killCharts();
   const d=await A("admin_custom_survey_results",{p_slug:meta.slug});
@@ -494,16 +530,26 @@ async function customDashboard(meta,list){
   const totalDays=Math.max(1,Math.round((new Date(sv.closes_at)-new Date(sv.opens_at))/86400000)+1);
   const elapsed=Math.min(totalDays,Math.max(0,Math.round((new Date(today)-new Date(sv.opens_at))/86400000)+1));
   const remaining=Math.max(0,totalDays-elapsed);
-  const avgDay=elapsed>0?(d.total/elapsed):0;
-  const byTurno=d.by_turno||{},byFreq=d.by_frequencia||{},coms=d.comentarios||[],daily=d.daily||[];
-  const bars=(obj,color)=>{const entries=Object.entries(obj).sort((a,b)=>b[1]-a[1]),max=Math.max(1,...entries.map(([,n])=>n)),tot=entries.reduce((a,[,n])=>a+n,0);
-    return entries.length?entries.map(([k,n])=>`<div style="display:flex;align-items:center;gap:10px;margin:7px 0"><div style="flex:1.4;font-size:13.5px">${esc(k)}</div><div class="bar" style="flex:2"><i style="width:${Math.round(100*n/max)}%;background:${color}"></i></div><b style="width:76px;text-align:right">${n} <span class="muted" style="font-weight:500">(${tot?Math.round(100*n/tot):0}%)</span></b></div>`).join(""):`<div class="muted" style="font-size:13.5px">Sem respostas ainda.</div>`};
-  const others=list.filter(x=>x.slug!==meta.slug);
+  const byTurno=d.by_turno||{},byFreq=d.by_frequencia||{},byOrig=d.by_origem||{},coms=d.comentarios||[],daily=d.daily||[];
+  S.custComs=coms;S.cust={turno:"",tag:"",crit:false,papel:false,q:""};
+  const nPapel=byOrig.manual||0,nApp=d.total-nPapel;
+  const elogios=coms.filter(c=>(c.tags||[]).includes(ELOGIO)).length;
+  const crits=coms.filter(c=>c.critico);
+  const ranking=custStats(coms),maxR=Math.max(1,...ranking.map(r=>r[1]));
+  const top3=ranking.slice(0,3).map(r=>r[0]);
+  const top3n=coms.filter(c=>(c.tags||[]).some(t=>top3.includes(t))).length;
+  const bars=(keys,obj,color)=>{const tot=Object.values(obj).reduce((a,n)=>a+n,0),max=Math.max(1,...Object.values(obj));
+    return keys.filter(k=>obj[k]!=null).concat(Object.keys(obj).filter(k=>!keys.includes(k))).map(k=>{const n=obj[k];return `<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><div style="flex:1.5;font-size:13.5px">${esc(k)}</div><div class="bar" style="flex:2"><i style="width:${Math.round(100*n/max)}%;background:${color}"></i></div><b style="width:78px;text-align:right">${n} <span class="muted" style="font-weight:500">(${tot?Math.round(100*n/tot):0}%)</span></b></div>`}).join("")||`<div class="muted" style="font-size:13.5px">Sem respostas ainda.</div>`};
+  const turnoCards=TURNOS.filter(t=>byTurno[t]!=null).map(t=>{
+    const cs=coms.filter(c=>c.turno===t),cn={};cs.forEach(c=>(c.tags||[]).forEach(x=>{if(x!==ELOGIO)cn[x]=(cn[x]||0)+1}));
+    const tops=Object.entries(cn).sort((a,b)=>b[1]-a[1]).slice(0,3),mx=Math.max(1,...tops.map(x=>x[1]));
+    const el=cs.filter(c=>(c.tags||[]).includes(ELOGIO)).length,cr=cs.filter(c=>c.critico).length;
+    return `<div class="card" style="padding:16px 18px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:8px"><h3 style="margin:0">${esc(t)}</h3><span class="muted" style="font-size:12.5px">${cs.length} comentários · ${byTurno[t]} respostas</span></div>${tops.map(([k,n])=>`<div style="display:flex;align-items:center;gap:8px;margin:7px 0;font-size:12.5px"><span style="width:104px;flex-shrink:0" class="muted">${esc((TEMAS[k]||{}).s||k)}</span><div class="bar" style="flex:1;height:6px"><i style="width:${Math.round(100*n/mx)}%;background:var(--orange)"></i></div><b style="width:22px;text-align:right">${n}</b></div>`).join("")}<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><span class="tag">${el} elogio${el===1?"":"s"}</span>${cr?`<span class="tag" style="background:var(--bad);color:#fff">${cr} alerta${cr===1?"":"s"} de higiene</span>`:""}</div></div>`}).join("");
   $("#body").innerHTML=`
   <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:14px">
     <button class="btn alt sm" onclick="customBack()">← Todas as pesquisas</button>
     <div class="row" style="gap:8px">
-      <button class="btn alt sm" onclick="customCopyLink('${esc(meta.slug)}')">Copiar link</button>
+      <button class="btn alt sm" onclick="customCopyLink('${esc(meta.slug)}')">Copiar link da pesquisa</button>
       <button class="btn alt sm" onclick="customExtendDlg('${esc(meta.slug)}','${sv.closes_at}')">Renovar período</button>
       <button class="btn alt sm" onclick="customToggle('${esc(meta.slug)}',${!sv.active})">${sv.active?"Pausar":"Reativar"}</button>
     </div>
@@ -514,22 +560,43 @@ async function customDashboard(meta,list){
       <span class="tag" style="background:${col}22;color:${col};font-size:12.5px;padding:4px 10px;white-space:nowrap">${status}</span>
     </div>
     <div class="statrow">
-      <div class="statm"><div class="l">Respostas</div><div class="v">${d.total}</div><div class="s">${d.unique_devices} dispositivo${d.unique_devices===1?"":"s"}</div></div>
-      <div class="statm"><div class="l">Sugestões</div><div class="v">${coms.length}</div><div class="s">${d.total?Math.round(100*coms.length/d.total):0}% das respostas</div></div>
-      <div class="statm"><div class="l">Média/dia</div><div class="v">${num2(avgDay)}</div><div class="s">em ${elapsed} dia${elapsed===1?"":"s"}</div></div>
+      <div class="statm"><div class="l">Respostas</div><div class="v">${d.total}</div><div class="s">${nApp} digitais + ${nPapel} em papel</div></div>
+      <div class="statm"><div class="l">Comentários</div><div class="v">${coms.length}</div><div class="s">${d.total?Math.round(100*coms.length/d.total):0}% das respostas</div></div>
+      <div class="statm"><div class="l">Elogios</div><div class="v">${elogios}</div><div class="s">espontâneos</div></div>
+      <div class="statm" style="${crits.length?"background:#FDECE8;border-color:var(--bad)":""}"><div class="l">Alertas de higiene</div><div class="v" style="${crits.length?"color:var(--bad)":""}">${crits.length}</div><div class="s">${coms.length?(100*crits.length/coms.length).toFixed(1).replace(".",",")+"% dos comentários":"—"}</div></div>
       <div class="statm"><div class="l">Período</div><div class="v">${elapsed}/${totalDays}</div><div class="s">${status==="em andamento"?`${remaining} dia${remaining===1?"":"s"} restante${remaining===1?"":"s"}`:status==="agendada"?"não começou":"encerrado"}</div></div>
-      <div class="statm"><div class="l">Atualizado</div><div class="v" style="font-size:17px">${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</div><div class="s"><a href="#" onclick="event.preventDefault();render()" style="color:var(--green);font-weight:600">atualizar ↻</a></div></div>
     </div>
+    <div class="muted" style="font-size:12.5px;margin-top:10px">Respostas em papel entram no mesmo banco, marcadas com (M). Atualizado às ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} · <a href="#" onclick="event.preventDefault();render()" style="color:var(--green);font-weight:600">atualizar ↻</a></div>
   </div>
-  <div class="card" style="margin-bottom:14px;padding:16px 18px"><h3 style="margin-bottom:8px">Respostas por dia</h3><div style="height:210px"><canvas id="ccDaily"></canvas></div></div>
-  <div class="grid g2" style="margin-bottom:14px">
-    <div class="card" style="padding:16px 18px"><h3 style="margin-bottom:8px">Turno de trabalho</h3>${bars(byTurno,"var(--green-2)")}</div>
-    <div class="card" style="padding:16px 18px"><h3 style="margin-bottom:8px">Frequência no restaurante</h3>${bars(byFreq,"var(--orange)")}</div>
+  ${crits.length?`<div class="card" style="margin-bottom:14px;background:#FDECE8;border-color:var(--bad);padding:18px 20px">
+    <h3 style="color:#7A1F1F;margin-bottom:4px">⚠ Alerta crítico: segurança alimentar</h3>
+    <div style="font-size:13px;color:#7A1F1F;margin-bottom:12px">Relatos de cabelo, inseto, larva ou lagartixa na comida, e de manipulação de alimentos logo após fumar. Pouco volume, mas gravidade alta: tratar à parte do ranking de temas.</div>
+    <div style="font-size:15px;margin-bottom:12px"><b style="color:var(--bad);font-size:17px">${crits.length} de ${coms.length} comentários (${(100*crits.length/coms.length).toFixed(1).replace(".",",")}%)</b> · ${TURNOS.map(t=>[t,crits.filter(c=>c.turno===t).length]).filter(x=>x[1]).map(([t,n])=>`${n} do ${esc(t)}`).join(", ")}</div>
+    ${crits.slice(0,4).map(c=>`<div style="background:#fff;border-left:3px solid var(--bad);border-radius:10px;padding:10px 14px;margin-bottom:8px"><div style="font-size:13.5px;font-style:italic;line-height:1.5">“${esc(String(c.texto).replace(/\s+/g," ").slice(0,210))}${String(c.texto).length>210?"…":""}”</div><div class="muted" style="font-size:11.5px;margin-top:4px">${esc(c.turno)} · ${fd(c.data)}${c.origem==="manual"?" · (M) Papel":""}</div></div>`).join("")}
+    <button class="btn sm" style="background:var(--bad);margin-top:6px" onclick="custShowCrit()">Ler os ${crits.length} relatos completos</button>
+  </div>`:""}
+  <div class="card" style="margin-bottom:14px;padding:16px 18px"><h3 style="margin-bottom:8px">Respostas por dia</h3><div style="height:200px"><canvas id="ccDaily"></canvas></div></div>
+  <div class="grid g2eq" style="margin-bottom:14px">
+    <div class="card" style="padding:16px 18px"><h3 style="margin-bottom:8px">Turno de trabalho</h3>${bars(TURNOS,byTurno,"var(--green-2)")}</div>
+    <div class="card" style="padding:16px 18px"><h3 style="margin-bottom:8px">Frequência no restaurante</h3>${bars(FREQS,byFreq,"var(--orange)")}</div>
   </div>
-  ${others.length?`<div class="card" style="margin-bottom:14px"><h3>Outras pesquisas</h3>${others.map(s=>{const st=customStatus(s),c2=customStatusColor[st];return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)"><div><b>${esc(s.title)}</b> <span class="tag" style="background:${c2}22;color:${c2};margin-left:6px">${st}</span><div class="muted" style="font-size:13px">${esc(s.client_unit)} · ${s.total} resposta${s.total===1?"":"s"}</div></div><button class="btn alt sm" onclick="customOpen('${esc(s.slug)}')">Abrir</button></div>`}).join("")}</div>`:""}
-  <div class="card"><h3>Sugestões de melhoria (${coms.length})</h3>
-    ${coms.length?`<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">${coms.map(c=>`<div style="border:1px solid var(--line);border-radius:14px;padding:14px"><div class="muted" style="font-size:12px;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span>${fdt(c.data)}</span>${c.turno?`<span class="tag" style="background:var(--cream);color:var(--green)">${esc(c.turno)}</span>`:""}</div><div class="bubble">${esc(c.texto)}</div></div>`).join("")}</div>`:`<div class="muted" style="font-size:13.5px;padding:10px 0">Nenhuma sugestão escrita ainda.</div>`}
+  <div class="card" style="margin-bottom:14px;padding:16px 18px">
+    <h3 style="margin-bottom:4px">Onde atuar primeiro</h3>
+    <div class="muted" style="font-size:13px;margin-bottom:12px">Temas citados nos ${coms.length} comentários, por número de menções. Um comentário pode tocar mais de um tema.</div>
+    ${ranking.map(([k,n],i)=>`<div style="display:flex;align-items:center;gap:10px;margin:9px 0"><span style="width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;${i<3?"background:var(--orange);color:#fff":""}">${i<3?i+1:""}</span><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-bottom:4px"><span>${esc((TEMAS[k]||{}).n||k)}</span><span class="muted" style="white-space:nowrap">${n} · ${Math.round(100*n/coms.length)}%</span></div><div class="bar"><i style="width:${Math.round(100*n/maxR)}%;background:${i<3?"var(--orange)":"var(--green-2)"}"></i></div></div></div>`).join("")}
+    ${top3.length===3?`<div style="margin-top:14px;font-size:13.5px;background:var(--cream);border-radius:10px;padding:12px 14px;line-height:1.5"><b>${top3n} de ${coms.length} comentários (${(100*top3n/coms.length).toFixed(1).replace(".",",")}%)</b> citam pelo menos um dos 3 temas prioritários: ${top3.map(k=>esc((TEMAS[k]||{}).s||k)).join(", ")}.</div>`:""}
+  </div>
+  <div style="margin-bottom:14px"><h3 style="margin-bottom:10px">Comentários por turno</h3><div class="grid g2eq">${turnoCards}</div></div>
+  <div class="card" id="cmBox" style="padding:18px 20px">
+    <h3 style="margin-bottom:4px">Todos os comentários</h3>
+    <div class="muted" style="font-size:13px;margin-bottom:12px">Leitura na íntegra, organizados por turno. Use a busca e os filtros para chegar rápido ao que importa.</div>
+    <div class="row" style="gap:10px;margin-bottom:10px"><input type="text" id="cmQ" placeholder="Buscar palavra (ex.: salada, tempero, cru)" style="flex:1;min-width:200px" oninput="custFilter('q',this.value)"><select id="cmTag" onchange="custFilter('tag',this.value)"><option value="">Todos os temas</option>${ranking.map(([k])=>`<option value="${esc(k)}">${esc((TEMAS[k]||{}).n||k)}</option>`).join("")}<option value="${ELOGIO}">Elogios</option></select></div>
+    <div class="chips" id="cmTurnos" style="margin-bottom:8px"><button class="chip-b" data-v="" onclick="custFilter('turno','')">Todos os turnos</button>${TURNOS.filter(t=>byTurno[t]!=null).map(t=>`<button class="chip-b" data-v="${esc(t)}" onclick="custFilter('turno',this.dataset.v)">${esc(t)}</button>`).join("")}</div>
+    <div class="chips"><button class="chip-b" id="cmCrit" onclick="custFilter('crit',!S.cust.crit)">⚠ Críticos de higiene</button><button class="chip-b" id="cmPapel" onclick="custFilter('papel',!S.cust.papel)">Pesquisas em papel (M)</button></div>
+    <div class="muted" id="cmCount" style="font-size:13px;margin:14px 0 0"></div>
+    <div id="cmList"></div>
   </div>`;
+  custComments();
   const days=daily.map(x=>fd(x.date).slice(0,5));
   S.charts.ccDaily=new Chart($("#ccDaily"),{type:"bar",data:{labels:days.length?days:["—"],datasets:[{label:"Respostas",data:daily.length?daily.map(x=>x.count):[0],backgroundColor:"rgba(31,78,61,.55)",borderRadius:6}]},options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:"#EEE8D9"}},x:{grid:{display:false}}},plugins:{legend:{display:false}}}});
 }
