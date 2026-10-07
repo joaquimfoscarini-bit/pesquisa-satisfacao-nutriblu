@@ -510,95 +510,128 @@ function custStats(coms){
   const ranking=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
   return ranking;
 }
-function custComments(){
-  const f=S.cust,q=f.q.trim().toLowerCase();
-  const list=S.custComs.filter(c=>(!f.turno||c.turno===f.turno)&&(!f.tag||(c.tags||[]).includes(f.tag))&&(!f.crit||c.critico)&&(!f.papel||c.origem==="manual")&&(!q||String(c.texto).toLowerCase().includes(q)));
-  $("#cmCount").textContent=list.length===S.custComs.length?`${list.length} comentários`:`${list.length} de ${S.custComs.length} comentários`;
-  const by={};list.forEach(c=>{(by[c.turno||"Sem turno"]=by[c.turno||"Sem turno"]||[]).push(c)});
-  const order=[...TURNOS,"Sem turno"].filter(t=>by[t]);
-  $("#cmList").innerHTML=list.length?order.map(t=>`<div style="margin-top:18px"><div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px"><h3 style="margin:0">${esc(t)}</h3><span class="muted" style="font-size:13px">${by[t].length} comentário${by[t].length===1?"":"s"}</span></div><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${by[t].map(c=>`<div style="border:1px solid ${c.critico?"var(--bad)":"var(--line)"};background:${c.critico?"#FDECE8":"#fff"};border-radius:14px;padding:14px"><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px"><span class="muted" style="font-size:12px">${fd(c.data)}</span>${c.origem==="manual"?`<span class="tag" style="background:#FBE8CF;color:#5C3C10">(M) Papel</span>`:""}${c.critico?`<span class="tag" style="background:var(--bad);color:#fff">Alerta de higiene</span>`:""}<span class="muted" style="font-size:12px">· ${esc(c.frequencia||"")}</span></div><div class="bubble">${esc(c.texto)}</div>${(c.tags||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">${c.tags.map(t=>`<span class="tag" style="font-size:11px;font-weight:600">${esc((TEMAS[t]||{}).s||(t===ELOGIO?"Elogio":t))}</span>`).join("")}</div>`:""}</div>`).join("")}</div></div>`).join(""):`<div class="empty">Nenhum comentário com esses filtros.</div>`;
-  document.querySelectorAll("#cmTurnos .chip-b").forEach(b=>b.classList.toggle("on",b.dataset.v===f.turno));
-  $("#cmCrit").classList.toggle("on",f.crit);$("#cmPapel").classList.toggle("on",f.papel);
-}
-function custFilter(k,v){S.cust[k]=v;custComments()}
-function custShowCrit(){S.cust={turno:"",tag:"",crit:true,papel:false,q:""};$("#cmQ").value="";$("#cmTag").value="";custComments();$("#cmBox").scrollIntoView({behavior:"smooth"})}
+const CUSTOM_COMMENTS_URL="https://claude.ai/artifact/9jCW6TNmFK2CSZ3AuJwoXt";
+const CD_CSS=`<style>
+.cd{--bg:#FBF8F1;--surface:#fff;--surface-2:#f4efe3;--text:#16241d;--text-2:#49584f;--text-m:#80897f;--bd:rgba(31,78,61,.14);--brand:#1F4E3D;--accent:#E08A2E;--accent-wash:#fbe8cf;--accent-ink:#5c3c10;--crit:#d03b3b;--crit-wash:#fbe3e1;--crit-ink:#7a1f1f;color:var(--text);background:var(--bg);border-radius:22px;padding:clamp(18px,2.4vw,36px);border:1px solid var(--bd)}
+.cd *{box-sizing:border-box}
+.cd .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-wash);display:inline-block;padding:4px 11px;border-radius:999px;font-weight:700}
+.cd h1{font-family:Inter,system-ui,sans-serif;font-size:clamp(24px,3.2vw,34px);margin:14px 0 4px;letter-spacing:-.015em;color:var(--brand);font-weight:700}
+.cd .sub{color:var(--text-2);font-size:15px;margin:0 0 26px;max-width:78ch;line-height:1.5}
+.cd section{margin-top:38px}
+.cd section>h2{font-family:Inter,system-ui,sans-serif;font-size:19px;margin:0 0 4px;color:var(--text);font-weight:700}
+.cd .note{color:var(--text-m);font-size:13px;margin:0 0 16px;max-width:80ch}
+.cd .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.cd .kpi{background:var(--surface);border:1px solid var(--bd);border-radius:14px;padding:18px 16px}
+.cd .kpi .n{font-size:30px;font-weight:700;color:var(--brand);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.cd .kpi .l{font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.3}
+.cd .kpi.crit{background:var(--crit-wash);border-color:var(--crit)}.cd .kpi.crit .n{color:var(--crit)}.cd .kpi.crit .l{color:var(--crit-ink)}
+.cd .panel{background:var(--surface);border:1px solid var(--bd);border-radius:16px;padding:18px 18px 14px}
+.cd .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cd .panel h3{font-family:Inter,system-ui,sans-serif;font-size:14px;margin:0 0 14px;color:var(--text-2);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.cd .br{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+.cd .br:last-child{margin-bottom:2px}
+.cd .rank{width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cd .rank.m{background:transparent}
+.cd .bm{flex:1;min-width:0}
+.cd .bl{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-bottom:5px}
+.cd .bv{color:var(--text-m);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cd .bt{height:9px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.cd .bf{height:100%;background:var(--brand);border-radius:5px}
+.cd .br.tp .bf{background:var(--accent)}
+.cd .callout{margin-top:14px;font-size:13.5px;color:var(--text-2);background:var(--surface-2);border-radius:10px;padding:12px 14px;line-height:1.5}.cd .callout b{color:var(--text)}
+.cd .alert{background:var(--crit-wash);border:1px solid var(--crit);border-radius:16px;padding:20px 20px 18px}
+.cd .alert h2{color:var(--crit-ink)!important}.cd .alert .note{color:var(--crit-ink);opacity:.85}
+.cd .alert-stat{font-size:15px;margin:6px 0 4px;color:var(--text)}.cd .alert-stat b{color:var(--crit);font-size:17px}
+.cd .tg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cd .tc{background:var(--surface);border:1px solid var(--bd);border-radius:14px;padding:16px}
+.cd .th{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px}
+.cd .th h3{font-family:Inter,system-ui,sans-serif;font-size:15px;margin:0;color:var(--brand);font-weight:700}
+.cd .tn{font-size:12px;color:var(--text-m)}
+.cd .mr{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12.5px}
+.cd .ml{width:108px;flex-shrink:0;color:var(--text-2)}
+.cd .mt{flex:1;height:6px;background:var(--surface-2);border-radius:4px;overflow:hidden}.cd .mf{height:100%;background:var(--accent);border-radius:4px}
+.cd .mv{width:22px;text-align:right;color:var(--text-m);font-variant-numeric:tabular-nums}
+.cd .tf{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.cd .bd{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;background:var(--surface-2);color:var(--text-2)}.cd .bd.c{background:var(--crit);color:#fff}
+.cd .qrp{display:flex;gap:24px;align-items:center;background:var(--surface);border:1px solid var(--bd);border-radius:16px;padding:22px}
+.cd .qrp canvas,.cd .qrp img{width:200px;height:200px;border-radius:12px;border:1px solid var(--bd);background:#fff;padding:8px;flex-shrink:0}
+.cd .qrp h3{font-family:Inter,system-ui,sans-serif;margin:0 0 6px;font-size:18px;color:var(--text);font-weight:700}
+.cd .qrp p{margin:0 0 8px;font-size:14px;color:var(--text-2);line-height:1.5;max-width:60ch}
+.cd .qrp .lk{font-size:12.5px;color:var(--text-m);word-break:break-all}
+.cd footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text-m);line-height:1.6}
+@media(max-width:900px){.cd .kpis{grid-template-columns:repeat(2,1fr)}.cd .two,.cd .tg{grid-template-columns:1fr}}
+@media(max-width:560px){.cd .qrp{flex-direction:column;text-align:center}}
+</style>`;
 async function customDashboard(meta,list){
   killCharts();
   const d=await A("admin_custom_survey_results",{p_slug:meta.slug});
   const sv=d.survey,status=customStatus(sv),col=customStatusColor[status];
-  const today=iso(0);
-  const totalDays=Math.max(1,Math.round((new Date(sv.closes_at)-new Date(sv.opens_at))/86400000)+1);
-  const elapsed=Math.min(totalDays,Math.max(0,Math.round((new Date(today)-new Date(sv.opens_at))/86400000)+1));
-  const remaining=Math.max(0,totalDays-elapsed);
-  const byTurno=d.by_turno||{},byFreq=d.by_frequencia||{},byOrig=d.by_origem||{},coms=d.comentarios||[],daily=d.daily||[];
-  S.custComs=coms;S.cust={turno:"",tag:"",crit:false,papel:false,q:""};
+  const byTurno=d.by_turno||{},byFreq=d.by_frequencia||{},byOrig=d.by_origem||{},coms=d.comentarios||[];
   const nPapel=byOrig.manual||0,nApp=d.total-nPapel;
+  const pc=(n,t)=>t?Math.round(100*n/t):0,pc1=(n,t)=>t?(100*n/t).toFixed(1).replace(".",","):"0";
   const elogios=coms.filter(c=>(c.tags||[]).includes(ELOGIO)).length;
   const crits=coms.filter(c=>c.critico);
   const ranking=custStats(coms),maxR=Math.max(1,...ranking.map(r=>r[1]));
   const top3=ranking.slice(0,3).map(r=>r[0]);
   const top3n=coms.filter(c=>(c.tags||[]).some(t=>top3.includes(t))).length;
-  const bars=(keys,obj,color)=>{const tot=Object.values(obj).reduce((a,n)=>a+n,0),max=Math.max(1,...Object.values(obj));
-    return keys.filter(k=>obj[k]!=null).concat(Object.keys(obj).filter(k=>!keys.includes(k))).map(k=>{const n=obj[k];return `<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><div style="flex:1.5;font-size:13.5px">${esc(k)}</div><div class="bar" style="flex:2"><i style="width:${Math.round(100*n/max)}%;background:${color}"></i></div><b style="width:78px;text-align:right">${n} <span class="muted" style="font-weight:500">(${tot?Math.round(100*n/tot):0}%)</span></b></div>`}).join("")||`<div class="muted" style="font-size:13.5px">Sem respostas ainda.</div>`};
+  const bars=(keys,obj)=>{const tot=Object.values(obj).reduce((a,n)=>a+n,0),max=Math.max(1,...Object.values(obj));
+    return keys.filter(k=>obj[k]!=null).concat(Object.keys(obj).filter(k=>!keys.includes(k))).map(k=>{const n=obj[k];return `<div class="br"><div class="bm"><div class="bl"><span>${esc(k)}</span><span class="bv">${n} · ${pc(n,tot)}%</span></div><div class="bt"><div class="bf" style="width:${(100*n/max).toFixed(1)}%"></div></div></div></div>`}).join("")};
   const turnoCards=TURNOS.filter(t=>byTurno[t]!=null).map(t=>{
     const cs=coms.filter(c=>c.turno===t),cn={};cs.forEach(c=>(c.tags||[]).forEach(x=>{if(x!==ELOGIO)cn[x]=(cn[x]||0)+1}));
     const tops=Object.entries(cn).sort((a,b)=>b[1]-a[1]).slice(0,3),mx=Math.max(1,...tops.map(x=>x[1]));
     const el=cs.filter(c=>(c.tags||[]).includes(ELOGIO)).length,cr=cs.filter(c=>c.critico).length;
-    return `<div class="card" style="padding:16px 18px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:8px"><h3 style="margin:0">${esc(t)}</h3><span class="muted" style="font-size:12.5px">${cs.length} comentários · ${byTurno[t]} respostas</span></div>${tops.map(([k,n])=>`<div style="display:flex;align-items:center;gap:8px;margin:7px 0;font-size:12.5px"><span style="width:104px;flex-shrink:0" class="muted">${esc((TEMAS[k]||{}).s||k)}</span><div class="bar" style="flex:1;height:6px"><i style="width:${Math.round(100*n/mx)}%;background:var(--orange)"></i></div><b style="width:22px;text-align:right">${n}</b></div>`).join("")}<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><span class="tag">${el} elogio${el===1?"":"s"}</span>${cr?`<span class="tag" style="background:var(--bad);color:#fff">${cr} alerta${cr===1?"":"s"} de higiene</span>`:""}</div></div>`}).join("");
+    return `<div class="tc"><div class="th"><h3>${esc(t)}</h3><span class="tn">${cs.length} comentários · ${byTurno[t]} respostas</span></div>${tops.map(([k,n])=>`<div class="mr"><span class="ml">${esc((TEMAS[k]||{}).s||k)}</span><div class="mt"><div class="mf" style="width:${(100*n/mx).toFixed(1)}%"></div></div><span class="mv">${n}</span></div>`).join("")}<div class="tf"><span class="bd">${el} elogio(s)</span>${cr?`<span class="bd c">${cr} alerta(s) de higiene</span>`:""}</div></div>`}).join("");
+  const rankHtml=ranking.map(([k,n],i)=>`<div class="br${i<3?" tp":""}"><span class="rank${i<3?"":" m"}">${i<3?i+1:"&nbsp;"}</span><div class="bm"><div class="bl"><span>${esc((TEMAS[k]||{}).n||k)}</span><span class="bv">${n} · ${pc(n,coms.length)}%</span></div><div class="bt"><div class="bf" style="width:${(100*n/maxR).toFixed(1)}%"></div></div></div></div>`).join("");
+  const qr=qrcode(0,"M");qr.addData(CUSTOM_COMMENTS_URL);qr.make();
+  const qrImg=qr.createDataURL(8,2);
   $("#body").innerHTML=`
-  <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:14px">
-    <button class="btn alt sm" onclick="customBack()">← Todas as pesquisas</button>
+  <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px">
+    <div class="row" style="gap:10px;align-items:center"><button class="btn alt sm" onclick="customBack()">← Todas as pesquisas</button><span class="tag" style="background:${col}22;color:${col};font-size:12.5px;padding:4px 10px">${status}</span></div>
     <div class="row" style="gap:8px">
       <button class="btn alt sm" onclick="customCopyLink('${esc(meta.slug)}')">Copiar link da pesquisa</button>
       <button class="btn alt sm" onclick="customExtendDlg('${esc(meta.slug)}','${sv.closes_at}')">Renovar período</button>
       <button class="btn alt sm" onclick="customToggle('${esc(meta.slug)}',${!sv.active})">${sv.active?"Pausar":"Reativar"}</button>
     </div>
   </div>
-  <div class="card" style="margin-bottom:14px;padding:16px 18px">
-    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px">
-      <div><h1 style="font-size:19px;margin-bottom:2px">${esc(sv.title)}</h1><div class="muted" style="font-size:13px">${esc(sv.client_unit)} · ${fd(sv.opens_at)} a ${fd(sv.closes_at)}</div></div>
-      <span class="tag" style="background:${col}22;color:${col};font-size:12.5px;padding:4px 10px;white-space:nowrap">${status}</span>
+  ${CD_CSS}
+  <div class="cd">
+    <span class="eyebrow">NutriBlu × Grupo Viveo</span>
+    <h1>${esc(sv.title)} ${esc(sv.client_unit)}</h1>
+    <p class="sub">Pesquisa de 1 semana (${fd(sv.opens_at)} a ${fd(sv.closes_at)}), independente da pesquisa diária de satisfação: turno de trabalho, frequência de uso do restaurante e sugestão de melhoria em campo aberto. Resultado unificado dos dois fluxos de resposta — digital (QR code) e formulário em papel.</p>
+    <div class="kpis">
+      <div class="kpi"><div class="n">${d.total}</div><div class="l">respostas registradas</div></div>
+      <div class="kpi"><div class="n">${coms.length}</div><div class="l">comentários com sugestão</div></div>
+      <div class="kpi"><div class="n">${elogios}</div><div class="l">elogios espontâneos</div></div>
+      <div class="kpi${crits.length?" crit":""}"><div class="n">${crits.length}</div><div class="l">alertas críticos de higiene</div></div>
     </div>
-    <div class="statrow">
-      <div class="statm"><div class="l">Respostas</div><div class="v">${d.total}</div><div class="s">${nApp} digitais + ${nPapel} em papel</div></div>
-      <div class="statm"><div class="l">Comentários</div><div class="v">${coms.length}</div><div class="s">${d.total?Math.round(100*coms.length/d.total):0}% das respostas</div></div>
-      <div class="statm"><div class="l">Elogios</div><div class="v">${elogios}</div><div class="s">espontâneos</div></div>
-      <div class="statm" style="${crits.length?"background:#FDECE8;border-color:var(--bad)":""}"><div class="l">Alertas de higiene</div><div class="v" style="${crits.length?"color:var(--bad)":""}">${crits.length}</div><div class="s">${coms.length?(100*crits.length/coms.length).toFixed(1).replace(".",",")+"% dos comentários":"—"}</div></div>
-      <div class="statm"><div class="l">Período</div><div class="v">${elapsed}/${totalDays}</div><div class="s">${status==="em andamento"?`${remaining} dia${remaining===1?"":"s"} restante${remaining===1?"":"s"}`:status==="agendada"?"não começou":"encerrado"}</div></div>
-    </div>
-    <div class="muted" style="font-size:12.5px;margin-top:10px">Respostas em papel entram no mesmo banco, marcadas com (M). Atualizado às ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} · <a href="#" onclick="event.preventDefault();render()" style="color:var(--green);font-weight:600">atualizar ↻</a></div>
-  </div>
-  ${crits.length?`<div class="card" style="margin-bottom:14px;background:#FDECE8;border-color:var(--bad);padding:18px 20px">
-    <h3 style="color:#7A1F1F;margin-bottom:4px">⚠ Alerta crítico: segurança alimentar</h3>
-    <div style="font-size:13px;color:#7A1F1F;margin-bottom:12px">Relatos de cabelo, inseto, larva ou lagartixa na comida, e de manipulação de alimentos logo após fumar. Pouco volume, mas gravidade alta: tratar à parte do ranking de temas.</div>
-    <div style="font-size:15px;margin-bottom:12px"><b style="color:var(--bad);font-size:17px">${crits.length} de ${coms.length} comentários (${(100*crits.length/coms.length).toFixed(1).replace(".",",")}%)</b> · ${TURNOS.map(t=>[t,crits.filter(c=>c.turno===t).length]).filter(x=>x[1]).map(([t,n])=>`${n} do ${esc(t)}`).join(", ")}</div>
-    ${crits.slice(0,4).map(c=>`<div style="background:#fff;border-left:3px solid var(--bad);border-radius:10px;padding:10px 14px;margin-bottom:8px"><div style="font-size:13.5px;font-style:italic;line-height:1.5">“${esc(String(c.texto).replace(/\s+/g," ").slice(0,210))}${String(c.texto).length>210?"…":""}”</div><div class="muted" style="font-size:11.5px;margin-top:4px">${esc(c.turno)} · ${fd(c.data)}${c.origem==="manual"?" · (M) Papel":""}</div></div>`).join("")}
-    <button class="btn sm" style="background:var(--bad);margin-top:6px" onclick="custShowCrit()">Ler os ${crits.length} relatos completos</button>
-  </div>`:""}
-  <div class="card" style="margin-bottom:14px;padding:16px 18px"><h3 style="margin-bottom:8px">Respostas por dia</h3><div style="height:200px"><canvas id="ccDaily"></canvas></div></div>
-  <div class="grid g2eq" style="margin-bottom:14px">
-    <div class="card" style="padding:16px 18px"><h3 style="margin-bottom:8px">Turno de trabalho</h3>${bars(TURNOS,byTurno,"var(--green-2)")}</div>
-    <div class="card" style="padding:16px 18px"><h3 style="margin-bottom:8px">Frequência no restaurante</h3>${bars(FREQS,byFreq,"var(--orange)")}</div>
-  </div>
-  <div class="card" style="margin-bottom:14px;padding:16px 18px">
-    <h3 style="margin-bottom:4px">Onde atuar primeiro</h3>
-    <div class="muted" style="font-size:13px;margin-bottom:12px">Temas citados nos ${coms.length} comentários, por número de menções. Um comentário pode tocar mais de um tema.</div>
-    ${ranking.map(([k,n],i)=>`<div style="display:flex;align-items:center;gap:10px;margin:9px 0"><span style="width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;${i<3?"background:var(--orange);color:#fff":""}">${i<3?i+1:""}</span><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-bottom:4px"><span>${esc((TEMAS[k]||{}).n||k)}</span><span class="muted" style="white-space:nowrap">${n} · ${Math.round(100*n/coms.length)}%</span></div><div class="bar"><i style="width:${Math.round(100*n/maxR)}%;background:${i<3?"var(--orange)":"var(--green-2)"}"></i></div></div></div>`).join("")}
-    ${top3.length===3?`<div style="margin-top:14px;font-size:13.5px;background:var(--cream);border-radius:10px;padding:12px 14px;line-height:1.5"><b>${top3n} de ${coms.length} comentários (${(100*top3n/coms.length).toFixed(1).replace(".",",")}%)</b> citam pelo menos um dos 3 temas prioritários: ${top3.map(k=>esc((TEMAS[k]||{}).s||k)).join(", ")}.</div>`:""}
-  </div>
-  <div style="margin-bottom:14px"><h3 style="margin-bottom:10px">Comentários por turno</h3><div class="grid g2eq">${turnoCards}</div></div>
-  <div class="card" id="cmBox" style="padding:18px 20px">
-    <h3 style="margin-bottom:4px">Todos os comentários</h3>
-    <div class="muted" style="font-size:13px;margin-bottom:12px">Leitura na íntegra, organizados por turno. Use a busca e os filtros para chegar rápido ao que importa.</div>
-    <div class="row" style="gap:10px;margin-bottom:10px"><input type="text" id="cmQ" placeholder="Buscar palavra (ex.: salada, tempero, cru)" style="flex:1;min-width:200px" oninput="custFilter('q',this.value)"><select id="cmTag" onchange="custFilter('tag',this.value)"><option value="">Todos os temas</option>${ranking.map(([k])=>`<option value="${esc(k)}">${esc((TEMAS[k]||{}).n||k)}</option>`).join("")}<option value="${ELOGIO}">Elogios</option></select></div>
-    <div class="chips" id="cmTurnos" style="margin-bottom:8px"><button class="chip-b" data-v="" onclick="custFilter('turno','')">Todos os turnos</button>${TURNOS.filter(t=>byTurno[t]!=null).map(t=>`<button class="chip-b" data-v="${esc(t)}" onclick="custFilter('turno',this.dataset.v)">${esc(t)}</button>`).join("")}</div>
-    <div class="chips"><button class="chip-b" id="cmCrit" onclick="custFilter('crit',!S.cust.crit)">⚠ Críticos de higiene</button><button class="chip-b" id="cmPapel" onclick="custFilter('papel',!S.cust.papel)">Pesquisas em papel (M)</button></div>
-    <div class="muted" id="cmCount" style="font-size:13px;margin:14px 0 0"></div>
-    <div id="cmList"></div>
+    <p class="note" style="margin-top:12px"><b>${nApp} respostas digitais</b> + <b>${nPapel} respostas em formulário de papel</b>, sem duplicidade. Respostas de teste foram desconsideradas. Atualizado às ${new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})} · <a href="#" onclick="event.preventDefault();render()" style="color:var(--green);font-weight:600">atualizar ↻</a></p>
+    <section>
+      <h2>Quem respondeu</h2>
+      <p class="note">Perfil das ${d.total} respostas por frequência de uso do restaurante e por turno de trabalho.</p>
+      <div class="two"><div class="panel"><h3>Frequência de uso</h3>${bars(FREQS,byFreq)}</div><div class="panel"><h3>Turno de trabalho</h3>${bars(TURNOS,byTurno)}</div></div>
+    </section>
+    <section>
+      <h2>Onde atuar primeiro</h2>
+      <p class="note">Temas citados nos ${coms.length} comentários, por número de menções (um mesmo comentário pode tocar mais de um tema).</p>
+      <div class="panel">${rankHtml}${top3.length===3?`<div class="callout"><b>${top3n} de ${coms.length} comentários (${pc1(top3n,coms.length)}%)</b> mencionam pelo menos um dos 3 temas prioritários — ${top3.map(k=>esc((TEMAS[k]||{}).s||k)).join(", ")}. Agir nesses três pontos endereça a maioria das reclamações recebidas.</div>`:""}</div>
+    </section>
+    ${crits.length?`<section class="alert">
+      <h2>⚠ Alerta crítico — segurança alimentar</h2>
+      <p class="note">Relatos que citam cabelo, inseto, larva ou lagartixa na comida, e manipulação de alimentos por pessoas que acabaram de fumar. Baixo volume, mas gravidade alta — tratamento prioritário independente do ranking de menções acima.</p>
+      <p class="alert-stat"><b>${crits.length} de ${coms.length} comentários (${pc1(crits.length,coms.length)}%)</b> — ${TURNOS.map(t=>[t,crits.filter(c=>c.turno===t).length]).filter(x=>x[1]).map(([t,n])=>`${n} do <b>${esc(t)}</b>`).join(" e ")}.</p>
+    </section>`:""}
+    <section>
+      <h2>Comentários por turno</h2>
+      <p class="note">Volume de comentários e principais temas citados em cada turno.</p>
+      <div class="tg">${turnoCards}</div>
+    </section>
+    <section>
+      <h2>Leia os comentários</h2>
+      <p class="note">Os comentários na íntegra não ficam neste painel. Aponte a câmera do celular para o código abaixo.</p>
+      <div class="qrp"><img src="${qrImg}" alt="QR Code dos comentários"><div><h3>Escaneie com o seu celular</h3><p>Abre a lista completa dos ${coms.length} comentários, com busca por palavra e filtros por turno, tema e relatos críticos de higiene.</p><div class="lk">${esc(CUSTOM_COMMENTS_URL)}</div></div></div>
+    </section>
+    <footer>NutriBlu Gastronomia Empresarial · unidade ${esc(sv.client_unit)} (Grupo Viveo) · pesquisa personalizada, ${fd(sv.opens_at).slice(0,5)}–${fd(sv.closes_at)}<br>Dados internos de gestão — uso restrito.</footer>
   </div>`;
-  custComments();
-  const days=daily.map(x=>fd(x.date).slice(0,5));
-  S.charts.ccDaily=new Chart($("#ccDaily"),{type:"bar",data:{labels:days.length?days:["—"],datasets:[{label:"Respostas",data:daily.length?daily.map(x=>x.count):[0],backgroundColor:"rgba(31,78,61,.55)",borderRadius:6}]},options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:"#EEE8D9"}},x:{grid:{display:false}}},plugins:{legend:{display:false}}}});
 }
 
 if(S.token){boot()}else loginView();
