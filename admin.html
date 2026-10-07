@@ -23,8 +23,8 @@ html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Inter",
 h1,h2,h3{font-family:var(--serif);color:var(--green);margin:0 0 8px;text-wrap:balance}
 h1{font-weight:680;font-size:27px;line-height:1.1;letter-spacing:-.3px}
 h2{font-weight:680;font-size:19px}
-.top{background:linear-gradient(180deg,#20553F 0%,var(--green) 62%,#193F30 100%);color:#fff;padding:calc(18px + env(safe-area-inset-top)) 20px 20px;position:relative}
-.top .in{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.top{background:linear-gradient(180deg,#20553F 0%,var(--green) 62%,#193F30 100%);color:#fff;padding:calc(18px + env(safe-area-inset-top)) clamp(16px,2.5vw,40px) 20px;position:relative}
+.top .in{max-width:1680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .logo-wrap{display:flex;align-items:center;gap:12px}
 .logo-img{height:40px;width:auto;display:block}
 .logo-fallback{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.3px;font-size:18px;color:#fff}
@@ -32,7 +32,7 @@ h2{font-weight:680;font-size:19px}
 .unit-pill{font-size:11.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:2px}
 .out{background:transparent;border:1.5px solid rgba(255,255,255,.5);color:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer}
 .out:hover{background:rgba(255,255,255,.12)}
-main{max-width:1200px;margin:24px auto 0;padding:0 20px 40px;position:relative}
+main{max-width:1680px;margin:24px auto 0;padding:0 clamp(16px,2.5vw,40px) 40px;position:relative}
 .navrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
 nav{display:flex;background:#EFE9DA;border-radius:14px;padding:4px;gap:4px;flex-wrap:wrap;flex:1}
 nav button{background:transparent;border:0;padding:11px 16px;border-radius:11px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap}
