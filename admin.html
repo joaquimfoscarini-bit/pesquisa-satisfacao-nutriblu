@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta name="color-scheme" content="light dark">
-<script>try{var t=localStorage.getItem("nbTheme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<meta name="color-scheme" content="light">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
@@ -22,8 +21,7 @@
   --serif:"Fraunces",Georgia,serif;
   --radius:20px;
 }
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--green:#5aa585;--green-2:#4f9a7d;--green-3:#4a9373;--orange:#eea254;--orange-2:#f3b06a;--cream:#0f1713;--ink:#f1f3ef;--muted:#b0bcb4;--line:rgba(255,255,255,.14);--card:#17221c;--ok:#4fb383;--ok2:#8cc063;--warn:#eea254;--bad:#e66767;--wash-g:#1d2a23;--wash-o:#3a2a14;--wash-r:#3a1a18;--wash-r-bd:#6b2c28;--wash-r-ink:#f6b9b9;--wash-y:#3a2a14;--wash-y-ink:#f3cf9c;--track:#26352c;--seg:#1d2a23;--btn-a:#3f8a6c;--btn-b:#2f6c53;--shadow:rgba(0,0,0,.55)}}
-:root[data-theme="dark"]{color-scheme:dark;--green:#5aa585;--green-2:#4f9a7d;--green-3:#4a9373;--orange:#eea254;--orange-2:#f3b06a;--cream:#0f1713;--ink:#f1f3ef;--muted:#b0bcb4;--line:rgba(255,255,255,.14);--card:#17221c;--ok:#4fb383;--ok2:#8cc063;--warn:#eea254;--bad:#e66767;--wash-g:#1d2a23;--wash-o:#3a2a14;--wash-r:#3a1a18;--wash-r-bd:#6b2c28;--wash-r-ink:#f6b9b9;--wash-y:#3a2a14;--wash-y-ink:#f3cf9c;--track:#26352c;--seg:#1d2a23;--btn-a:#3f8a6c;--btn-b:#2f6c53;--shadow:rgba(0,0,0,.55)}
+
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Inter",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.45}
 h1,h2,h3{font-family:var(--serif);color:var(--green);margin:0 0 8px;text-wrap:balance}
@@ -192,7 +190,7 @@ const TABS=[["dash","Dashboard"],["comments","Comentários"],["raffle","Sorteio"
 function shell(){
   $("#root").innerHTML=`${topHeader(`<div class="unit-pill">Gestão da pesquisa de satisfação</div>`)}
     <main>
-      <div class="navrow"><nav id="nav"></nav><button class="out" id="themeBtn" onclick="cdCycle()" title="Alternar tema">◐ Tema</button><button class="out" onclick="logout()">Sair</button></div>
+      <div class="navrow"><nav id="nav"></nav><button class="out" onclick="logout()">Sair</button></div>
       <div id="flt"></div><div id="body"></div>
     </main>`;
   renderNav();
@@ -568,20 +566,10 @@ const CD_CSS=`<style>
 .cd .qrp p{margin:0 0 8px;font-size:14px;color:var(--text-2);line-height:1.5;max-width:60ch}
 .cd .qrp .lk{font-size:12.5px;color:var(--text-m);word-break:break-all}
 .cd footer{margin-top:40px;text-align:center;font-size:12px;color:var(--text-m);line-height:1.6}
-.cd.dk{color-scheme:dark;--bg:#0f1713;--surface:#17221c;--surface-2:#1d2a23;--text:#f1f3ef;--text-2:#b9c3bc;--text-m:#818d86;--bd:rgba(255,255,255,.14);--brand:#4f9a7d;--accent:#eea254;--accent-wash:#3a2a14;--accent-ink:#f3cf9c;--crit:#e66767;--crit-wash:#3a1a18;--crit-ink:#f6b9b9}
-.cd.dk .rank{color:#0f1713}.cd.dk .bd.c{color:#0f1713}.cd.dk .qrp img{border-color:rgba(255,255,255,.2)}.cd.dk a{color:var(--brand)!important}
 @media(max-width:900px){.cd .kpis{grid-template-columns:repeat(2,1fr)}.cd .two,.cd .tg{grid-template-columns:1fr}}
 @media(max-width:560px){.cd .qrp{flex-direction:column;text-align:center}}
 </style>`;
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const cdMode=()=>{try{return localStorage.getItem("nbTheme")||"auto"}catch(e){return"auto"}};
-const cdIsDark=()=>{const m=cdMode();return m==="dark"||(m!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches)};
-const CD_LABEL={auto:"Tema: automático",light:"Tema: claro",dark:"Tema: escuro"};
-function cdApplyTheme(){const m=cdMode(),h=document.documentElement;if(m==="auto")h.removeAttribute("data-theme");else h.setAttribute("data-theme",m);
-  document.querySelector(".cd")?.classList.toggle("dk",cdIsDark());const b=document.getElementById("themeBtn");if(b)b.textContent="◐ "+CD_LABEL[m];
-  if(S.charts&&Object.keys(S.charts).length&&typeof render==="function")render()}
-function cdCycle(){const o=["auto","light","dark"],n=o[(o.indexOf(cdMode())+1)%3];try{localStorage.setItem("nbTheme",n)}catch(e){}cdApplyTheme()}
-try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{if(cdMode()==="auto")cdApplyTheme()})}catch(e){}
 async function customDashboard(meta,list){
   killCharts();
   const d=await A("admin_custom_survey_results",{p_slug:meta.slug});
@@ -614,7 +602,7 @@ async function customDashboard(meta,list){
     </div>
   </div>
   ${CD_CSS}
-  <div class="cd${cdIsDark()?" dk":""}">
+  <div class="cd">
     <span class="eyebrow">NutriBlu × Grupo Viveo</span>
     <h1>${esc(sv.title)} ${esc(sv.client_unit)}</h1>
     <p class="sub">Pesquisa de 1 semana (${fd(sv.opens_at)} a ${fd(sv.closes_at)}), independente da pesquisa diária de satisfação: turno de trabalho, frequência de uso do restaurante e sugestão de melhoria em campo aberto. Resultado unificado dos dois fluxos de resposta — digital (QR code) e formulário em papel.</p>
