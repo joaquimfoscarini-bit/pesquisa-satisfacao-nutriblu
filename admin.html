@@ -625,7 +625,7 @@ async function customDashboard(meta,list){
     </section>
     ${crits.length?`<section class="alert">
       <h2>⚠ Alerta crítico — segurança alimentar</h2>
-      <p class="note">Relatos que citam cabelo, inseto, larva ou lagartixa na comida, e manipulação de alimentos por pessoas que acabaram de fumar. Baixo volume, mas gravidade alta — tratamento prioritário independente do ranking de menções acima.</p>
+      <p class="note">Relatos que citam cabelo, inseto, larva, lagartixa ou cheiro de barata na comida, manipulação de alimentos por pessoas que acabaram de fumar e um caso de infecção intestinal atribuída ao refeitório. Baixo volume, mas gravidade alta — tratamento prioritário independente do ranking de menções acima.</p>
       <p class="alert-stat"><b>${crits.length} de ${coms.length} comentários (${pc1(crits.length,coms.length)}%)</b> — ${TURNOS.map(t=>[t,crits.filter(c=>c.turno===t).length]).filter(x=>x[1]).map(([t,n])=>`${n} do <b>${esc(t)}</b>`).join(" e ")}.</p>
     </section>`:""}
     <section>
