@@ -109,9 +109,13 @@ function markDone(){ try { localStorage.setItem(DONE, "1"); } catch(e){} }
 function view(html){ $("#view").innerHTML = html; window.scrollTo({top:0}); }
 function errBox(msg){ return msg ? `<div class="err" role="alert">${esc(msg)}</div>` : ""; }
 
+function hasTurno(){ return !state.survey || state.survey.ask_turno !== false; }
+function total(){ return hasTurno() ? 3 : 2; }
+function qn(step){ return hasTurno() ? step : step-1; }
 function progress(){
-  const dots = [1,2,3].map(n => {
-    const cls = state.step>n ? "done" : state.step===n ? "on" : "";
+  const cur = qn(state.step);
+  const dots = Array.from({length: total()}, (_, i) => i+1).map(n => {
+    const cls = cur>n ? "done" : cur===n ? "on" : "";
     return `<i class="${cls}"></i>`;
   }).join("");
   return `<div class="progress">${dots}</div>`;
@@ -141,13 +145,14 @@ function renderAlreadyAnswered(){
 }
 
 function renderIntro(){
+  if (!hasTurno()) { state.step = 2; return renderStep2(); }
   view(`
   <div class="card">
     ${progress()}
     <div class="tag"><span class="ic">🤝</span>Sua opinião importa</div>
     <h1>Vamos juntos fazer do nosso restaurante um lugar melhor</h1>
-    <p class="muted" style="margin-bottom:22px">Cada resposta ajuda a gestão a decidir o que muda por aqui. São só 3 perguntas rápidas, sem cadastro — você faz parte dessa mudança.</p>
-    <div class="sub">Pergunta 1 de 3</div>
+    <p class="muted" style="margin-bottom:22px">Cada resposta ajuda a gestão a decidir o que muda por aqui. São só ${total()} perguntas rápidas, sem cadastro — você faz parte dessa mudança.</p>
+    <div class="sub">Pergunta 1 de ${total()}</div>
     <p style="font-weight:700;font-size:17px;color:var(--green);margin:0 0 14px">Em qual turno você trabalha?</p>
     <div class="opts" id="opts1"></div>
     <button class="btn" id="go1" disabled>Continuar</button>
@@ -166,8 +171,9 @@ function renderStep2(){
   view(`
   <div class="card">
     ${progress()}
-    <button type="button" class="link" style="margin:-6px 0 10px;display:block" id="back1">&larr; Voltar</button>
-    <div class="sub">Pergunta 2 de 3</div>
+    ${hasTurno() ? `<button type="button" class="link" style="margin:-6px 0 10px;display:block" id="back1">&larr; Voltar</button>` : `<div class="tag"><span class="ic">🤝</span>Sua opinião importa</div>`}
+    <div class="sub">Pergunta ${qn(2)} de ${total()}</div>
+    ${hasTurno() ? "" : `<p class="muted" style="margin:0 0 14px">Cada resposta ajuda a gestão a decidir o que muda por aqui. São só ${total()} perguntas rápidas, sem cadastro.</p>`}
     <h1>Você costuma almoçar no restaurante da empresa?</h1>
     <div class="opts" id="opts2" style="margin-top:14px"></div>
     <button class="btn" id="go2" disabled>Continuar</button>
@@ -179,7 +185,7 @@ function renderStep2(){
     document.querySelectorAll("#opts2 .opt").forEach(x => x.classList.toggle("sel", x===b));
     $("#go2").disabled = false;
   }));
-  $("#back1").addEventListener("click", () => { state.step = 1; renderIntro(); });
+  if ($("#back1")) $("#back1").addEventListener("click", () => { state.step = 1; renderIntro(); });
   $("#go2").addEventListener("click", () => { state.step = 3; renderStep3(); });
 }
 
@@ -188,7 +194,7 @@ function renderStep3(msg){
   <div class="card">
     ${progress()}
     <button type="button" class="link" style="margin:-6px 0 10px;display:block" id="back2">&larr; Voltar</button>
-    <div class="sub">Pergunta 3 de 3</div>
+    <div class="sub">Pergunta ${qn(3)} de ${total()}</div>
     <h1>Alguma sugestão de melhoria?</h1>
     <p class="muted">Elogio, crítica ou ideia — a gestão lê. <span style="font-weight:400">(opcional)</span></p>
     <textarea id="sug" maxlength="1000" placeholder="Escreva aqui...">${esc(state.sugestao)}</textarea>
@@ -201,7 +207,7 @@ function renderStep3(msg){
   $("#send").addEventListener("click", async () => {
     const btn = $("#send"); btn.disabled = true; btn.textContent = "Enviando...";
     try {
-      await api("submit_custom_survey_response",{p_slug:slug,p_device_token:deviceToken(),p_turno:state.turno,p_frequencia:state.freq,p_sugestao:state.sugestao});
+      await api("submit_custom_survey_response",{p_slug:slug,p_device_token:deviceToken(),p_turno:state.turno||"",p_frequencia:state.freq,p_sugestao:state.sugestao});
       markDone();
       renderThanks();
     } catch(e){
