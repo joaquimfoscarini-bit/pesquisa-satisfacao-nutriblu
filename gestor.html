@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="color-scheme" content="dark">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel do gestor · Pesquisa de Satisfação | NutriBlu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,680;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+:root{
+  --green:#5aa585;--green-2:#4f9a7d;--green-3:#4a9373;--orange:#eea254;--orange-2:#f3b06a;--butter:#F6C15C;--cream:#0f1713;--ink:#f1f3ef;--muted:#b0bcb4;--line:rgba(255,255,255,.14);--card:#17221c;--ok:#4fb383;--ok2:#8cc063;--warn:#eea254;--bad:#e66767;--wash-g:#1d2a23;--wash-o:#3a2a14;--wash-r:#3a1a18;--wash-r-bd:#6b2c28;--wash-r-ink:#f6b9b9;--wash-y:#3a2a14;--wash-y-ink:#f3cf9c;--track:#26352c;--seg:#1d2a23;--btn-a:#3f8a6c;--btn-b:#2f6c53;--shadow:rgba(0,0,0,.55);color-scheme:dark;
+  --serif:"Fraunces",Georgia,serif;
+  --radius:20px;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Inter",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.45}
+h1,h2,h3{font-family:var(--serif);color:var(--green);margin:0 0 8px;text-wrap:balance}
+h1{font-weight:680;font-size:27px;line-height:1.1;letter-spacing:-.3px}
+h2{font-weight:680;font-size:19px}
+.top{background:linear-gradient(180deg,#20553F 0%,#1F4E3D 62%,#193F30 100%);color:#fff;padding:calc(18px + env(safe-area-inset-top)) clamp(16px,2.5vw,40px) 20px;position:relative}
+.top .in{max-width:1680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.logo-wrap{display:flex;align-items:center;gap:12px}
+.logo-img{height:40px;width:auto;display:block}
+.logo-fallback{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.3px;font-size:18px;color:#fff}
+.logo-fallback i{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--orange)}
+.unit-pill{font-size:11.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:2px}
+.out{background:transparent;border:1.5px solid rgba(255,255,255,.5);color:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer}
+.out:hover{background:rgba(255,255,255,.12)}
+.navrow .out{color:var(--green);border-color:var(--green);padding:10px 16px;white-space:nowrap}
+.navrow .out:hover{background:var(--wash-g)}
+main{max-width:1680px;margin:24px auto 0;padding:0 clamp(16px,2.5vw,40px) 40px;position:relative}
+.navrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+nav{display:flex;background:var(--seg);border-radius:14px;padding:4px;gap:4px;flex-wrap:wrap;flex:1}
+nav button{background:transparent;border:0;padding:11px 16px;border-radius:11px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap}
+nav button.on{background:var(--card);color:var(--green);box-shadow:0 2px 8px -3px rgba(0,0,0,.2)}
+.badge{background:var(--orange);color:#fff;border-radius:10px;padding:1px 7px;font-size:12px;margin-left:6px}
+.filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:18px;box-shadow:0 20px 40px -30px var(--shadow)}
+.filters label,.f label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+select,input[type=text],input[type=password],input[type=date],input[type=number],textarea{font:inherit;padding:12px 13px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);max-width:100%}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--green-2);box-shadow:0 0 0 3px rgba(43,106,83,.15)}
+textarea{width:100%;min-height:74px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip-b{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+.chip-b.on{background:var(--btn-b);border-color:var(--green);color:#fff}
+.btn{background:linear-gradient(155deg,var(--btn-a),var(--btn-b));color:#fff;border:0;border-radius:14px;padding:12px 18px;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 10px 20px -10px rgba(31,78,61,.55);transition:transform .05s,opacity .2s}
+.btn:active{transform:scale(.99)}
+.btn:hover{filter:brightness(1.04)}
+.btn.alt{background:transparent;color:var(--green);border:1.5px solid var(--green);box-shadow:none}
+.btn.or{background:linear-gradient(155deg,var(--orange-2),var(--orange));box-shadow:0 10px 20px -10px rgba(224,138,46,.55)}
+.btn.sm{padding:9px 14px;font-size:13.5px;border-radius:12px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(3,1fr);margin-bottom:18px}
+.g2{grid-template-columns:2fr 1fr}
+.g2eq{grid-template-columns:1fr 1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:0 20px 40px -28px var(--shadow)}
+.card h3{margin:0 0 12px;font-size:16px;color:var(--green)}
+.kpi .l{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:var(--serif);font-weight:680;font-size:32px;color:var(--green);line-height:1.15;margin:6px 0}
+.kpi .s{font-size:13px;color:var(--muted)}
+.kpi.ok .v{color:var(--ok)}.kpi.mid .v{color:var(--warn)}.kpi.bad .v{color:var(--bad)}
+.kpi .s b{color:var(--orange)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+.bar{height:8px;border-radius:6px;background:var(--track);overflow:hidden;min-width:80px}
+.bar i{display:block;height:100%;border-radius:6px}
+.scroll{overflow:auto}
+.rchip{display:inline-flex;gap:6px;align-items:center;font-weight:700;font-size:12.5px;padding:4px 10px;border-radius:999px;color:#fff;background:var(--c);white-space:nowrap}
+.cm{border-top:1px solid var(--line);padding:16px 0}.cm:first-child{border-top:0}
+.cm .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;background:none;color:inherit;padding:0}
+.cm .who b{font-size:15px}.cm .who span{color:var(--muted);font-size:13px;margin-left:6px}
+.bubble{background:var(--cream);border-radius:12px;padding:12px 14px;word-wrap:break-word;white-space:pre-wrap}
+.rep{margin:8px 0 0 18px;border-left:4px solid var(--green-2);background:var(--wash-g);border-radius:0 12px 12px 0;padding:10px 13px;white-space:pre-wrap}
+.rep small{display:block;font-weight:700;color:var(--green);margin-bottom:3px}
+.rf{display:flex;gap:8px;margin:10px 0 0 18px;align-items:flex-start}
+.rf textarea{min-height:56px}
+.empty{text-align:center;color:var(--muted);padding:34px 10px}
+.f{margin-bottom:12px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.win{display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;background:var(--wash-o);border:2px solid var(--orange);margin-bottom:10px}
+.win.sup{background:#F4F1E8;border-color:var(--line)}
+.win .m{font-size:34px}
+.win b{font-size:19px;color:var(--green)}
+.win small{display:block;color:var(--muted)}
+.shuffle{font-family:var(--serif);font-size:30px;font-weight:680;color:var(--green);text-align:center;padding:26px;background:var(--wash-g);border-radius:16px;min-height:96px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--btn-b);color:#fff;padding:12px 18px;border-radius:12px;z-index:100;box-shadow:0 10px 30px -10px rgba(0,0,0,.4);font-weight:600}
+.toast.err{background:var(--bad)}
+.mask{position:fixed;inset:0;background:rgba(15,30,24,.55);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.dlg{background:var(--card);border-radius:var(--radius);max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:24px}
+.dlg h3{margin:0 0 12px;color:var(--green);font-size:19px}
+.dlg .act{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.spin{width:34px;height:34px;border:4px solid var(--track);border-top-color:var(--green);border-radius:50%;animation:s 1s linear infinite;margin:50px auto}
+@keyframes s{to{transform:rotate(360deg)}}
+.wrap{max-width:400px;margin:-16px auto 0;padding:0 16px 40px;position:relative}
+.err{background:var(--wash-r);border:1px solid var(--wash-r-bd);color:var(--wash-r-ink);padding:12px 14px;border-radius:12px;margin-top:14px;font-size:14px}
+.muted{color:var(--muted)}
+.unit{border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;background:var(--card)}
+.statm{background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.statm .l{font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--muted)}
+.statm .v{font-family:var(--serif);font-weight:680;font-size:20px;color:var(--green);line-height:1.2;margin:2px 0}
+.statm .s{font-size:11px;color:var(--muted)}
+.statrow{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+@media(max-width:900px){.statrow{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.statrow{grid-template-columns:1fr 1fr}}
+.unit .h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.tag{font-size:12px;background:var(--wash-g);color:var(--green);padding:3px 9px;border-radius:999px;font-weight:700}
+.tag.off{background:#F3E1DC;color:var(--bad)}
+@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.g2,.g2eq{grid-template-columns:1fr}}
+@media(max-width:560px){.kpis{grid-template-columns:1fr}main{padding:0 14px 30px}.kpi .v{font-size:28px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const SB_URL="https://yfbmpvmavjwuedphyrsa.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYm1wdm1hdmp3dWVkcGh5cnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2MTQ0MjYsImV4cCI6MjEwNjE5MDQyNn0.2clDzH9PT4IwkUYDVc6VHH3h8Gq2mWKKw1e3d-zeaeA";
+const RATINGS=[{v:4,t:"Muito satisfeito",e:"😄",c:"#1F7A4D"},{v:3,t:"Satisfeito",e:"🙂",c:"#6BAF3F"},{v:2,t:"Insatisfeito",e:"🙁",c:"#E08A2E"},{v:1,t:"Muito insatisfeito",e:"😠",c:"#C5432F"}];
+const R=v=>RATINGS.find(r=>r.v===v);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const iso=o=>{const d=new Date();d.setDate(d.getDate()+o);return d.toLocaleDateString("sv-SE")};
+const fd=d=>{const[y,m,x]=String(d).slice(0,10).split("-");return`${x}/${m}/${y}`};
+const fdt=i=>new Date(i).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"});
+const pct=v=>(+v).toFixed(1).replace(".",",")+"%";
+const num2=v=>(+v).toFixed(2).replace(".",",");
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const store={get(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem(k,v)}catch(e){}},del(k){try{sessionStorage.removeItem(k)}catch(e){}}};
+const S={token:store.get("ns_gestor"),me:null,unit:"",from:iso(-29),to:iso(0),tab:"dash",charts:{},pending:0,cf:{status:"pending",rating:""},survey:null};
+
+async function api(fn,args={}){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:"POST",headers:{"Content-Type":"application/json",apikey:SB_KEY,Authorization:"Bearer "+SB_KEY},body:JSON.stringify(args)});
+  const t=await r.text();let d=null;try{d=t?JSON.parse(t):null}catch(e){}
+  if(!r.ok)throw new Error((d&&d.message)||"Falha na comunicação. Tente novamente.");
+  return d;
+}
+async function M(fn,args={}){
+  try{return await api(fn,{p_token:S.token,...args})}
+  catch(e){if(/Sessão expirada/.test(e.message)){logout(true)}throw e}
+}
+function toast(m,err){const t=document.createElement("div");t.className="toast"+(err?" err":"");t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3200)}
+function dialog(html){const m=document.createElement("div");m.className="mask";m.innerHTML=`<div class="dlg">${html}</div>`;m.addEventListener("click",e=>{if(e.target===m)m.remove()});document.body.appendChild(m);return m}
+const unitArg=()=>S.unit||null;
+
+/* ---------- Login / estrutura ---------- */
+function topHeader(sub){
+  return `<header class="top"><div class="in">
+    <div class="logo-wrap">
+      <img src="logo-white.png?v=3" alt="NutriBlu Gastronomia Empresarial" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="logo-fallback" style="display:none"><i></i>NutriBlu</div>
+    </div>
+    ${sub||""}
+  </div></header>`;
+}
+function loginView(msg){
+  $("#root").innerHTML=`${topHeader()}
+  <div class="wrap">
+    <div class="card">
+      <h1>Acesso do gestor</h1>
+      <div class="unit-pill" style="color:var(--muted);margin-bottom:14px">Pesquisa de satisfação</div>
+      <p class="muted">Entre com o seu usuário e senha para ver os resultados e os comentários da sua unidade.</p>
+      <form id="lf" novalidate>
+        <label for="us">Usuário</label>
+        <input id="us" type="text" style="width:100%;margin-bottom:12px" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" autofocus>
+        <label for="pw">Senha</label>
+        <input id="pw" type="password" style="width:100%" autocomplete="current-password">
+        <div id="lm">${msg?`<div class="err">${esc(msg)}</div>`:""}</div>
+        <button class="btn" style="width:100%;margin-top:18px" id="lb">Entrar</button>
+      </form>
+    </div>
+  </div>`;
+  $("#lf").addEventListener("submit",async e=>{
+    e.preventDefault();const b=$("#lb");
+    if(!$("#us").value.trim()||!$("#pw").value){$("#lm").innerHTML=`<div class="err">Informe o usuário e a senha.</div>`;return}
+    b.disabled=true;
+    try{const o=await api("manager_login",{p_username:$("#us").value,p_pass:$("#pw").value});
+      if(!o.ok)throw new Error(o.message);
+      S.token=o.token;store.set("ns_gestor",o.token);await boot();
+    }catch(er){$("#lm").innerHTML=`<div class="err">${esc(er.message)}</div>`;b.disabled=false}
+  });
+}
+function logout(expired){
+  S.token=null;S.me=null;S.unit="";S.survey=null;S.tab="dash";killCharts();store.del("ns_gestor");
+  loginView(expired===true?"Sessão expirada. Entre novamente.":"");
+}
+
+const TABS=[["dash","Resumo"],["comments","Comentários"],["custom","Pesquisas personalizadas"]];
+function shell(){
+  const units=S.me.units;
+  $("#root").innerHTML=`${topHeader(`<div style="text-align:right"><div class="unit-pill">Painel do gestor</div><div style="font-weight:700;font-size:15px">${esc(S.me.display_name)}</div></div>`)}
+    <main>
+      <div class="navrow"><nav id="nav"></nav><button class="out" onclick="passDlg()">Alterar senha</button><button class="out" onclick="logout()">Sair</button></div>
+      <div id="flt"></div><div id="body"></div>
+    </main>`;
+  renderNav();
+}
+function renderNav(){
+  $("#nav").innerHTML=TABS.map(([k,l])=>`<button class="${S.tab===k?"on":""}" onclick="go('${k}')">${l}${k==="comments"&&S.pending>0?`<span class="badge">${S.pending}</span>`:""}</button>`).join("");
+}
+function go(t){S.tab=t;S.survey=null;renderNav();render()}
+function unitOptions(sel){
+  const u=S.me.units;
+  return (u.length>1?`<option value="">Todas as minhas unidades</option>`:"")+u.map(x=>`<option value="${x.id}" ${x.id===sel?"selected":""}>${esc(x.name)}</option>`).join("");
+}
+function filtersBar(){
+  const show=["dash","comments"].includes(S.tab);
+  const f=$("#flt");if(!show){f.innerHTML="";return}
+  const multi=S.me.units.length>1;
+  f.innerHTML=`<div class="filters">
+    ${multi?`<div><label>Unidade</label><select id="fu">${unitOptions(S.unit)}</select></div>`:""}
+    <div><label>De</label><input type="date" id="ff" value="${S.from}"></div>
+    <div><label>Até</label><input type="date" id="ft" value="${S.to}"></div>
+    <div class="chips">${[[6,"7 dias"],[14,"15 dias"],[29,"30 dias"],[89,"90 dias"]].map(([o,l])=>`<button class="chip-b ${S.from===iso(-o)&&S.to===iso(0)?"on":""}" onclick="quick(${o})">${l}</button>`).join("")}</div></div>`;
+  if(multi)$("#fu").onchange=e=>{S.unit=e.target.value;render()};
+  $("#ff").onchange=e=>{S.from=e.target.value;render()};
+  $("#ft").onchange=e=>{S.to=e.target.value;render()};
+}
+function quick(o){S.from=iso(-o);S.to=iso(0);render()}
+
+async function boot(){
+  try{
+    S.me=await M("manager_profile");
+    if(!S.me.units.length)throw new Error("Seu usuário ainda não está vinculado a nenhuma unidade. Fale com a gestão.");
+    if(S.me.units.length===1)S.unit=S.me.units[0].id;
+    shell();$("#body").innerHTML=`<div class="spin"></div>`;render();
+  }catch(e){if(S.token){shell0Error(e.message)}}
+}
+function shell0Error(msg){
+  $("#root").innerHTML=`${topHeader()}<div class="wrap"><div class="card"><h1>Não foi possível abrir o painel</h1><div class="err">${esc(msg)}</div><button class="btn alt" style="width:100%;margin-top:16px" onclick="logout()">Voltar ao login</button></div></div>`;
+}
+function render(){
+  renderNav();filtersBar();
+  const fn={dash:tabDash,comments:tabComments,custom:tabCustom}[S.tab];
+  $("#body").innerHTML=`<div class="spin"></div>`;
+  fn().catch(e=>{if(S.token)$("#body").innerHTML=`<div class="err">${esc(e.message)}</div>`});
+}
+function passDlg(){
+  const m=dialog(`<h3>Alterar senha</h3><p class="muted" style="font-size:14px">A nova senha vale a partir do próximo acesso. Use pelo menos 8 caracteres.</p><div class="f"><label>Nova senha</label><input type="password" id="np" style="width:100%" autocomplete="new-password"></div><div class="f"><label>Repita a nova senha</label><input type="password" id="np2" style="width:100%" autocomplete="new-password"></div><div class="act"><button class="btn alt" id="x">Cancelar</button><button class="btn" id="ok">Salvar</button></div>`);
+  m.querySelector("#x").onclick=()=>m.remove();
+  m.querySelector("#ok").onclick=async()=>{
+    const a=m.querySelector("#np").value,b=m.querySelector("#np2").value;
+    if(a.length<8)return toast("A senha deve ter pelo menos 8 caracteres.",1);
+    if(a!==b)return toast("As senhas não conferem.",1);
+    try{await M("manager_change_pass",{p_new:a});toast("Senha alterada ✓");m.remove()}catch(e){toast(e.message,1)}
+  };
+}
+
+/* ---------- Resumo ---------- */
+function killCharts(){Object.values(S.charts).forEach(c=>c.destroy());S.charts={}}
+async function tabDash(){
+  killCharts();
+  const d=await M("manager_panel",{p_from:S.from,p_to:S.to,p_unit:unitArg()});
+  const k=d.kpis,p=d.participants;S.pending=k.pending;renderNav();
+  const head=`<h2 style="margin-bottom:12px">${esc(d.unit_name)}</h2>`;
+  if(!k.total){$("#body").innerHTML=`${head}<div class="card empty"><div style="font-size:44px">📊</div><h3>Ainda não há respostas neste período</h3><p>Assim que os participantes começarem a responder, os indicadores aparecem aqui.</p></div>`;return}
+  const cs=+k.csat,cls=cs>=85?"ok":cs>=70?"mid":"bad";
+  const adhesion=p.active?Math.round(100*d.answered_today/p.active):0;
+  $("#body").innerHTML=`${head}
+  <div class="grid kpis">
+    <div class="card kpi"><div class="l">Respostas no período</div><div class="v">${k.total}</div><div class="s">${k.respondents} participantes diferentes${k.anonymous?` · ${k.anonymous} sem cadastro`:""}</div></div>
+    <div class="card kpi ${cls}"><div class="l">Satisfação</div><div class="v">${pct(k.csat)}</div><div class="s">Satisfeito + Muito satisfeito</div></div>
+    <div class="card kpi"><div class="l">Nota média</div><div class="v">${num2(k.avg_score)}<span style="font-size:16px;color:var(--muted)"> / 4</span></div><div class="s">1 = muito insatisfeito · 4 = muito satisfeito</div></div>
+    <div class="card kpi"><div class="l">Adesão hoje</div><div class="v">${adhesion}%</div><div class="s">${d.answered_today} de ${p.active} participantes ativos</div></div>
+    <div class="card kpi"><div class="l">Comentários</div><div class="v">${k.comments}</div><div class="s">${k.pending>0?`<b>${k.pending} aguardando resposta</b>`:"Todos respondidos"}</div></div>
+    <div class="card kpi"><div class="l">Cadastrados</div><div class="v">${p.total}</div><div class="s">${p.active} com período ativo</div></div>
+  </div>
+  <div class="grid g2" style="margin-bottom:14px">
+    <div class="card"><h3>Evolução diária: satisfação e volume de respostas</h3><div style="height:300px"><canvas id="c1"></canvas></div></div>
+    <div class="card"><h3>Distribuição das avaliações</h3><div style="height:220px"><canvas id="c2"></canvas></div><div id="lg" style="margin-top:10px"></div></div>
+  </div>
+  ${d.by_unit.length>1?`<div class="card"><h3>Comparativo entre as minhas unidades</h3><div class="scroll"><table><thead><tr><th>Unidade</th><th>Respostas</th><th>Participantes</th><th>Satisfação</th><th></th><th>Nota média</th><th>Comentários</th></tr></thead><tbody>
+  ${d.by_unit.map(u=>{const c=+u.csat,col=c>=85?"var(--ok)":c>=70?"var(--warn)":"var(--bad)";return`<tr><td><b>${esc(u.name)}</b></td><td>${u.count}</td><td>${u.respondents}</td><td><b style="color:${u.count?col:"var(--muted)"}">${u.count?pct(u.csat):"—"}</b></td><td style="width:22%"><div class="bar"><i style="width:${u.count?c:0}%;background:${col}"></i></div></td><td>${u.count?num2(u.avg):"—"}</td><td>${u.comments}</td></tr>`}).join("")}</tbody></table></div></div>`:""}`;
+  const days=d.daily.map(x=>fd(x.date).slice(0,5));
+  Chart.defaults.color=css("--muted");
+  S.charts.a=new Chart($("#c1"),{data:{labels:days,datasets:[
+    {type:"bar",label:"Respostas",data:d.daily.map(x=>x.count),backgroundColor:"rgba(224,138,46,.35)",yAxisID:"y1",borderRadius:6},
+    {type:"line",label:"Satisfação (%)",data:d.daily.map(x=>+x.csat),borderColor:"#4f9a7d",backgroundColor:"#4f9a7d",tension:.3,pointRadius:3,yAxisID:"y"}]},
+    options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales:{y:{min:0,max:100,ticks:{callback:v=>v+"%"},grid:{color:css("--line")}},y1:{position:"right",beginAtZero:true,grid:{display:false},ticks:{precision:0}},x:{grid:{display:false}}},plugins:{legend:{position:"bottom"}}}});
+  const dist=RATINGS.map(r=>d.distribution.find(x=>x.rating===r.v)?.count||0);
+  S.charts.b=new Chart($("#c2"),{type:"doughnut",data:{labels:RATINGS.map(r=>r.t),datasets:[{data:dist,backgroundColor:RATINGS.map(r=>r.c),borderWidth:2,borderColor:css("--card")}]},options:{maintainAspectRatio:false,cutout:"62%",plugins:{legend:{display:false}}}});
+  $("#lg").innerHTML=RATINGS.map((r,i)=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${r.c};margin-right:8px"></span>${r.e} ${r.t}</span><b>${dist[i]} <span class="muted" style="font-weight:500">(${k.total?Math.round(100*dist[i]/k.total):0}%)</span></b></div>`).join("");
+}
+
+/* ---------- Comentários ---------- */
+async function tabComments(){
+  const base={p_from:S.from,p_to:S.to,p_unit:unitArg()};
+  const list=await M("manager_comments",{...base,p_status:S.cf.status,p_rating:S.cf.rating?+S.cf.rating:null});
+  const pend=await M("manager_comments",{...base,p_status:"pending",p_rating:null});S.pending=pend.length;renderNav();
+  $("#body").innerHTML=`<div class="card">
+    <div class="row" style="margin-bottom:8px">
+      <div class="f"><label>Situação</label><select id="cs"><option value="pending">Aguardando resposta</option><option value="replied">Respondidos</option><option value="all">Todos</option></select></div>
+      <div class="f"><label>Avaliação</label><select id="cr"><option value="">Todas</option>${RATINGS.map(r=>`<option value="${r.v}">${r.e} ${r.t}</option>`).join("")}</select></div>
+      <div class="muted f" style="margin-left:auto">${list.length} comentário${list.length===1?"":"s"}</div></div>
+    ${list.length?list.map(c=>{const r=R(c.rating);return`<div class="cm" id="cm-${c.id}">
+      <div class="top"><div class="who"><b>${esc(c.name)}</b><span>${c.anonymous?"Sem cadastro":"Mat. "+esc(c.matricula)} · ${esc(c.unit)} · ${fd(c.date)}</span></div><span class="rchip" style="--c:${r.c}">${r.e} ${r.t}</span></div>
+      <div class="bubble">${esc(c.comment)}</div>
+      ${c.replies.map(x=>`<div class="rep"><small>Resposta enviada · ${fdt(x.created_at)} ${x.read?"· ✓ lida":"· não lida"}</small>${esc(x.message)}</div>`).join("")}
+      <div class="rf"><textarea id="rt-${c.id}" maxlength="1000" placeholder="Escreva a resposta que o participante verá na pesquisa..."></textarea><button class="btn sm" onclick="sendReply('${c.id}')">Responder</button></div></div>`}).join(""):`<div class="empty">Nenhum comentário para este filtro. 🎉</div>`}</div>`;
+  $("#cs").value=S.cf.status;$("#cr").value=S.cf.rating;
+  $("#cs").onchange=e=>{S.cf.status=e.target.value;render()};
+  $("#cr").onchange=e=>{S.cf.rating=e.target.value;render()};
+}
+async function sendReply(id){
+  const t=$("#rt-"+id).value.trim();if(!t)return toast("Escreva a resposta antes de enviar.",1);
+  try{await M("manager_send_reply",{p_response_id:id,p_message:t});toast("Resposta enviada ao participante ✓");render()}catch(e){toast(e.message,1)}
+}
+
+/* ---------- Pesquisas personalizadas ---------- */
+function surveyStatus(s){const today=iso(0);return !s.active?"pausada":(today<s.opens_at?"agendada":(today>s.closes_at?"encerrada":"em andamento"))}
+const statusColor={pausada:"var(--bad)",agendada:"var(--warn)",encerrada:"var(--muted)","em andamento":"var(--ok)"};
+async function tabCustom(){
+  if(S.survey)return surveyDetail(S.survey);
+  const list=await M("manager_surveys");
+  $("#body").innerHTML=`<div class="card" style="margin-bottom:14px"><h3>Pesquisas personalizadas</h3>
+    <p class="muted" style="font-size:13.5px">Pesquisas sob medida feitas para as suas unidades, fora do fluxo diário. Abra cada uma para ver o resultado e as sugestões recebidas.</p></div>
+  ${list.length?list.map(s=>{const st=surveyStatus(s),col=statusColor[st];return `<div class="unit"><div class="h"><div><b style="font-size:17px">${esc(s.title)}</b> <span class="tag" style="background:${col}22;color:${col}">${st}</span></div>
+    <div class="muted" style="font-size:13px">${esc(s.unit_name||s.client_unit)} · ${fd(s.opens_at)} a ${fd(s.closes_at)}</div></div>
+    <div class="muted" style="font-size:13px;margin-bottom:10px">${s.total} resposta${s.total===1?"":"s"} · ${s.comments} sugestõe${s.comments===1?"":"s"}</div>
+    <button class="btn sm" onclick="openSurvey('${esc(s.slug)}')">📊 Ver resultado e comentários</button></div>`}).join(""):`<div class="empty">Nenhuma pesquisa personalizada para as suas unidades no momento.</div>`}`;
+}
+function openSurvey(slug){S.survey=slug;S.sf={turno:"",q:""};render()}
+function closeSurvey(){S.survey=null;render()}
+function barsHtml(obj){
+  const tot=Object.values(obj).reduce((a,n)=>a+n,0),max=Math.max(1,...Object.values(obj));
+  const keys=Object.keys(obj).sort((a,b)=>obj[b]-obj[a]);
+  if(!keys.length)return `<div class="muted">Sem dados.</div>`;
+  return keys.map(k=>{const n=obj[k];return `<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-bottom:5px"><span>${esc(k)}</span><span class="muted">${n} · ${tot?Math.round(100*n/tot):0}%</span></div><div class="bar"><i style="width:${(100*n/max).toFixed(1)}%;background:var(--green-2)"></i></div></div>`}).join("");
+}
+async function surveyDetail(slug){
+  const d=await M("manager_survey_results",{p_slug:slug});
+  const sv=d.survey,st=surveyStatus(sv),col=statusColor[st],coms=d.comentarios||[];
+  const crit=coms.filter(c=>c.critico).length;
+  const turnos=Object.keys(d.by_turno||{});
+  const draw=()=>{
+    const f=S.sf,q=f.q.trim().toLowerCase();
+    const rows=coms.filter(c=>(!f.turno||c.turno===f.turno)&&(!q||String(c.texto).toLowerCase().includes(q)));
+    $("#cl").innerHTML=rows.length?rows.map(c=>`<div class="cm"><div class="top"><div class="who"><b>${esc(c.turno||"—")}</b><span>${esc(c.frequencia||"")} · ${fd(c.data)}</span></div>${c.critico?`<span class="rchip" style="--c:var(--bad)">⚠ Higiene</span>`:""}</div><div class="bubble">${esc(c.texto)}</div>${(c.tags||[]).length?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${c.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}</div>`).join(""):`<div class="empty">Nenhum comentário para este filtro.</div>`;
+    $("#cc").textContent=`${rows.length} comentário${rows.length===1?"":"s"}`;
+  };
+  $("#body").innerHTML=`
+  <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px">
+    <div class="row" style="gap:10px;align-items:center"><button class="btn alt sm" onclick="closeSurvey()">← Todas as pesquisas</button><span class="tag" style="background:${col}22;color:${col};font-size:12.5px;padding:4px 10px">${st}</span></div></div>
+  <h2>${esc(sv.title)} · ${esc(sv.client_unit)}</h2>
+  <p class="muted" style="margin:0 0 14px">${fd(sv.opens_at)} a ${fd(sv.closes_at)}</p>
+  <div class="grid kpis">
+    <div class="card kpi"><div class="l">Respostas</div><div class="v">${d.total}</div></div>
+    <div class="card kpi"><div class="l">Comentários</div><div class="v">${coms.length}</div></div>
+    <div class="card kpi ${crit?"bad":""}"><div class="l">Alertas de higiene</div><div class="v">${crit}</div></div>
+  </div>
+  <div class="grid g2eq" style="margin-bottom:14px">
+    <div class="card"><h3>Turno de trabalho</h3>${barsHtml(d.by_turno||{})}</div>
+    <div class="card"><h3>Frequência de uso do restaurante</h3>${barsHtml(d.by_frequencia||{})}</div>
+  </div>
+  <div class="card"><h3>Comentários</h3>
+    <div class="row" style="margin-bottom:8px">
+      <div class="f"><label>Turno</label><select id="sft"><option value="">Todos</option>${turnos.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join("")}</select></div>
+      <div class="f" style="flex:1;min-width:200px"><label>Buscar</label><input type="text" id="sfq" style="width:100%" placeholder="Palavra no comentário"></div>
+      <div class="muted f" style="margin-left:auto" id="cc"></div></div>
+    <div id="cl"></div></div>`;
+  $("#sft").value=S.sf.turno;$("#sfq").value=S.sf.q;
+  $("#sft").onchange=e=>{S.sf.turno=e.target.value;draw()};
+  $("#sfq").oninput=e=>{S.sf.q=e.target.value;draw()};
+  draw();
+}
+
+if(S.token){boot()}else loginView();
+</script>
+</body>
+</html>

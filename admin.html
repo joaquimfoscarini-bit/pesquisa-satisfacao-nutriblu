@@ -182,7 +182,7 @@ function loginView(msg){
 }
 function logout(expired){S.token=null;sessionStorage.removeItem("ns_admin");loginView(expired?"Sessão expirada. Entre novamente.":"")}
 
-const TABS=[["dash","Dashboard"],["comments","Comentários"],["raffle","Sorteio"],["people","Participantes"],["units","Unidades"],["custom","Pesquisas personalizadas"]];
+const TABS=[["dash","Dashboard"],["comments","Comentários"],["raffle","Sorteio"],["people","Participantes"],["units","Unidades"],["managers","Gestores"],["custom","Pesquisas personalizadas"]];
 function shell(){
   $("#root").innerHTML=`${topHeader(`<div class="unit-pill">Gestão da pesquisa de satisfação</div>`)}
     <main>
@@ -217,7 +217,7 @@ async function boot(){
 }
 function render(){
   renderNav();filtersBar();
-  const fn={dash:tabDash,comments:tabComments,raffle:tabRaffle,people:tabPeople,units:tabUnits,custom:tabCustom}[S.tab];
+  const fn={dash:tabDash,comments:tabComments,raffle:tabRaffle,people:tabPeople,units:tabUnits,managers:tabManagers,custom:tabCustom}[S.tab];
   $("#body").innerHTML=`<div class="spin"></div>`;
   fn().catch(e=>{$("#body").innerHTML=`<div class="err">${esc(e.message)}</div>`});
 }
@@ -636,6 +636,80 @@ async function customDashboard(meta,list){
     </section>
     <footer>NutriBlu Gastronomia Empresarial · unidade ${esc(sv.client_unit)} (Grupo Viveo) · pesquisa personalizada, ${fd(sv.opens_at).slice(0,5)}–${fd(sv.closes_at)}<br>Dados internos de gestão — uso restrito.</footer>
   </div>`;
+}
+
+/* ---------- Gestores (acesso por unidade) ---------- */
+const MANAGER_URL="https://satisfacaonutriblu.com.br/gestor.html";
+async function tabManagers(){
+  S.units=await A("admin_list_units");
+  const list=await A("admin_managers");
+  S.managers=list;
+  $("#body").innerHTML=`<div class="card" style="margin-bottom:14px">
+    <div class="row" style="justify-content:space-between;align-items:center;gap:12px">
+      <div style="flex:1;min-width:240px"><h3 style="margin-bottom:6px">Gestores</h3>
+      <p class="muted" style="font-size:13.5px;margin:0">Cada gestor entra com o próprio usuário e senha e vê só o resultado, os comentários e as pesquisas das unidades liberadas aqui. Um mesmo gestor pode ter mais de uma unidade.</p></div>
+      <button class="btn" onclick="managerDlg()">+ Novo gestor</button></div>
+    <div class="muted" style="font-size:12.5px;margin-top:12px;word-break:break-all">🔗 Link de acesso dos gestores: ${esc(MANAGER_URL)} <button class="btn alt sm" style="margin-left:8px" onclick="copyManagerLink()">Copiar link</button></div>
+  </div>
+  ${list.length?list.map(m=>`<div class="unit"><div class="h"><div><b style="font-size:17px">${esc(m.display_name)}</b> <span class="tag ${m.active?"":"off"}">${m.active?"ativo":"desativado"}</span></div>
+    <div class="muted" style="font-size:13px">usuário: <b>${esc(m.username)}</b> · criado em ${fd(m.created_at)}</div></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${m.units.length?m.units.map(u=>`<span class="tag">${esc(u.name)}</span>`).join(""):'<span class="muted" style="font-size:13px">Nenhuma unidade</span>'}</div>
+    <div class="row" style="gap:8px"><button class="btn sm" onclick="managerDlg('${m.id}')">Editar</button><button class="btn alt sm" onclick="managerToggle('${m.id}')">${m.active?"Desativar acesso":"Reativar acesso"}</button></div></div>`).join(""):`<div class="empty">Nenhum gestor cadastrado ainda. Clique em "Novo gestor" para criar o primeiro acesso.</div>`}`;
+}
+function copyManagerLink(){navigator.clipboard?.writeText(MANAGER_URL);toast("Link copiado")}
+function managerDlg(id){
+  const cur=id?S.managers.find(x=>x.id===id):null;
+  const sel=new Set(cur?cur.unit_ids:[]);
+  const m=dialog(`<h3>${cur?"Editar gestor":"Novo gestor"}</h3>
+    <div class="f"><label>Nome do gestor</label><input type="text" id="mn" style="width:100%" value="${esc(cur?cur.display_name:"")}" placeholder="Ex.: Maria Souza"></div>
+    <div class="row"><div class="f" style="flex:1;min-width:180px"><label>Usuário (login)</label><input type="text" id="mu" style="width:100%" value="${esc(cur?cur.username:"")}" placeholder="maria.souza" autocapitalize="none" autocomplete="off" spellcheck="false"></div>
+    <div class="f" style="flex:1;min-width:180px"><label>${cur?"Nova senha (opcional)":"Senha"}</label><input type="password" id="mp" style="width:100%" placeholder="${cur?"Deixe em branco para manter":"Mínimo 8 caracteres"}" autocomplete="new-password"></div></div>
+    <div class="muted" style="font-size:12.5px;margin:-2px 0 12px">Usuário: só letras minúsculas, números, ponto, hífen e sublinhado.</div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Unidades que este gestor pode ver</div>
+    <input type="text" id="gq" style="width:100%;margin-bottom:8px" placeholder="Filtrar unidades">
+    <div id="gl" style="max-height:230px;overflow:auto;border:1.5px solid var(--line);border-radius:12px;padding:6px 12px"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px;gap:8px;flex-wrap:wrap"><span class="muted" style="font-size:13px" id="gc"></span><span><button class="btn alt sm" type="button" id="ga">Selecionar visíveis</button> <button class="btn alt sm" type="button" id="gn">Limpar</button></span></div>
+    <label style="display:flex;gap:8px;align-items:center;font-size:14px;margin-bottom:4px"><input type="checkbox" id="mact" ${!cur||cur.active?"checked":""} style="width:18px;height:18px;accent-color:var(--green)"> Acesso ativo</label>
+    <div class="act"><button class="btn alt" id="x">Cancelar</button><button class="btn" id="ok">${cur?"Salvar":"Criar gestor"}</button></div>`);
+  const drawList=()=>{
+    const q=m.querySelector("#gq").value.trim().toLowerCase();
+    const vis=S.units.filter(u=>!q||u.name.toLowerCase().includes(q));
+    m.querySelector("#gl").innerHTML=vis.length?vis.map(u=>`<label style="display:flex;gap:9px;align-items:center;font-size:14px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--ink);padding:7px 0;margin:0;cursor:pointer"><input type="checkbox" data-u="${u.id}" ${sel.has(u.id)?"checked":""} style="width:18px;height:18px;accent-color:var(--green)"> ${esc(u.name)}${u.active?"":' <span class="tag off">pausada</span>'}</label>`).join(""):`<div class="muted" style="padding:10px 0">Nenhuma unidade encontrada.</div>`;
+    m.querySelectorAll("#gl input[data-u]").forEach(c=>c.onchange=()=>{c.checked?sel.add(c.dataset.u):sel.delete(c.dataset.u);count()});
+    count();
+  };
+  const count=()=>{m.querySelector("#gc").textContent=`${sel.size} unidade${sel.size===1?"":"s"} selecionada${sel.size===1?"":"s"}`};
+  m.querySelector("#gq").oninput=drawList;
+  m.querySelector("#ga").onclick=()=>{const q=m.querySelector("#gq").value.trim().toLowerCase();S.units.filter(u=>!q||u.name.toLowerCase().includes(q)).forEach(u=>sel.add(u.id));drawList()};
+  m.querySelector("#gn").onclick=()=>{sel.clear();drawList()};
+  m.querySelector("#x").onclick=()=>m.remove();
+  m.querySelector("#ok").onclick=async()=>{
+    const btn=m.querySelector("#ok"),units=S.units.filter(u=>sel.has(u.id)).map(u=>u.id);
+    if(!units.length)return toast("Selecione pelo menos uma unidade.",1);
+    btn.disabled=true;
+    try{
+      const r=await A("admin_upsert_manager",{p_id:cur?cur.id:null,p_unit:units[0],p_username:m.querySelector("#mu").value,p_display_name:m.querySelector("#mn").value,p_active:m.querySelector("#mact").checked,p_pass:m.querySelector("#mp").value||null});
+      try{
+        await A("admin_set_manager_units",{p_manager:r.id,p_units:units});
+        toast(cur?"Gestor atualizado ✓":"Gestor criado ✓");
+      }catch(e2){
+        if(/admin_set_manager_units|schema cache|Could not find/i.test(e2.message)){
+          toast("Gestor salvo com a 1ª unidade. O vínculo com várias unidades ainda não está habilitado no banco.",1);
+        }else throw e2;
+      }
+      m.remove();tabManagers();
+    }catch(e){toast(e.message,1);btn.disabled=false}
+  };
+  drawList();
+}
+async function managerToggle(id){
+  const c=S.managers.find(x=>x.id===id);if(!c)return;
+  const next=!c.active;
+  if(!next&&!confirm(`Desativar o acesso de ${c.display_name}? Ele não conseguirá mais entrar.`))return;
+  try{
+    await A("admin_upsert_manager",{p_id:c.id,p_unit:c.unit_ids[0],p_username:c.username,p_display_name:c.display_name,p_active:next,p_pass:null});
+    toast(next?"Acesso reativado ✓":"Acesso desativado ✓");tabManagers();
+  }catch(e){toast(e.message,1)}
 }
 
 if(S.token){boot()}else loginView();
