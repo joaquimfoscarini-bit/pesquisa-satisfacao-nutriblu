@@ -476,6 +476,7 @@ function customListView(list){
       <div class="row" style="gap:8px">
         <button class="btn sm" onclick="customOpen('${esc(s.slug)}')">📊 Ver dashboard</button>
         <button class="btn sm" onclick="customOpenComments('${esc(s.slug)}')">💬 Ver comentários</button>
+        <button class="btn alt sm" onclick="customReportPdf('${esc(s.slug)}')">📄 Relatório PDF</button>
         <button class="btn alt sm" onclick="customCopyLink('${esc(s.slug)}')">Copiar link</button>
         <button class="btn alt sm" onclick="customExtendDlg('${esc(s.slug)}','${s.closes_at}')">Renovar período</button>
         <button class="btn alt sm" onclick="customToggle('${esc(s.slug)}',${!s.active})">${s.active?"Pausar":"Reativar"}</button>
@@ -487,6 +488,101 @@ function customBack(){S.customView=null;S.customComments=false;if(location.hash)
 const customCommentsLinkFor=s=>`https://satisfacaonutriblu.com.br/admin.html#comentarios/${s}`;
 function customOpenComments(slug){S.customView=slug;S.customComments=true;S.cq={turno:"",tema:"",crit:false,q:""};history.replaceState(null,"","#comentarios/"+slug);render()}
 function customCopyCommentsLink(slug){navigator.clipboard?.writeText(customCommentsLinkFor(slug));toast("Link dos comentários copiado")}
+/* Relatório em PDF: resumo + comentários na íntegra no final (abre a janela de impressão; escolher "Salvar como PDF") */
+async function customReportPdf(slug){
+  const w=window.open("");
+  if(!w)return toast("Libere pop-ups para gerar o PDF.",1);
+  w.document.write(`<title>Gerando relatório…</title><body style="font-family:sans-serif;padding:40px;color:#1F4E3D">Gerando relatório…</body>`);
+  try{
+    const d=await A("admin_custom_survey_results",{p_slug:slug});
+    const sv=d.survey,coms=d.comentarios||[];
+    const byTurno=d.by_turno||{},byFreq=d.by_frequencia||{},byOrig=d.by_origem||{};
+    const nPapel=byOrig.manual||0,nApp=d.total-nPapel;
+    const pc=(n,t)=>t?Math.round(100*n/t):0,pc1=(n,t)=>t?(100*n/t).toFixed(1).replace(".",","):"0";
+    const elogios=coms.filter(c=>(c.tags||[]).includes(ELOGIO)).length;
+    const crits=coms.filter(c=>c.critico);
+    const ranking=custStats(coms),maxR=Math.max(1,...ranking.map(r=>r[1]));
+    const bars=(keys,obj)=>{const tot=Object.values(obj).reduce((a,n)=>a+n,0),max=Math.max(1,...Object.values(obj));
+      return keys.filter(k=>obj[k]!=null).concat(Object.keys(obj).filter(k=>!keys.includes(k))).map(k=>{const n=obj[k];return `<div class="br"><div class="bl"><span>${esc(k)}</span><b>${n} · ${pc(n,tot)}%</b></div><div class="bt"><i style="width:${(100*n/max).toFixed(1)}%"></i></div></div>`}).join("")||`<p class="mu">Sem dados.</p>`};
+    const rank=ranking.map(([k,n],i)=>`<div class="br"><div class="bl"><span>${i<3?`<em>${i+1}</em>`:""}${esc((TEMAS[k]||{}).n||k)}</span><b>${n} · ${pc(n,coms.length)}%</b></div><div class="bt"><i class="${i<3?"o":""}" style="width:${(100*n/maxR).toFixed(1)}%"></i></div></div>`).join("");
+    const turnoRows=TURNOS.filter(t=>byTurno[t]!=null).map(t=>{
+      const cs=coms.filter(c=>c.turno===t),cn={};cs.forEach(c=>(c.tags||[]).forEach(x=>{if(x!==ELOGIO)cn[x]=(cn[x]||0)+1}));
+      const tops=Object.entries(cn).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,n])=>`${esc((TEMAS[k]||{}).s||k)} (${n})`).join(", ")||"—";
+      const el=cs.filter(c=>(c.tags||[]).includes(ELOGIO)).length,cr=cs.filter(c=>c.critico).length;
+      return `<tr><td><b>${esc(t)}</b></td><td class="n">${byTurno[t]}</td><td class="n">${cs.length}</td><td class="n">${el}</td><td class="n">${cr||"—"}</td><td>${tops}</td></tr>`}).join("");
+    /* comentários na íntegra, agrupados por turno */
+    const turnosCom=TURNOS.filter(t=>coms.some(c=>c.turno===t)).concat([...new Set(coms.map(c=>c.turno||"").filter(t=>!TURNOS.includes(t)))].filter(t=>coms.some(c=>(c.turno||"")===t)));
+    let seq=0;
+    const comHtml=turnosCom.map(t=>{
+      const cs=coms.filter(c=>(c.turno||"")===t).sort((a,b)=>String(a.data).localeCompare(String(b.data)));
+      return `<h3 class="gt">${esc(t||"Turno não informado")} <span>${cs.length} comentário${cs.length===1?"":"s"}</span></h3>`+cs.map(c=>{seq++;
+        return `<div class="cm${c.critico?" cr":""}"><div class="ch"><span class="no">#${seq}</span><span>${esc(c.frequencia||"")}${c.data?" · "+fd(c.data):""}</span>${c.critico?`<span class="al">⚠ Higiene</span>`:""}</div><p>${esc(c.texto)}</p>${(c.tags||[]).length?`<div class="tg">${c.tags.map(x=>`<span>${esc((TEMAS[x]||{}).s||x)}</span>`).join("")}</div>`:""}</div>`}).join("")}).join("");
+    const logo=new URL("logo-white.png",location.href).href;
+    const html=`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório - ${esc(sv.title)} ${esc(sv.client_unit)}</title><style>
+@page{size:A4;margin:14mm 13mm}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;color:#1c2a24;font-size:12.5px;line-height:1.5;background:#fff}
+.bar{position:sticky;top:0;background:#1F4E3D;color:#fff;padding:10px 18px;display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:13px}
+.bar button{background:#E08A2E;color:#fff;border:0;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer}
+.pg{max-width:190mm;margin:0 auto;padding:14px 0}
+.hd{background:#1F4E3D;color:#fff;border-radius:10px;padding:22px 26px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.hd img{height:46px;display:block}
+.hd .t{text-align:right}.hd .t small{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;opacity:.8}
+.hd .t b{display:block;font-size:19px;margin-top:3px}
+.sub{color:#5b6b63;margin:12px 0 0;font-size:12px}
+h2{font-size:15px;color:#1F4E3D;margin:26px 0 4px;padding-bottom:5px;border-bottom:2px solid #E08A2E;break-after:avoid}
+h2+p.mu{margin:6px 0 10px}
+.mu{color:#5b6b63;font-size:11.5px}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.kp>div{background:#FBF8F1;border:1px solid #e6dfcc;border-radius:9px;padding:11px 13px}
+.kp .n{font-size:24px;font-weight:800;color:#1F4E3D;line-height:1.1}.kp .l{font-size:11px;color:#5b6b63;margin-top:3px}
+.kp>.c{background:#fbeeea;border-color:#efc9bf}.kp .c .n{color:#B23A28}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.br{margin-bottom:9px;break-inside:avoid}.bl{display:flex;justify-content:space-between;gap:10px;font-size:12px;margin-bottom:3px}.bl b{white-space:nowrap}
+.bl em{display:inline-block;background:#E08A2E;color:#fff;border-radius:50%;width:16px;height:16px;text-align:center;font-style:normal;font-size:10px;line-height:16px;margin-right:6px;font-weight:700}
+.bt{height:7px;background:#ece7d8;border-radius:4px;overflow:hidden}.bt i{display:block;height:100%;background:#2f7a5c;border-radius:4px}.bt i.o{background:#E08A2E}
+.alert{background:#fbeeea;border:1px solid #efc9bf;border-left:4px solid #B23A28;border-radius:8px;padding:11px 14px;margin-top:14px;break-inside:avoid}
+.callout{background:#FBF8F1;border-left:4px solid #E08A2E;border-radius:6px;padding:10px 14px;margin-top:12px;break-inside:avoid}
+table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}
+th{background:#1F4E3D;color:#fff;text-align:left;padding:7px 9px;font-weight:600}th.n,td.n{text-align:center}
+td{padding:7px 9px;border-bottom:1px solid #e6dfcc}tr{break-inside:avoid}
+.fin{break-before:page}
+h3.gt{font-size:13.5px;margin:20px 0 8px;color:#1F4E3D;background:#FBF8F1;border:1px solid #e6dfcc;border-radius:7px;padding:7px 12px;break-after:avoid;display:flex;justify-content:space-between}
+h3.gt span{font-weight:500;color:#5b6b63;font-size:11.5px}
+.cm{border:1px solid #e6dfcc;border-radius:8px;padding:9px 12px;margin-bottom:8px;break-inside:avoid}.cm.cr{border-color:#e3b4a9;background:#fdf6f4}
+.ch{display:flex;gap:10px;align-items:center;font-size:11px;color:#5b6b63;margin-bottom:4px}.ch .no{font-weight:800;color:#1F4E3D}
+.ch .al{margin-left:auto;background:#B23A28;color:#fff;border-radius:99px;padding:1px 9px;font-weight:700;font-size:10.5px}
+.cm p{margin:0;white-space:pre-wrap;word-wrap:break-word}
+.tg{margin-top:6px;display:flex;gap:5px;flex-wrap:wrap}.tg span{background:#e5f0ea;color:#1F4E3D;border-radius:99px;padding:1px 8px;font-size:10.5px;font-weight:600}
+.ft{margin-top:26px;padding-top:9px;border-top:1px solid #e6dfcc;color:#7a867f;font-size:10.5px;text-align:center}
+@media print{.bar{display:none}.pg{padding:0}}
+</style></head><body>
+<div class="bar"><span>Para salvar: na janela de impressão escolha <b>“Salvar como PDF”</b> como destino.</span><button onclick="print()">Imprimir / Salvar PDF</button></div>
+<div class="pg">
+<div class="hd"><img src="${logo}" alt="NutriBlu"><div class="t"><small>Relatório de pesquisa personalizada</small><b>${esc(sv.title)} · ${esc(sv.client_unit)}</b></div></div>
+<p class="sub">Período: ${fd(sv.opens_at)} a ${fd(sv.closes_at)} · Gerado em ${new Date().toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}</p>
+<div class="kp">
+  <div><div class="n">${d.total}</div><div class="l">respostas registradas</div></div>
+  <div><div class="n">${coms.length}</div><div class="l">comentários com sugestão</div></div>
+  <div><div class="n">${elogios}</div><div class="l">elogios espontâneos</div></div>
+  <div class="${crits.length?"c":""}"><div class="n">${crits.length}</div><div class="l">alertas de higiene</div></div>
+</div>
+<p class="mu" style="margin-top:9px">${nApp} respostas digitais + ${nPapel} em formulário de papel, sem duplicidade.</p>
+<h2>Quem respondeu</h2>
+<div class="two"><div><b style="font-size:12px">Frequência de uso do restaurante</b><div style="margin-top:8px">${bars(FREQS,byFreq)}</div></div><div><b style="font-size:12px">Turno de trabalho</b><div style="margin-top:8px">${bars(TURNOS,byTurno)}</div></div></div>
+${ranking.length?`<h2>Onde atuar primeiro</h2><p class="mu">Temas citados nos ${coms.length} comentários, por número de menções (um comentário pode tocar mais de um tema).</p>${rank}`:""}
+${ranking.length>=3?(()=>{const t3=ranking.slice(0,3).map(r=>r[0]),n3=coms.filter(c=>(c.tags||[]).some(t=>t3.includes(t))).length;return `<div class="callout"><b>${n3} de ${coms.length} comentários (${pc1(n3,coms.length)}%)</b> mencionam ao menos um dos 3 temas prioritários: ${t3.map(k=>esc((TEMAS[k]||{}).s||k)).join(", ")}.</div>`})():""}
+${crits.length?`<div class="alert"><b>⚠ Alerta crítico — segurança alimentar</b><br>${crits.length} de ${coms.length} comentários (${pc1(crits.length,coms.length)}%) relatam problemas de higiene${TURNOS.map(t=>[t,crits.filter(c=>c.turno===t).length]).filter(x=>x[1]).length?" — "+TURNOS.map(t=>[t,crits.filter(c=>c.turno===t).length]).filter(x=>x[1]).map(([t,n])=>`${n} do ${esc(t)}`).join(" e "):""}. Gravidade alta, tratamento prioritário independente do ranking de menções.</div>`:""}
+${turnoRows?`<h2>Comentários por turno</h2><table><thead><tr><th>Turno</th><th class="n">Respostas</th><th class="n">Comentários</th><th class="n">Elogios</th><th class="n">Alertas</th><th>Principais temas</th></tr></thead><tbody>${turnoRows}</tbody></table>`:""}
+<div class="fin"><h2>Comentários na íntegra</h2><p class="mu">Todos os ${coms.length} comentários recebidos, agrupados por turno e em ordem de data.</p>${comHtml||`<p class="mu">Nenhum comentário registrado.</p>`}</div>
+<div class="ft">NutriBlu Gastronomia Empresarial · unidade ${esc(sv.client_unit)} · pesquisa personalizada ${fd(sv.opens_at).slice(0,5)}–${fd(sv.closes_at)}<br>Dados internos de gestão — uso restrito.</div>
+</div>
+<script>var im=document.querySelector(".hd img");function go(){setTimeout(function(){print()},350)}im.complete?go():(im.onload=im.onerror=go)<\/script>
+</body></html>`;
+    w.document.open();w.document.write(html);w.document.close();
+  }catch(e){w.close();toast(e.message||"Falha ao gerar o relatório.",1)}
+}
 /* Lista completa dos comentários de uma pesquisa personalizada, com busca e filtros */
 async function customComments(meta){
   killCharts();
@@ -506,7 +602,7 @@ async function customComments(meta){
   $("#body").innerHTML=`
   <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px">
     <div class="row" style="gap:10px;align-items:center"><button class="btn alt sm" onclick="customBack()">← Todas as pesquisas</button><button class="btn alt sm" onclick="customOpen('${esc(meta.slug)}')">📊 Ver dashboard</button><span class="tag" style="background:${col}22;color:${col};font-size:12.5px;padding:4px 10px">${status}</span></div>
-    <button class="btn alt sm" onclick="customCopyCommentsLink('${esc(meta.slug)}')">Copiar link desta página</button>
+    <div class="row" style="gap:8px"><button class="btn sm" onclick="customReportPdf('${esc(meta.slug)}')">📄 Relatório PDF</button><button class="btn alt sm" onclick="customCopyCommentsLink('${esc(meta.slug)}')">Copiar link desta página</button></div>
   </div>
   <h2>${esc(sv.title)} · ${esc(sv.client_unit)}</h2>
   <p class="muted" style="margin:0 0 14px">Comentários de ${fd(sv.opens_at)} a ${fd(sv.closes_at)} · ${coms.length} no total${nCrit?` · ${nCrit} alerta${nCrit===1?"":"s"} de higiene`:""}</p>
@@ -638,6 +734,7 @@ async function customDashboard(meta,list){
     <div class="row" style="gap:10px;align-items:center"><button class="btn alt sm" onclick="customBack()">← Todas as pesquisas</button><span class="tag" style="background:${col}22;color:${col};font-size:12.5px;padding:4px 10px">${status}</span></div>
     <div class="row" style="gap:8px">
       <button class="btn sm" onclick="customOpenComments('${esc(meta.slug)}')">💬 Ver comentários</button>
+      <button class="btn sm" onclick="customReportPdf('${esc(meta.slug)}')">📄 Relatório PDF</button>
       <button class="btn alt sm" onclick="customCopyLink('${esc(meta.slug)}')">Copiar link da pesquisa</button>
       <button class="btn alt sm" onclick="customExtendDlg('${esc(meta.slug)}','${sv.closes_at}')">Renovar período</button>
       <button class="btn alt sm" onclick="customToggle('${esc(meta.slug)}',${!sv.active})">${sv.active?"Pausar":"Reativar"}</button>
