@@ -132,6 +132,8 @@ const fdt=i=>new Date(i).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",y
 const pct=v=>(+v).toFixed(1).replace(".",",")+"%";
 const num2=v=>(+v).toFixed(2).replace(".",",");
 const S={token:sessionStorage.getItem("ns_admin"),units:[],unit:"",from:iso(-29),to:iso(0),tab:"dash",charts:{},pending:0,cf:{status:"pending",rating:""}};
+/* Link direto para os comentários de uma pesquisa personalizada: admin.html#comentarios/<slug> (pede a senha da gestão se não houver sessão) */
+{const h=location.hash.match(/^#comentarios\/([\w-]+)/);if(h){S.tab="custom";S.customView=h[1];S.customComments=true}}
 
 async function api(fn,args={}){
   const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:"POST",headers:{"Content-Type":"application/json",apikey:SB_KEY,Authorization:"Bearer "+SB_KEY},body:JSON.stringify(args)});
@@ -456,7 +458,7 @@ async function tabCustom(){
   if(S.customView){
     const s=list.find(x=>x.slug===S.customView);
     if(!s){S.customView=null;return tabCustom()}
-    return customDashboard(s,list);
+    return S.customComments?customComments(s):customDashboard(s,list);
   }
   customListView(list);
 }
@@ -473,14 +475,57 @@ function customListView(list){
       <div class="muted" style="font-size:12.5px;margin-bottom:10px;word-break:break-all">🔗 ${esc(customLinkFor(s.slug))}</div>
       <div class="row" style="gap:8px">
         <button class="btn sm" onclick="customOpen('${esc(s.slug)}')">📊 Ver dashboard</button>
+        <button class="btn sm" onclick="customOpenComments('${esc(s.slug)}')">💬 Ver comentários</button>
         <button class="btn alt sm" onclick="customCopyLink('${esc(s.slug)}')">Copiar link</button>
         <button class="btn alt sm" onclick="customExtendDlg('${esc(s.slug)}','${s.closes_at}')">Renovar período</button>
         <button class="btn alt sm" onclick="customToggle('${esc(s.slug)}',${!s.active})">${s.active?"Pausar":"Reativar"}</button>
       </div></div>`;
   }).join(""):`<div class="empty">Nenhuma pesquisa personalizada criada ainda. Peça para a equipe técnica montar uma para o próximo cliente.</div>`}`;
 }
-function customOpen(slug){S.customView=slug;render()}
-function customBack(){S.customView=null;render()}
+function customOpen(slug){S.customView=slug;S.customComments=false;if(location.hash)history.replaceState(null,"",location.pathname+location.search);render()}
+function customBack(){S.customView=null;S.customComments=false;if(location.hash)history.replaceState(null,"",location.pathname+location.search);render()}
+const customCommentsLinkFor=s=>`https://satisfacaonutriblu.com.br/admin.html#comentarios/${s}`;
+function customOpenComments(slug){S.customView=slug;S.customComments=true;S.cq={turno:"",tema:"",crit:false,q:""};history.replaceState(null,"","#comentarios/"+slug);render()}
+function customCopyCommentsLink(slug){navigator.clipboard?.writeText(customCommentsLinkFor(slug));toast("Link dos comentários copiado")}
+/* Lista completa dos comentários de uma pesquisa personalizada, com busca e filtros */
+async function customComments(meta){
+  killCharts();
+  const d=await A("admin_custom_survey_results",{p_slug:meta.slug});
+  const sv=d.survey,status=customStatus(sv),col=customStatusColor[status],coms=d.comentarios||[];
+  if(!S.cq)S.cq={turno:"",tema:"",crit:false,q:""};
+  const turnos=TURNOS.filter(t=>coms.some(c=>c.turno===t)).concat([...new Set(coms.map(c=>c.turno).filter(t=>t&&!TURNOS.includes(t)))]);
+  const temas=custStats(coms).map(r=>r[0]);
+  const hasElogio=coms.some(c=>(c.tags||[]).includes(ELOGIO));
+  const nCrit=coms.filter(c=>c.critico).length;
+  const draw=()=>{
+    const f=S.cq,q=f.q.trim().toLowerCase();
+    const rows=coms.filter(c=>(!f.turno||c.turno===f.turno)&&(!f.tema||(c.tags||[]).includes(f.tema))&&(!f.crit||c.critico)&&(!q||String(c.texto).toLowerCase().includes(q)));
+    $("#cl").innerHTML=rows.length?rows.map(c=>`<div class="cm"><div class="top"><div class="who"><b>${esc(c.turno||"—")}</b><span>${esc(c.frequencia||"")}${c.data?" · "+fd(c.data):""}</span></div>${c.critico?`<span class="rchip" style="--c:var(--bad)">⚠ Higiene</span>`:""}</div><div class="bubble">${esc(c.texto)}</div>${(c.tags||[]).length?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${c.tags.map(t=>`<span class="tag">${esc((TEMAS[t]||{}).s||t)}</span>`).join("")}</div>`:""}</div>`).join(""):`<div class="empty">Nenhum comentário para este filtro.</div>`;
+    $("#cc").textContent=`${rows.length} de ${coms.length} comentário${coms.length===1?"":"s"}`;
+  };
+  $("#body").innerHTML=`
+  <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px">
+    <div class="row" style="gap:10px;align-items:center"><button class="btn alt sm" onclick="customBack()">← Todas as pesquisas</button><button class="btn alt sm" onclick="customOpen('${esc(meta.slug)}')">📊 Ver dashboard</button><span class="tag" style="background:${col}22;color:${col};font-size:12.5px;padding:4px 10px">${status}</span></div>
+    <button class="btn alt sm" onclick="customCopyCommentsLink('${esc(meta.slug)}')">Copiar link desta página</button>
+  </div>
+  <h2>${esc(sv.title)} · ${esc(sv.client_unit)}</h2>
+  <p class="muted" style="margin:0 0 14px">Comentários de ${fd(sv.opens_at)} a ${fd(sv.closes_at)} · ${coms.length} no total${nCrit?` · ${nCrit} alerta${nCrit===1?"":"s"} de higiene`:""}</p>
+  <div class="card"><h3>Comentários</h3>
+    <div class="row" style="margin-bottom:8px;gap:12px;align-items:flex-end;flex-wrap:wrap">
+      <div class="f"><label>Turno</label><select id="cqt"><option value="">Todos</option>${turnos.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join("")}</select></div>
+      <div class="f"><label>Tema</label><select id="cqm"><option value="">Todos</option>${hasElogio?`<option value="${esc(ELOGIO)}">Elogios</option>`:""}${temas.map(t=>`<option value="${esc(t)}">${esc((TEMAS[t]||{}).n||t)}</option>`).join("")}</select></div>
+      <div class="f" style="flex:1;min-width:200px"><label>Buscar</label><input type="text" id="cqq" style="width:100%" placeholder="Palavra no comentário"></div>
+      ${nCrit?`<div class="f"><label style="text-transform:none;font-size:13px;display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="cqc"> Só alertas de higiene</label></div>`:""}
+      <div class="muted f" style="margin-left:auto" id="cc"></div></div>
+    <div id="cl"></div></div>`;
+  $("#cqt").value=S.cq.turno;$("#cqm").value=S.cq.tema;$("#cqq").value=S.cq.q;
+  if($("#cqc"))$("#cqc").checked=S.cq.crit;
+  $("#cqt").onchange=e=>{S.cq.turno=e.target.value;draw()};
+  $("#cqm").onchange=e=>{S.cq.tema=e.target.value;draw()};
+  $("#cqq").oninput=e=>{S.cq.q=e.target.value;draw()};
+  if($("#cqc"))$("#cqc").onchange=e=>{S.cq.crit=e.target.checked;draw()};
+  draw();
+}
 function customCopyLink(slug){navigator.clipboard?.writeText(customLinkFor(slug));toast("Link copiado")}
 async function customToggle(slug,next){
   try{await A("admin_custom_survey_toggle",{p_slug:slug,p_active:next});toast(next?"Pesquisa reativada ✓":"Pesquisa pausada ✓");render()}catch(e){toast(e.message,1)}
@@ -592,6 +637,7 @@ async function customDashboard(meta,list){
   <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px">
     <div class="row" style="gap:10px;align-items:center"><button class="btn alt sm" onclick="customBack()">← Todas as pesquisas</button><span class="tag" style="background:${col}22;color:${col};font-size:12.5px;padding:4px 10px">${status}</span></div>
     <div class="row" style="gap:8px">
+      <button class="btn sm" onclick="customOpenComments('${esc(meta.slug)}')">💬 Ver comentários</button>
       <button class="btn alt sm" onclick="customCopyLink('${esc(meta.slug)}')">Copiar link da pesquisa</button>
       <button class="btn alt sm" onclick="customExtendDlg('${esc(meta.slug)}','${sv.closes_at}')">Renovar período</button>
       <button class="btn alt sm" onclick="customToggle('${esc(meta.slug)}',${!sv.active})">${sv.active?"Pausar":"Reativar"}</button>
@@ -631,7 +677,8 @@ async function customDashboard(meta,list){
     </section>
     <section>
       <h2>Leia os comentários</h2>
-      <p class="note">Os comentários na íntegra não ficam neste painel. Aponte a câmera do celular para o código abaixo.</p>
+      <p class="note">Os comentários na íntegra não ficam neste painel. Abra pelo link abaixo ou aponte a câmera do celular para o código.</p>
+      <p style="margin:0 0 14px"><a href="${esc(customCommentsLinkFor(meta.slug))}" onclick="event.preventDefault();customOpenComments('${esc(meta.slug)}')" style="display:inline-block;background:var(--brand);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:10px 18px;border-radius:12px">💬 Abrir os ${coms.length} comentários →</a></p>
       <div class="qrp"><img src="${qrImg}" alt="QR Code dos comentários"><div><h3>Escaneie com o seu celular</h3><p>Abre a lista completa dos ${coms.length} comentários, com busca por palavra e filtros por turno, tema e relatos críticos de higiene.</p><div class="lk">${esc(CUSTOM_COMMENTS_URL)}</div></div></div>
     </section>
     <footer>NutriBlu Gastronomia Empresarial · unidade ${esc(sv.client_unit)} (Grupo Viveo) · pesquisa personalizada, ${fd(sv.opens_at).slice(0,5)}–${fd(sv.closes_at)}<br>Dados internos de gestão — uso restrito.</footer>
