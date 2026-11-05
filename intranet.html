@@ -120,6 +120,7 @@ const fsize=b=>{b=+b||0;return b>=1048576?(b/1048576).toFixed(1).replace(".",","
 const store={get(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem(k,v)}catch(e){}},del(k){try{sessionStorage.removeItem(k)}catch(e){}}};
 const S={token:null,key:null,data:null,q:"",cat:"",st:""};
 const isAdmin=()=>S.data&&S.data.role==="admin";
+const canEdit=()=>S.data&&(S.data.role==="admin"||S.data.role==="qualidade");
 
 async function api(fn,args={}){
   const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:"POST",headers:{"Content-Type":"application/json",apikey:SB_KEY,Authorization:"Bearer "+SB_KEY},body:JSON.stringify(args)});
@@ -160,14 +161,15 @@ function topHeader(sub){
     </div>${sub||""}</div></header>`;
 }
 let loginMode="gestor";
+const MODES={gestor:{key:"ns_gestor",txt:"Entre com o mesmo usuário e senha do painel do gestor."},qualidade:{key:"ns_qualidade",txt:"Entre com o usuário e a senha da equipe da Qualidade."},admin:{key:"ns_admin",txt:"Entre com a senha de acesso da gestão."}};
 function loginView(msg){
-  const g=loginMode==="gestor";
+  const g=loginMode!=="admin";
   $("#root").innerHTML=`${topHeader()}
   <div class="wrap"><div class="card">
     <h1>Intranet da Qualidade</h1>
     <div class="unit-pill" style="color:var(--muted);margin-bottom:16px">Documentos padrão da NutriBlu</div>
-    <div class="seg"><button type="button" class="${g?"on":""}" data-m="gestor">Gestor de unidade</button><button type="button" class="${g?"":"on"}" data-m="admin">Gestão</button></div>
-    <p class="muted" style="margin-top:0">${g?"Entre com o mesmo usuário e senha do painel do gestor.":"Entre com a senha de acesso da gestão."}</p>
+    <div class="seg">${[["gestor","Gestor"],["qualidade","Qualidade"],["admin","Gestão"]].map(([k,l])=>`<button type="button" class="${loginMode===k?"on":""}" data-m="${k}">${l}</button>`).join("")}</div>
+    <p class="muted" style="margin-top:0">${MODES[loginMode].txt}</p>
     <form id="lf" novalidate>
       ${g?`<label for="us">Usuário</label><input id="us" type="text" style="width:100%;margin-bottom:12px" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">`:""}
       <label for="pw">Senha</label>
@@ -182,9 +184,9 @@ function loginView(msg){
     if((g&&!$("#us").value.trim())||!$("#pw").value){$("#lm").innerHTML=`<div class="err">${g?"Informe o usuário e a senha.":"Informe a senha."}</div>`;return}
     b.disabled=true;
     try{
-      const o=g?await api("manager_login",{p_username:$("#us").value,p_pass:$("#pw").value}):await api("admin_login",{p_pass:$("#pw").value});
+      const o=loginMode==="admin"?await api("admin_login",{p_pass:$("#pw").value}):await api(loginMode==="qualidade"?"qual_login":"manager_login",{p_username:$("#us").value,p_pass:$("#pw").value});
       if(!o.ok)throw new Error(o.message);
-      S.key=g?"ns_gestor":"ns_admin";S.token=o.token;store.set(S.key,o.token);await start();
+      S.key=MODES[loginMode].key;S.token=o.token;store.set(S.key,o.token);await start();
     }catch(er){$("#lm").innerHTML=`<div class="err">${esc(er.message)}</div>`;b.disabled=false}
   });
 }
@@ -195,7 +197,7 @@ function logout(expired){
 }
 async function boot(){
   $("#root").innerHTML=`${topHeader()}<div class="spin"></div>`;
-  for(const k of ["ns_admin","ns_gestor"]){
+  for(const k of ["ns_admin","ns_qualidade","ns_gestor"]){
     const t=store.get(k);if(!t)continue;
     try{S.data=await api("qual_overview",{p_token:t});S.token=t;S.key=k;shell();return}
     catch(e){if(/expirada/i.test(e.message))store.del(k);else{$("#root").innerHTML=`${topHeader()}<div class="wrap"><div class="err">${esc(e.message)}</div></div>`;return}}
@@ -211,7 +213,7 @@ function shell(){
   const adm=isAdmin();
   $("#root").innerHTML=`${topHeader(`<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <div style="text-align:right"><div class="unit-pill">Intranet da Qualidade</div><div style="font-weight:700;font-size:15px">${esc(S.data.who)}</div></div>
-      <a class="out" href="${adm?"admin.html":"gestor.html"}">← ${adm?"Painel da gestão":"Painel do gestor"}</a>
+      ${S.data.role==="qualidade"?`<button class="out" onclick="passDlg()">Alterar senha</button>`:`<a class="out" href="${adm?"admin.html":"gestor.html"}">← ${adm?"Painel da gestão":"Painel do gestor"}</a>`}
       <button class="out" onclick="logout()">Sair</button></div>`)}
     <main id="main"></main>`;
   paint();
@@ -240,7 +242,7 @@ function filtered(){
 
 /* ---------- Tela principal ---------- */
 function paint(){
-  const D=S.data,adm=isAdmin(),docs=D.documents,act=docs.filter(d=>d.active);
+  const D=S.data,adm=canEdit(),docs=D.documents,act=docs.filter(d=>d.active);
   const soon=act.filter(d=>vstate(d).k==="soon").length,exp=act.filter(d=>vstate(d).k==="exp").length;
   const recent=act.filter(d=>(new Date(D.today)-new Date(String(d.updated_at).slice(0,10)))/864e5<=30).length;
   const kpis=adm?`
@@ -256,7 +258,7 @@ function paint(){
   $("#main").innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px">
       <div><h2 style="margin:0">Documentos padrão da Qualidade</h2><div class="muted" style="font-size:14px;margin-top:4px">Consulte e baixe sempre a versão vigente publicada aqui.</div></div>
-      ${adm?`<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn alt" onclick="catDlg()">Categorias</button><button class="btn" onclick="docForm()">+ Novo documento</button></div>`:""}
+      ${adm?`<div style="display:flex;gap:10px;flex-wrap:wrap">${isAdmin()?`<button class="btn alt" onclick="userDlg()">Usuários da Qualidade</button><button class="btn alt" onclick="catDlg()">Categorias</button>`:""}<button class="btn" onclick="docForm()">+ Novo documento</button></div>`:""}
     </div>
     <div class="grid kpis" style="${adm?"":"grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"}">${kpis}</div>
     <div class="toolbar">
@@ -276,7 +278,7 @@ function paint(){
   list();
 }
 function docCard(d){
-  const adm=isAdmin(),t=ftype(d),v=vstate(d);
+  const adm=canEdit(),t=ftype(d),v=vstate(d);
   return `<article class="doc ${d.active?"":"off"}">
     <div class="hd"><div class="ft" style="--c:${t.c}">${esc(t.l)}</div>
       <div style="min-width:0;flex:1">${d.code?`<div class="code">${esc(d.code)}</div>`:""}<h4>${esc(d.title)}</h4>
@@ -290,7 +292,7 @@ function docCard(d){
     </div></article>`;
 }
 function list(){
-  const D=S.data,rows=filtered(),adm=isAdmin(),box=$("#list");
+  const D=S.data,rows=filtered(),adm=canEdit(),box=$("#list");
   if(!D.documents.length){
     box.innerHTML=`<div class="card empty"><div class="big">📚</div><h3>${adm?"Nenhum documento publicado ainda":"Os documentos estão sendo publicados"}</h3><p>${adm?"Clique em “+ Novo documento” para anexar o primeiro arquivo padrão da Qualidade.":"Em breve os documentos padrão da Qualidade estarão disponíveis aqui."}</p></div>`;return;
   }
@@ -384,6 +386,50 @@ async function histDlg(id){
     m.querySelector("#x").onclick=()=>m.remove();
     m.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>openDoc(id,false,b.dataset.v||null));
   }catch(e){toast(e.message,1)}
+}
+
+/* ---------- Senha (Qualidade) ---------- */
+function passDlg(){
+  const m=dialog(`<h3>Alterar senha</h3><p class="muted" style="font-size:14px">A nova senha vale a partir do próximo acesso. Use pelo menos 8 caracteres.</p><div class="f"><label>Nova senha</label><input type="password" id="np" style="width:100%" autocomplete="new-password"></div><div class="f"><label>Repita a nova senha</label><input type="password" id="np2" style="width:100%" autocomplete="new-password"></div><div class="act"><button class="btn alt" id="x">Cancelar</button><button class="btn" id="ok">Salvar</button></div>`);
+  m.querySelector("#x").onclick=()=>m.remove();
+  m.querySelector("#ok").onclick=async()=>{
+    const a=m.querySelector("#np").value,b=m.querySelector("#np2").value;
+    if(a.length<8)return toast("A senha deve ter pelo menos 8 caracteres.",1);
+    if(a!==b)return toast("As senhas não conferem.",1);
+    try{await Q("qual_change_pass",{p_new:a});toast("Senha alterada ✓");m.remove()}catch(e){toast(e.message,1)}
+  };
+}
+
+/* ---------- Gestão: usuários da Qualidade ---------- */
+async function userDlg(){
+  let users;
+  try{users=await Q("qual_admin_list_users")}catch(e){return toast(e.message,1)}
+  const m=dialog(`<h3>Usuários da Qualidade</h3><p class="muted" style="font-size:14px;margin-top:-6px">Acessam só a intranet: podem enviar, editar e excluir documentos. Não veem a pesquisa de satisfação.</p><div id="ul"></div><div class="act"><button class="btn alt" id="x">Fechar</button><button class="btn" id="nw">+ Novo usuário</button></div>`,true);
+  m.querySelector("#x").onclick=()=>m.remove();
+  const draw=()=>{
+    m.querySelector("#ul").innerHTML=users.length?users.map(u=>`<div class="vrow"><div><b>${esc(u.display_name)}</b> <span class="tag ${u.active?"ok":"muted"}">${u.active?"ativo":"desativado"}</span><div class="n">usuário: ${esc(u.username)} · criado em ${fd(u.created_at)}</div></div><div style="display:flex;gap:8px"><button class="btn sm alt" data-e="${esc(u.id)}">Editar</button><button class="btn sm alt" data-t="${esc(u.id)}">${u.active?"Desativar":"Reativar"}</button></div></div>`).join(""):`<div class="empty" style="padding:24px">Nenhum usuário da Qualidade cadastrado.</div>`;
+    m.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>form(users.find(x=>x.id===b.dataset.e)));
+    m.querySelectorAll("[data-t]").forEach(b=>b.onclick=async()=>{const u=users.find(x=>x.id===b.dataset.t);try{await Q("qual_admin_upsert_user",{p_id:u.id,p_username:u.username,p_display_name:u.display_name,p_active:!u.active});toast(u.active?"Acesso desativado":"Acesso reativado ✓");await refresh()}catch(e){toast(e.message,1)}});
+  };
+  const refresh=async()=>{users=await Q("qual_admin_list_users");draw()};
+  const form=u=>{
+    const f=dialog(`<h3>${u?"Editar usuário":"Novo usuário da Qualidade"}</h3>
+      <div class="f"><label>Nome da pessoa</label><input type="text" id="un" style="width:100%" maxlength="80" placeholder="Ex.: Ana Souza"></div>
+      <div class="two"><div class="f"><label>Usuário (login)</label><input type="text" id="uu" style="width:100%" maxlength="40" placeholder="ana.souza" autocapitalize="none" autocomplete="off" spellcheck="false"></div>
+      <div class="f"><label>${u?"Nova senha (opcional)":"Senha"}</label><input type="password" id="up" style="width:100%" autocomplete="new-password" placeholder="${u?"Deixe em branco para manter":"Mínimo 8 caracteres"}"></div></div>
+      <div class="muted" style="font-size:12.5px;margin:-4px 0 12px">Usuário: só letras minúsculas, números, ponto, hífen e sublinhado.</div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:14px;text-transform:none;letter-spacing:0;color:var(--ink);font-weight:500"><input type="checkbox" id="ua" style="width:18px;height:18px;accent-color:var(--green)"> Acesso ativo</label>
+      <div id="ue"></div><div class="act"><button class="btn alt" id="fx">Cancelar</button><button class="btn" id="fo">${u?"Salvar":"Criar usuário"}</button></div>`,true);
+    f.querySelector("#un").value=u?u.display_name:"";f.querySelector("#uu").value=u?u.username:"";f.querySelector("#ua").checked=u?u.active:true;
+    f.querySelector("#fx").onclick=()=>f.remove();
+    f.querySelector("#fo").onclick=async()=>{
+      const b=f.querySelector("#fo");b.disabled=true;
+      try{await Q("qual_admin_upsert_user",{p_id:u?u.id:null,p_username:f.querySelector("#uu").value,p_display_name:f.querySelector("#un").value,p_active:f.querySelector("#ua").checked,p_pass:f.querySelector("#up").value||null});f.remove();toast(u?"Usuário salvo ✓":"Usuário criado ✓");await refresh()}
+      catch(e){f.querySelector("#ue").innerHTML=`<div class="err">${esc(e.message)}</div>`;b.disabled=false}
+    };
+  };
+  m.querySelector("#nw").onclick=()=>form(null);
+  draw();
 }
 
 /* ---------- Gestão: categorias ---------- */
