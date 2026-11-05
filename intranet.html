@@ -255,7 +255,7 @@ function paint(){
   const counts={};docs.forEach(d=>{counts[d.category_id]=(counts[d.category_id]||0)+1});
   $("#main").innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px">
-      <div><h2 style="margin:0">Documentos padrão da Qualidade</h2><div class="muted" style="font-size:14px;margin-top:4px">Consulte e baixe sempre a versão vigente publicada aqui.</div></div>
+      <div><h2 style="margin:0">Documentos padrão da Qualidade</h2><div class="muted" style="font-size:14px;margin-top:4px">${adm?"Consulte e baixe sempre a versão vigente publicada aqui.":"Consulte sempre a versão vigente publicada aqui. Acesso somente para visualização."}</div></div>
       ${adm?`<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn alt" onclick="catDlg()">Categorias</button><button class="btn" onclick="docForm()">+ Novo documento</button></div>`:""}
     </div>
     <div class="grid kpis" style="${adm?"":"grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"}">${kpis}</div>
@@ -284,8 +284,8 @@ function docCard(d){
     ${d.description?`<p class="desc">${esc(d.description)}</p>`:""}
     <div class="meta"><span>Versão ${esc(d.version)}</span><span>Atualizado em ${fd(d.updated_at)}</span><span>${fsize(d.size_bytes)}</span>${adm?`<span>${+d.downloads||0} acesso${+d.downloads===1?"":"s"}</span>`:""}</div>
     <div class="acts">
-      ${canView(d)?`<button class="btn sm" onclick="openDoc('${esc(d.id)}',true)">Abrir</button>`:""}
-      <button class="btn sm ${canView(d)?"alt":""}" onclick="openDoc('${esc(d.id)}',false)">Baixar</button>
+      ${canView(d)?`<button class="btn sm" onclick="openDoc('${esc(d.id)}',true)">${adm?"Abrir":"Visualizar"}</button>`:(adm?"":`<span class="muted" style="font-size:13px">Sem visualização neste formato · solicite à gestão</span>`)}
+      ${adm?`<button class="btn sm ${canView(d)?"alt":""}" onclick="openDoc('${esc(d.id)}',false)">Baixar</button>`:""}
       ${adm?`<button class="btn sm alt" onclick="docForm('${esc(d.id)}')">Editar</button>${+d.versions?`<button class="btn sm alt" onclick="histDlg('${esc(d.id)}')">Histórico (${+d.versions})</button>`:""}<button class="btn sm danger" onclick="delDoc('${esc(d.id)}')">Excluir</button>`:""}
     </div></article>`;
 }
@@ -306,7 +306,7 @@ async function openDoc(id,view,vid){
   const w=view?window.open("about:blank","_blank"):null;
   try{
     const d=await fnPost({action:"url",doc_id:id,version_id:vid||null,view:!!view});
-    if(view){if(w)w.location.href=d.url;else location.href=d.url}
+    if(view){const u=(!isAdmin()&&/pdf/.test(d.mime||""))?d.url+"#toolbar=0&navpanes=0":d.url;if(w)w.location.href=u;else location.href=u}
     else{const a=document.createElement("a");a.href=d.url;a.download=d.name;document.body.appendChild(a);a.click();a.remove()}
   }catch(e){if(w)w.close();toast(e.message,1)}
 }
@@ -341,6 +341,7 @@ function docForm(id){
   const pick=f=>{
     if(!f)return;file=f;g("#dn").textContent=f.name;g("#ds").textContent=fsize(f.size)+" · novo arquivo";
     if(d)g("#d_nw").style.display="block";
+    if(!/\.(pdf|png|jpe?g|txt)$/i.test(f.name))toast("Atenção: este formato não pode ser visualizado pelos gestores. Use PDF para que eles consigam abrir.",1);
     if(!g("#d_tit").value.trim())g("#d_tit").value=f.name.replace(/\.[^.]+$/,"").replace(/[_]+/g," ");
   };
   g("#d_file").onchange=e=>pick(e.target.files[0]);
