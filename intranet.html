@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="color-scheme" content="dark">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Intranet da Qualidade | NutriBlu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,680;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#5aa585;--green-2:#4f9a7d;--orange:#eea254;--orange-2:#f3b06a;--cream:#0f1713;--ink:#f1f3ef;--muted:#b0bcb4;--line:rgba(255,255,255,.14);--card:#17221c;--ok:#4fb383;--warn:#eea254;--bad:#e66767;--wash-g:#1d2a23;--wash-o:#3a2a14;--wash-r:#3a1a18;--wash-r-bd:#6b2c28;--wash-r-ink:#f6b9b9;--track:#26352c;--seg:#1d2a23;--btn-a:#3f8a6c;--btn-b:#2f6c53;--shadow:rgba(0,0,0,.55);color-scheme:dark;
+  --serif:"Fraunces",Georgia,serif;--radius:20px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Inter",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.45}
+h1,h2,h3,h4{font-family:var(--serif);color:var(--green);margin:0 0 8px;text-wrap:balance}
+h1{font-weight:680;font-size:27px;line-height:1.1;letter-spacing:-.3px}
+h2{font-weight:680;font-size:21px}
+.top{background:linear-gradient(180deg,#20553F 0%,#1F4E3D 62%,#193F30 100%);color:#fff;padding:calc(18px + env(safe-area-inset-top)) clamp(16px,2.5vw,40px) 20px}
+.top .in{max-width:1680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.logo-wrap{display:flex;align-items:center;gap:12px}
+.logo-img{height:40px;width:auto;display:block}
+.logo-fallback{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.3px;font-size:18px;color:#fff}
+.logo-fallback i{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--orange)}
+.unit-pill{font-size:11.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:2px}
+.out{background:transparent;border:1.5px solid rgba(255,255,255,.5);color:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;white-space:nowrap}
+.out:hover{background:rgba(255,255,255,.12)}
+main{max-width:1680px;margin:24px auto 0;padding:0 clamp(16px,2.5vw,40px) 48px}
+label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+select,input[type=text],input[type=password],input[type=date],input[type=number],textarea{font:inherit;padding:12px 13px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);max-width:100%}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--green-2);box-shadow:0 0 0 3px rgba(79,154,125,.22)}
+textarea{width:100%;min-height:80px;resize:vertical}
+.btn{background:linear-gradient(155deg,var(--btn-a),var(--btn-b));color:#fff;border:0;border-radius:14px;padding:12px 18px;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 10px 20px -10px rgba(31,78,61,.55);transition:transform .05s,opacity .2s}
+.btn:active{transform:scale(.99)}.btn:hover{filter:brightness(1.05)}
+.btn.alt{background:transparent;color:var(--green);border:1.5px solid var(--green);box-shadow:none}
+.btn.danger{background:transparent;color:var(--bad);border:1.5px solid var(--bad);box-shadow:none}
+.btn.sm{padding:9px 14px;font-size:13.5px;border-radius:12px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:0 20px 40px -28px var(--shadow)}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(4,1fr);margin-bottom:18px}
+.kpi{padding:18px 20px}
+.kpi .l{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:var(--serif);font-weight:680;font-size:32px;color:var(--green);line-height:1.15;margin:6px 0}
+.kpi .s{font-size:13px;color:var(--muted)}
+.kpi.warn .v{color:var(--warn)}.kpi.bad .v{color:var(--bad)}
+.toolbar{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:14px}
+.toolbar .grow{flex:1;min-width:220px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.chip-b{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+.chip-b.on{background:var(--btn-b);border-color:var(--green);color:#fff}
+.chip-b small{opacity:.75;font-weight:600;margin-left:4px}
+.cat-h{display:flex;align-items:center;gap:10px;margin:26px 0 12px}
+.cat-h .ic{font-size:22px}
+.cat-h h2{margin:0}
+.cat-h .n{color:var(--muted);font-size:13px;font-weight:600}
+.docs{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(330px,1fr))}
+.doc{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 40px -30px var(--shadow)}
+.doc.off{opacity:.72}
+.doc .hd{display:flex;gap:13px;align-items:flex-start}
+.ft{flex:none;width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;letter-spacing:.4px;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.doc h4{margin:0 0 3px;font-size:16.5px;line-height:1.25;color:var(--ink);font-family:"Inter",system-ui,sans-serif;font-weight:700}
+.code{font-size:11.5px;font-weight:700;letter-spacing:.5px;color:var(--orange);text-transform:uppercase}
+.desc{margin:0;color:var(--muted);font-size:13.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.meta{font-size:12.5px;color:var(--muted);display:flex;gap:6px 12px;flex-wrap:wrap;margin-top:auto}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--wash-g);color:var(--green)}
+.tag.ok{background:rgba(79,179,131,.16);color:var(--ok)}
+.tag.warn{background:var(--wash-o);color:var(--warn)}
+.tag.bad{background:var(--wash-r);color:var(--wash-r-ink)}
+.tag.muted{background:rgba(255,255,255,.07);color:var(--muted)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line)}
+.empty{text-align:center;color:var(--muted);padding:44px 14px}
+.empty .big{font-size:44px;margin-bottom:6px}
+.note{color:var(--muted);font-size:13px;margin-top:26px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--btn-b);color:#fff;padding:12px 18px;border-radius:12px;z-index:200;box-shadow:0 10px 30px -10px rgba(0,0,0,.5);font-weight:600;max-width:92vw}
+.toast.err{background:#a83a3a}
+.mask{position:fixed;inset:0;background:rgba(5,12,9,.66);display:flex;align-items:flex-start;justify-content:center;z-index:100;padding:24px 14px;overflow:auto}
+.dlg{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);max-width:640px;width:100%;padding:24px;margin:auto}
+.dlg h3{margin:0 0 14px;font-size:20px}
+.dlg .act{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.f{margin-bottom:14px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.drop{display:flex;align-items:center;gap:14px;border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;background:var(--wash-g);transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--green-2);background:#22332a}
+.drop b{display:block;font-size:14px;color:var(--ink);text-transform:none;letter-spacing:0}
+.drop span{font-size:12.5px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:500}
+.drop input{display:none}
+.prog{height:8px;border-radius:6px;background:var(--track);overflow:hidden;margin-top:12px;display:none}
+.prog i{display:block;height:100%;width:0;background:var(--green-2);transition:width .15s}
+.crow{display:grid;grid-template-columns:62px 1fr 76px auto auto;gap:8px;align-items:center;margin-bottom:10px}
+.crow input{width:100%;padding:10px 11px}
+.vrow{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.vrow:first-of-type{border-top:0}
+.vrow .n{font-size:12.5px;color:var(--muted)}
+.spin{width:34px;height:34px;border:4px solid var(--track);border-top-color:var(--green);border-radius:50%;animation:s 1s linear infinite;margin:50px auto}
+@keyframes s{to{transform:rotate(360deg)}}
+.wrap{max-width:420px;margin:-16px auto 0;padding:0 16px 40px;position:relative}
+.err{background:var(--wash-r);border:1px solid var(--wash-r-bd);color:var(--wash-r-ink);padding:12px 14px;border-radius:12px;margin-top:14px;font-size:14px}
+.muted{color:var(--muted)}
+.seg{display:flex;background:var(--seg);border-radius:14px;padding:4px;gap:4px;margin-bottom:16px}
+.seg button{flex:1;background:transparent;border:0;padding:10px 12px;border-radius:11px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--card);color:var(--green);box-shadow:0 2px 8px -3px rgba(0,0,0,.4)}
+@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.kpis{grid-template-columns:1fr}.docs{grid-template-columns:1fr}.two{grid-template-columns:1fr}.crow{grid-template-columns:54px 1fr 64px}.crow .btn{grid-column:span 3}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const SB_URL="https://yfbmpvmavjwuedphyrsa.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYm1wdm1hdmp3dWVkcGh5cnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2MTQ0MjYsImV4cCI6MjEwNjE5MDQyNn0.2clDzH9PT4IwkUYDVc6VHH3h8Gq2mWKKw1e3d-zeaeA";
+const FN=SB_URL+"/functions/v1/qualidade-arquivos";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fd=d=>{const[y,m,x]=String(d).slice(0,10).split("-");return`${x}/${m}/${y}`};
+const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const fsize=b=>{b=+b||0;return b>=1048576?(b/1048576).toFixed(1).replace(".",",")+" MB":Math.max(1,Math.round(b/1024))+" KB"};
+const store={get(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem(k,v)}catch(e){}},del(k){try{sessionStorage.removeItem(k)}catch(e){}}};
+const S={token:null,key:null,data:null,q:"",cat:"",st:""};
+const isAdmin=()=>S.data&&S.data.role==="admin";
+
+async function api(fn,args={}){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:"POST",headers:{"Content-Type":"application/json",apikey:SB_KEY,Authorization:"Bearer "+SB_KEY},body:JSON.stringify(args)});
+  const t=await r.text();let d=null;try{d=t?JSON.parse(t):null}catch(e){}
+  if(!r.ok)throw new Error((d&&d.message)||"Falha na comunicação. Tente novamente.");
+  return d;
+}
+async function Q(fn,args={}){
+  try{return await api(fn,{p_token:S.token,...args})}
+  catch(e){if(/expirada/i.test(e.message))logout(true);throw e}
+}
+async function fnPost(body){
+  const r=await fetch(FN,{method:"POST",headers:{"Content-Type":"application/json",apikey:SB_KEY,Authorization:"Bearer "+SB_KEY},body:JSON.stringify({token:S.token,...body})});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok){if(/expirada/i.test(d.error||""))logout(true);throw new Error(d.error||"Falha na comunicação. Tente novamente.")}
+  return d;
+}
+function uploadFile(file,onprog){
+  return new Promise((res,rej)=>{
+    const f=new FormData();f.append("token",S.token);f.append("file",file);
+    const x=new XMLHttpRequest();x.open("POST",FN);
+    x.setRequestHeader("apikey",SB_KEY);x.setRequestHeader("Authorization","Bearer "+SB_KEY);
+    x.upload.onprogress=e=>{if(e.lengthComputable)onprog(e.loaded/e.total)};
+    x.onload=()=>{let d={};try{d=JSON.parse(x.responseText)}catch(e){}x.status>=200&&x.status<300?res(d):rej(new Error(d.error||"Falha no envio do arquivo."))};
+    x.onerror=()=>rej(new Error("Falha de conexão no envio do arquivo."));
+    x.send(f);
+  });
+}
+function toast(m,err){const t=document.createElement("div");t.className="toast"+(err?" err":"");t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3600)}
+function dialog(html,sticky){const m=document.createElement("div");m.className="mask";m.innerHTML=`<div class="dlg">${html}</div>`;if(!sticky)m.addEventListener("click",e=>{if(e.target===m)m.remove()});document.body.appendChild(m);return m}
+
+/* ---------- Estrutura / login ---------- */
+function topHeader(sub){
+  return `<header class="top"><div class="in">
+    <div class="logo-wrap">
+      <img src="logo-white.png?v=3" alt="NutriBlu Gastronomia Empresarial" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="logo-fallback" style="display:none"><i></i>NutriBlu</div>
+    </div>${sub||""}</div></header>`;
+}
+let loginMode="gestor";
+function loginView(msg){
+  const g=loginMode==="gestor";
+  $("#root").innerHTML=`${topHeader()}
+  <div class="wrap"><div class="card">
+    <h1>Intranet da Qualidade</h1>
+    <div class="unit-pill" style="color:var(--muted);margin-bottom:16px">Documentos padrão da NutriBlu</div>
+    <div class="seg"><button type="button" class="${g?"on":""}" data-m="gestor">Gestor de unidade</button><button type="button" class="${g?"":"on"}" data-m="admin">Gestão</button></div>
+    <p class="muted" style="margin-top:0">${g?"Entre com o mesmo usuário e senha do painel do gestor.":"Entre com a senha de acesso da gestão."}</p>
+    <form id="lf" novalidate>
+      ${g?`<label for="us">Usuário</label><input id="us" type="text" style="width:100%;margin-bottom:12px" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">`:""}
+      <label for="pw">Senha</label>
+      <input id="pw" type="password" style="width:100%" autocomplete="current-password">
+      <div id="lm">${msg?`<div class="err">${esc(msg)}</div>`:""}</div>
+      <button class="btn" style="width:100%;margin-top:18px" id="lb">Entrar</button>
+    </form></div></div>`;
+  document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{loginMode=b.dataset.m;loginView()});
+  (g?$("#us"):$("#pw")).focus();
+  $("#lf").addEventListener("submit",async e=>{
+    e.preventDefault();const b=$("#lb");
+    if((g&&!$("#us").value.trim())||!$("#pw").value){$("#lm").innerHTML=`<div class="err">${g?"Informe o usuário e a senha.":"Informe a senha."}</div>`;return}
+    b.disabled=true;
+    try{
+      const o=g?await api("manager_login",{p_username:$("#us").value,p_pass:$("#pw").value}):await api("admin_login",{p_pass:$("#pw").value});
+      if(!o.ok)throw new Error(o.message);
+      S.key=g?"ns_gestor":"ns_admin";S.token=o.token;store.set(S.key,o.token);await start();
+    }catch(er){$("#lm").innerHTML=`<div class="err">${esc(er.message)}</div>`;b.disabled=false}
+  });
+}
+function logout(expired){
+  if(S.key)store.del(S.key);
+  S.token=null;S.key=null;S.data=null;
+  loginView(expired===true?"Sessão expirada. Entre novamente.":"");
+}
+async function boot(){
+  $("#root").innerHTML=`${topHeader()}<div class="spin"></div>`;
+  for(const k of ["ns_admin","ns_gestor"]){
+    const t=store.get(k);if(!t)continue;
+    try{S.data=await api("qual_overview",{p_token:t});S.token=t;S.key=k;shell();return}
+    catch(e){if(/expirada/i.test(e.message))store.del(k);else{$("#root").innerHTML=`${topHeader()}<div class="wrap"><div class="err">${esc(e.message)}</div></div>`;return}}
+  }
+  loginView();
+}
+async function start(){
+  try{S.data=await Q("qual_overview");shell()}catch(e){if(S.token)loginView(e.message)}
+}
+async function reload(){S.data=await Q("qual_overview");paint()}
+
+function shell(){
+  const adm=isAdmin();
+  $("#root").innerHTML=`${topHeader(`<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="text-align:right"><div class="unit-pill">Intranet da Qualidade</div><div style="font-weight:700;font-size:15px">${esc(S.data.who)}</div></div>
+      <a class="out" href="${adm?"admin.html":"gestor.html"}">← ${adm?"Painel da gestão":"Painel do gestor"}</a>
+      <button class="out" onclick="logout()">Sair</button></div>`)}
+    <main id="main"></main>`;
+  paint();
+}
+
+/* ---------- Regras de exibição ---------- */
+const TYPES=[[/pdf/,"PDF","#e66767"],[/word|msword/,"DOC","#6fa0f0"],[/sheet|excel|csv/,"XLS","#4fb383"],[/presentation|powerpoint/,"PPT","#eea254"],[/^image\//,"IMG","#b48be0"],[/text\/plain/,"TXT","#b0bcb4"]];
+function ftype(d){const m=d.mime||"";for(const[re,l,c]of TYPES)if(re.test(m))return{l,c};return{l:(d.file_name.split(".").pop()||"ARQ").slice(0,4).toUpperCase(),c:"#b0bcb4"}}
+const canView=d=>/^(application\/pdf|image\/|text\/plain)/.test(d.mime||"");
+function vstate(d){
+  if(!d.valid_until)return{k:"none",t:"Sem prazo de validade",c:"muted"};
+  const days=Math.round((new Date(d.valid_until+"T00:00:00")-new Date(S.data.today+"T00:00:00"))/864e5);
+  if(days<0)return{k:"exp",t:"Vencido em "+fd(d.valid_until),c:"bad"};
+  if(days<=30)return{k:"soon",t:days===0?"Vence hoje":`Vence em ${days} dia${days===1?"":"s"}`,c:"warn"};
+  return{k:"ok",t:"Vigente até "+fd(d.valid_until),c:"ok"};
+}
+function filtered(){
+  const q=norm(S.q.trim()),cats=Object.fromEntries(S.data.categories.map(c=>[c.id,c.name]));
+  return S.data.documents.filter(d=>{
+    if(S.cat&&d.category_id!==S.cat)return false;
+    if(q&&!norm([d.title,d.code,d.description,d.file_name,cats[d.category_id]].join(" ")).includes(q))return false;
+    if(S.st){if(S.st==="off")return !d.active;const k=vstate(d).k;if(S.st==="ok")return d.active&&(k==="ok"||k==="none");if(S.st==="soon")return d.active&&k==="soon";if(S.st==="exp")return d.active&&k==="exp"}
+    return true;
+  });
+}
+
+/* ---------- Tela principal ---------- */
+function paint(){
+  const D=S.data,adm=isAdmin(),docs=D.documents,act=docs.filter(d=>d.active);
+  const soon=act.filter(d=>vstate(d).k==="soon").length,exp=act.filter(d=>vstate(d).k==="exp").length;
+  const recent=act.filter(d=>(new Date(D.today)-new Date(String(d.updated_at).slice(0,10)))/864e5<=30).length;
+  const kpis=adm?`
+    <div class="card kpi"><div class="l">Documentos</div><div class="v">${docs.length}</div><div class="s">${act.length} visíveis para os gestores</div></div>
+    <div class="card kpi ${soon?"warn":""}"><div class="l">Vencendo em 30 dias</div><div class="v">${soon}</div><div class="s">${soon?"Programe a revisão":"Nada a revisar agora"}</div></div>
+    <div class="card kpi ${exp?"bad":""}"><div class="l">Vencidos</div><div class="v">${exp}</div><div class="s">${exp?"Precisam de revisão":"Tudo em dia"}</div></div>
+    <div class="card kpi"><div class="l">Acessos</div><div class="v">${docs.reduce((a,d)=>a+(+d.downloads||0),0)}</div><div class="s">Aberturas e downloads</div></div>`
+  :`
+    <div class="card kpi"><div class="l">Documentos disponíveis</div><div class="v">${act.length}</div><div class="s">Em ${D.categories.filter(c=>act.some(d=>d.category_id===c.id)).length} categorias</div></div>
+    <div class="card kpi"><div class="l">Atualizados</div><div class="v">${recent}</div><div class="s">Nos últimos 30 dias</div></div>
+    ${exp?`<div class="card kpi bad"><div class="l">Em revisão</div><div class="v">${exp}</div><div class="s">Prazo de validade vencido</div></div>`:""}`;
+  const counts={};docs.forEach(d=>{counts[d.category_id]=(counts[d.category_id]||0)+1});
+  $("#main").innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+      <div><h2 style="margin:0">Documentos padrão da Qualidade</h2><div class="muted" style="font-size:14px;margin-top:4px">Consulte e baixe sempre a versão vigente publicada aqui.</div></div>
+      ${adm?`<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn alt" onclick="catDlg()">Categorias</button><button class="btn" onclick="docForm()">+ Novo documento</button></div>`:""}
+    </div>
+    <div class="grid kpis" style="${adm?"":"grid-template-columns:repeat(auto-fit,minmax(220px,1fr))"}">${kpis}</div>
+    <div class="toolbar">
+      <div class="grow"><label for="q">Buscar</label><input type="text" id="q" style="width:100%" placeholder="Título, código ou palavra do documento" value="${esc(S.q)}"></div>
+      ${adm?`<div><label for="st">Situação</label><select id="st"><option value="">Todas</option><option value="ok">Vigentes</option><option value="soon">Vencendo em 30 dias</option><option value="exp">Vencidos</option><option value="off">Ocultos</option></select></div>`:""}
+    </div>
+    <div class="chips" id="chips">
+      <button class="chip-b ${S.cat?"":"on"}" data-c="">Todas<small>${(adm?docs:act).length}</small></button>
+      ${D.categories.map(c=>{const n=(adm?docs:act).filter(d=>d.category_id===c.id).length;return(n||adm)?`<button class="chip-b ${S.cat===c.id?"on":""}" data-c="${esc(c.id)}">${esc(c.icon)} ${esc(c.name)}<small>${n}</small></button>`:""}).join("")}
+    </div>
+    <div id="list"></div>
+    <div class="note">Em caso de dúvida sobre qual documento usar, fale com a gestão.</div>`;
+  if(adm)$("#st").value=S.st;
+  $("#q").oninput=e=>{S.q=e.target.value;list()};
+  if(adm)$("#st").onchange=e=>{S.st=e.target.value;list()};
+  document.querySelectorAll("#chips .chip-b").forEach(b=>b.onclick=()=>{S.cat=b.dataset.c;document.querySelectorAll("#chips .chip-b").forEach(x=>x.classList.toggle("on",x===b));list()});
+  list();
+}
+function docCard(d){
+  const adm=isAdmin(),t=ftype(d),v=vstate(d);
+  return `<article class="doc ${d.active?"":"off"}">
+    <div class="hd"><div class="ft" style="--c:${t.c}">${esc(t.l)}</div>
+      <div style="min-width:0;flex:1">${d.code?`<div class="code">${esc(d.code)}</div>`:""}<h4>${esc(d.title)}</h4>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><span class="tag ${v.c}">${esc(v.t)}</span>${d.active?"":`<span class="tag muted">Oculto</span>`}</div></div></div>
+    ${d.description?`<p class="desc">${esc(d.description)}</p>`:""}
+    <div class="meta"><span>Versão ${esc(d.version)}</span><span>Atualizado em ${fd(d.updated_at)}</span><span>${fsize(d.size_bytes)}</span>${adm?`<span>${+d.downloads||0} acesso${+d.downloads===1?"":"s"}</span>`:""}</div>
+    <div class="acts">
+      ${canView(d)?`<button class="btn sm" onclick="openDoc('${esc(d.id)}',true)">Abrir</button>`:""}
+      <button class="btn sm ${canView(d)?"alt":""}" onclick="openDoc('${esc(d.id)}',false)">Baixar</button>
+      ${adm?`<button class="btn sm alt" onclick="docForm('${esc(d.id)}')">Editar</button>${+d.versions?`<button class="btn sm alt" onclick="histDlg('${esc(d.id)}')">Histórico (${+d.versions})</button>`:""}<button class="btn sm danger" onclick="delDoc('${esc(d.id)}')">Excluir</button>`:""}
+    </div></article>`;
+}
+function list(){
+  const D=S.data,rows=filtered(),adm=isAdmin(),box=$("#list");
+  if(!D.documents.length){
+    box.innerHTML=`<div class="card empty"><div class="big">📚</div><h3>${adm?"Nenhum documento publicado ainda":"Os documentos estão sendo publicados"}</h3><p>${adm?"Clique em “+ Novo documento” para anexar o primeiro arquivo padrão da Qualidade.":"Em breve os documentos padrão da Qualidade estarão disponíveis aqui."}</p></div>`;return;
+  }
+  if(!rows.length){box.innerHTML=`<div class="card empty"><div class="big">🔎</div><h3>Nenhum documento encontrado</h3><p>Ajuste a busca ou os filtros.</p></div>`;return}
+  box.innerHTML=D.categories.map(c=>{
+    const r=rows.filter(d=>d.category_id===c.id);if(!r.length)return"";
+    return `<div class="cat-h"><span class="ic">${esc(c.icon)}</span><h2>${esc(c.name)}</h2><span class="n">${r.length} documento${r.length===1?"":"s"}</span></div><div class="docs">${r.map(docCard).join("")}</div>`;
+  }).join("");
+}
+
+/* ---------- Abrir / baixar ---------- */
+async function openDoc(id,view,vid){
+  const w=view?window.open("about:blank","_blank"):null;
+  try{
+    const d=await fnPost({action:"url",doc_id:id,version_id:vid||null,view:!!view});
+    if(view){if(w)w.location.href=d.url;else location.href=d.url}
+    else{const a=document.createElement("a");a.href=d.url;a.download=d.name;document.body.appendChild(a);a.click();a.remove()}
+  }catch(e){if(w)w.close();toast(e.message,1)}
+}
+
+/* ---------- Gestão: documento ---------- */
+function docForm(id){
+  const D=S.data,d=id?D.documents.find(x=>x.id===id):null;
+  if(!D.categories.length)return toast("Crie uma categoria antes de cadastrar documentos.",1);
+  let file=null;
+  const m=dialog(`<h3>${d?"Editar documento":"Novo documento"}</h3>
+  <form id="df" novalidate>
+    <div class="f"><label>Categoria *</label><select id="d_cat" style="width:100%">${D.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.icon)} ${esc(c.name)}</option>`).join("")}</select></div>
+    <div class="two"><div class="f"><label>Código</label><input id="d_code" type="text" style="width:100%" placeholder="Ex.: POP-001" maxlength="40"></div>
+      <div class="f"><label>Versão *</label><input id="d_ver" type="text" style="width:100%" placeholder="Ex.: 1.0" maxlength="20"></div></div>
+    <div class="f"><label>Título *</label><input id="d_tit" type="text" style="width:100%" maxlength="160"></div>
+    <div class="f"><label>Descrição</label><textarea id="d_desc" maxlength="600" placeholder="Para que serve e quando usar"></textarea></div>
+    <div class="two"><div class="f"><label>Válido até</label><input id="d_val" type="date" style="width:100%"></div>
+      <div class="f"><label>Visibilidade</label><select id="d_act" style="width:100%"><option value="1">Visível para os gestores</option><option value="0">Oculto (só a gestão vê)</option></select></div></div>
+    <div class="f"><label>${d?"Substituir arquivo (opcional)":"Arquivo *"}</label>
+      <label class="drop" id="drop"><input type="file" id="d_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg,.txt,.csv">
+        <div style="font-size:26px">📎</div><div><b id="dn">${d?esc(d.file_name):"Escolher arquivo ou arrastar até aqui"}</b><span id="ds">${d?fsize(d.size_bytes)+" · arquivo atual":"PDF, Word, Excel, PowerPoint, imagem, TXT ou CSV · até 25 MB"}</span></div></label>
+      <div class="prog" id="pg"><i></i></div></div>
+    <div class="f" id="d_nw" style="display:none"><label>Motivo da revisão</label><input id="d_note" type="text" style="width:100%" maxlength="200" placeholder="O que mudou nesta versão (fica no histórico)">
+      <div class="muted" style="font-size:12.5px;margin-top:6px">A versão anterior será guardada no histórico. Lembre de atualizar o número da versão.</div></div>
+    <div id="de"></div>
+    <div class="act"><button type="button" class="btn alt" id="dx">Cancelar</button><button class="btn" id="ds2">${d?"Salvar alterações":"Publicar documento"}</button></div>
+  </form>`,true);
+  const g=s=>m.querySelector(s);
+  g("#d_cat").value=d?d.category_id:(S.cat||D.categories[0].id);
+  g("#d_code").value=d?.code||"";g("#d_ver").value=d?.version||"1.0";g("#d_tit").value=d?.title||"";g("#d_desc").value=d?.description||"";
+  g("#d_val").value=d?.valid_until?String(d.valid_until).slice(0,10):"";g("#d_act").value=d&&!d.active?"0":"1";
+  const pick=f=>{
+    if(!f)return;file=f;g("#dn").textContent=f.name;g("#ds").textContent=fsize(f.size)+" · novo arquivo";
+    if(d)g("#d_nw").style.display="block";
+    if(!g("#d_tit").value.trim())g("#d_tit").value=f.name.replace(/\.[^.]+$/,"").replace(/[_]+/g," ");
+  };
+  g("#d_file").onchange=e=>pick(e.target.files[0]);
+  const dz=g("#drop");
+  ["dragover","dragenter"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add("over")}));
+  ["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove("over")}));
+  dz.addEventListener("drop",e=>pick(e.dataTransfer.files[0]));
+  g("#dx").onclick=()=>m.remove();
+  g("#df").addEventListener("submit",async e=>{
+    e.preventDefault();const err=g("#de"),b=g("#ds2");err.innerHTML="";
+    if(!g("#d_tit").value.trim()){err.innerHTML=`<div class="err">Informe o título do documento.</div>`;return}
+    if(!d&&!file){err.innerHTML=`<div class="err">Anexe o arquivo do documento.</div>`;return}
+    b.disabled=true;g("#dx").disabled=true;let up=null;
+    try{
+      if(file){g("#pg").style.display="block";b.textContent="Enviando arquivo…";up=await uploadFile(file,p=>{g("#pg i").style.width=Math.round(p*100)+"%"})}
+      b.textContent="Salvando…";
+      try{
+        await Q("qual_admin_save_document",{p_id:d?d.id:null,p_category:g("#d_cat").value,p_code:g("#d_code").value,p_title:g("#d_tit").value,p_description:g("#d_desc").value,p_version:g("#d_ver").value,p_valid_until:g("#d_val").value||null,p_active:g("#d_act").value==="1",p_file_path:up?up.path:null,p_file_name:up?up.name:null,p_mime:up?up.mime:null,p_size:up?up.size:null,p_note:g("#d_note").value});
+      }catch(er){if(up)fnPost({action:"remove",paths:[up.path]}).catch(()=>{});throw er}
+      m.remove();toast(d?"Documento atualizado ✓":"Documento publicado ✓");await reload();
+    }catch(er){err.innerHTML=`<div class="err">${esc(er.message)}</div>`;b.disabled=false;g("#dx").disabled=false;b.textContent=d?"Salvar alterações":"Publicar documento";g("#pg").style.display="none"}
+  });
+}
+function delDoc(id){
+  const d=S.data.documents.find(x=>x.id===id);if(!d)return;
+  const m=dialog(`<h3>Excluir documento?</h3><p><b>${esc(d.title)}</b></p><p class="muted" style="font-size:14px">O arquivo e todo o histórico de versões serão apagados e não poderão ser recuperados. Para só tirar da vista dos gestores, use <b>Editar → Oculto</b>.</p><div class="act"><button class="btn alt" id="x">Cancelar</button><button class="btn danger" id="ok">Excluir definitivamente</button></div>`);
+  m.querySelector("#x").onclick=()=>m.remove();
+  m.querySelector("#ok").onclick=async()=>{
+    try{const paths=await Q("qual_admin_delete_document",{p_id:id});fnPost({action:"remove",paths}).catch(()=>{});m.remove();toast("Documento excluído");await reload()}
+    catch(e){toast(e.message,1)}
+  };
+}
+async function histDlg(id){
+  const d=S.data.documents.find(x=>x.id===id);
+  try{
+    const v=await Q("qual_doc_versions",{p_doc:id});
+    const m=dialog(`<h3>Histórico · ${esc(d.title)}</h3>
+      <div class="vrow"><div><b>Versão ${esc(d.version)}</b> <span class="tag ok">Atual</span><div class="n">${esc(d.file_name)} · ${fsize(d.size_bytes)} · ${fd(d.updated_at)}</div></div><button class="btn sm alt" data-v="">Baixar</button></div>
+      ${v.map(x=>`<div class="vrow"><div><b>Versão ${esc(x.version||"—")}</b><div class="n">${esc(x.file_name)} · ${fsize(x.size_bytes)} · substituída em ${fd(x.archived_at)}${x.note?`<br>${esc(x.note)}`:""}</div></div><button class="btn sm alt" data-v="${esc(x.id)}">Baixar</button></div>`).join("")}
+      <div class="act"><button class="btn" id="x">Fechar</button></div>`);
+    m.querySelector("#x").onclick=()=>m.remove();
+    m.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>openDoc(id,false,b.dataset.v||null));
+  }catch(e){toast(e.message,1)}
+}
+
+/* ---------- Gestão: categorias ---------- */
+function catDlg(){
+  const m=dialog(`<h3>Categorias</h3><p class="muted" style="font-size:14px;margin-top:-6px">Ícone, nome e ordem de exibição. Só é possível excluir categorias sem documentos.</p><div id="cl"></div><div class="act"><button class="btn" id="x">Fechar</button></div>`,true);
+  m.querySelector("#x").onclick=()=>m.remove();
+  const draw=()=>{
+    const cats=S.data.categories,cnt=id=>S.data.documents.filter(d=>d.category_id===id).length;
+    m.querySelector("#cl").innerHTML=cats.map(c=>`<div class="crow" data-id="${esc(c.id)}"><input class="ci" type="text" value="${esc(c.icon)}" maxlength="4" title="Ícone"><input class="cn" type="text" value="${esc(c.name)}" maxlength="80"><input class="cs" type="number" value="${+c.sort}" title="Ordem"><button class="btn sm alt" data-a="s">Salvar</button><button class="btn sm danger" data-a="d" ${cnt(c.id)?`disabled title="Tem ${cnt(c.id)} documento(s)"`:""}>Excluir</button></div>`).join("")+
+    `<div class="crow" data-id="" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line)"><input class="ci" type="text" value="📁" maxlength="4"><input class="cn" type="text" placeholder="Nova categoria" maxlength="80"><input class="cs" type="number" placeholder="Ordem"><button class="btn sm" data-a="s" style="grid-column:span 2">Adicionar</button></div>`;
+    m.querySelectorAll(".crow").forEach(r=>r.querySelectorAll("button").forEach(b=>b.onclick=async()=>{
+      const id=r.dataset.id||null;
+      try{
+        if(b.dataset.a==="d"){await Q("qual_admin_delete_category",{p_id:id});toast("Categoria excluída")}
+        else{const s=r.querySelector(".cs").value;await Q("qual_admin_upsert_category",{p_id:id,p_name:r.querySelector(".cn").value,p_icon:r.querySelector(".ci").value,p_sort:s===""?null:+s});toast(id?"Categoria salva ✓":"Categoria criada ✓")}
+        S.data=await Q("qual_overview");draw();paint();
+      }catch(e){toast(e.message,1)}
+    }));
+  };
+  draw();
+}
+
+boot();
+</script>
+</body>
+</html>

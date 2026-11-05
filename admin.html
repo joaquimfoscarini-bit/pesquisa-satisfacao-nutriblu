@@ -188,7 +188,7 @@ const TABS=[["dash","Dashboard"],["comments","Comentários"],["raffle","Sorteio"
 function shell(){
   $("#root").innerHTML=`${topHeader(`<div class="unit-pill">Gestão da pesquisa de satisfação</div>`)}
     <main>
-      <div class="navrow"><nav id="nav"></nav><button class="out" onclick="logout()">Sair</button></div>
+      <div class="navrow"><nav id="nav"></nav><a class="out" href="intranet.html" style="text-decoration:none;display:inline-block">📚 Intranet da Qualidade</a><button class="out" onclick="logout()">Sair</button></div>
       <div id="flt"></div><div id="body"></div>
     </main>`;
   renderNav();

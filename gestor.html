@@ -196,7 +196,7 @@ function shell(){
   const units=S.me.units;
   $("#root").innerHTML=`${topHeader(`<div style="text-align:right"><div class="unit-pill">Painel do gestor</div><div style="font-weight:700;font-size:15px">${esc(S.me.display_name)}</div></div>`)}
     <main>
-      <div class="navrow"><nav id="nav"></nav><button class="out" onclick="passDlg()">Alterar senha</button><button class="out" onclick="logout()">Sair</button></div>
+      <div class="navrow"><nav id="nav"></nav><a class="out" href="intranet.html" style="text-decoration:none;display:inline-block">📚 Intranet da Qualidade</a><button class="out" onclick="passDlg()">Alterar senha</button><button class="out" onclick="logout()">Sair</button></div>
       <div id="flt"></div><div id="body"></div>
     </main>`;
   renderNav();
