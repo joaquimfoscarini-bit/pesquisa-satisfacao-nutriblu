@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta name="color-scheme" content="dark">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel do cliente · Pesquisa de Satisfação | NutriBlu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;0,9..144,680;1,9..144,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<style>
+:root{
+  --green:#5aa585;--green-2:#4f9a7d;--green-3:#4a9373;--orange:#eea254;--orange-2:#f3b06a;--butter:#F6C15C;--cream:#0f1713;--ink:#f1f3ef;--muted:#b0bcb4;--line:rgba(255,255,255,.14);--card:#17221c;--ok:#4fb383;--ok2:#8cc063;--warn:#eea254;--bad:#e66767;--wash-g:#1d2a23;--wash-o:#3a2a14;--wash-r:#3a1a18;--wash-r-bd:#6b2c28;--wash-r-ink:#f6b9b9;--wash-y:#3a2a14;--wash-y-ink:#f3cf9c;--track:#26352c;--seg:#1d2a23;--btn-a:#3f8a6c;--btn-b:#2f6c53;--shadow:rgba(0,0,0,.55);color-scheme:dark;
+  --serif:"Fraunces",Georgia,serif;
+  --radius:20px;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:"Inter",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.45}
+h1,h2,h3{font-family:var(--serif);color:var(--green);margin:0 0 8px;text-wrap:balance}
+h1{font-weight:680;font-size:27px;line-height:1.1;letter-spacing:-.3px}
+h2{font-weight:680;font-size:19px}
+.top{background:linear-gradient(180deg,#20553F 0%,#1F4E3D 62%,#193F30 100%);color:#fff;padding:calc(18px + env(safe-area-inset-top)) clamp(16px,2.5vw,40px) 20px;position:relative}
+.top .in{max-width:1680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.logo-wrap{display:flex;align-items:center;gap:12px}
+.logo-img{height:40px;width:auto;display:block}
+.logo-fallback{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.3px;font-size:18px;color:#fff}
+.logo-fallback i{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--orange)}
+.unit-pill{font-size:11.5px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.72);margin-top:2px}
+.out{background:transparent;border:1.5px solid rgba(255,255,255,.5);color:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer}
+.out:hover{background:rgba(255,255,255,.12)}
+.navrow .out{color:var(--green);border-color:var(--green);padding:10px 16px;white-space:nowrap}
+.navrow .out:hover{background:var(--wash-g)}
+main{max-width:1680px;margin:24px auto 0;padding:0 clamp(16px,2.5vw,40px) 40px;position:relative}
+.navrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+nav{display:flex;background:var(--seg);border-radius:14px;padding:4px;gap:4px;flex-wrap:wrap;flex:1}
+nav button{background:transparent;border:0;padding:11px 16px;border-radius:11px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap}
+nav button.on{background:var(--card);color:var(--green);box-shadow:0 2px 8px -3px rgba(0,0,0,.2)}
+.badge{background:var(--orange);color:#fff;border-radius:10px;padding:1px 7px;font-size:12px;margin-left:6px}
+.filters{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:18px;box-shadow:0 20px 40px -30px var(--shadow)}
+.filters label,.f label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+select,input[type=text],input[type=password],input[type=date],input[type=number],textarea{font:inherit;padding:12px 13px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);max-width:100%}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--green-2);box-shadow:0 0 0 3px rgba(43,106,83,.15)}
+textarea{width:100%;min-height:74px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip-b{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
+.chip-b.on{background:var(--btn-b);border-color:var(--green);color:#fff}
+.btn{background:linear-gradient(155deg,var(--btn-a),var(--btn-b));color:#fff;border:0;border-radius:14px;padding:12px 18px;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 10px 20px -10px rgba(31,78,61,.55);transition:transform .05s,opacity .2s}
+.btn:active{transform:scale(.99)}
+.btn:hover{filter:brightness(1.04)}
+.btn.alt{background:transparent;color:var(--green);border:1.5px solid var(--green);box-shadow:none}
+.btn.or{background:linear-gradient(155deg,var(--orange-2),var(--orange));box-shadow:0 10px 20px -10px rgba(224,138,46,.55)}
+.btn.sm{padding:9px 14px;font-size:13.5px;border-radius:12px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(3,1fr);margin-bottom:18px}
+.g2{grid-template-columns:2fr 1fr}
+.g2eq{grid-template-columns:1fr 1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:0 20px 40px -28px var(--shadow)}
+.card h3{margin:0 0 12px;font-size:16px;color:var(--green)}
+.kpi .l{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:var(--serif);font-weight:680;font-size:32px;color:var(--green);line-height:1.15;margin:6px 0}
+.kpi .s{font-size:13px;color:var(--muted)}
+.kpi.ok .v{color:var(--ok)}.kpi.mid .v{color:var(--warn)}.kpi.bad .v{color:var(--bad)}
+.kpi .s b{color:var(--orange)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+.bar{height:8px;border-radius:6px;background:var(--track);overflow:hidden;min-width:80px}
+.bar i{display:block;height:100%;border-radius:6px}
+.scroll{overflow:auto}
+.rchip{display:inline-flex;gap:6px;align-items:center;font-weight:700;font-size:12.5px;padding:4px 10px;border-radius:999px;color:#fff;background:var(--c);white-space:nowrap}
+.cm{border-top:1px solid var(--line);padding:16px 0}.cm:first-child{border-top:0}
+.cm .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;background:none;color:inherit;padding:0}
+.cm .who b{font-size:15px}.cm .who span{color:var(--muted);font-size:13px;margin-left:6px}
+.bubble{background:var(--cream);border-radius:12px;padding:12px 14px;word-wrap:break-word;white-space:pre-wrap}
+.rep{margin:8px 0 0 18px;border-left:4px solid var(--green-2);background:var(--wash-g);border-radius:0 12px 12px 0;padding:10px 13px;white-space:pre-wrap}
+.rep small{display:block;font-weight:700;color:var(--green);margin-bottom:3px}
+.rf{display:flex;gap:8px;margin:10px 0 0 18px;align-items:flex-start}
+.rf textarea{min-height:56px}
+.empty{text-align:center;color:var(--muted);padding:34px 10px}
+.f{margin-bottom:12px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.win{display:flex;align-items:center;gap:14px;padding:16px;border-radius:16px;background:var(--wash-o);border:2px solid var(--orange);margin-bottom:10px}
+.win.sup{background:#F4F1E8;border-color:var(--line)}
+.win .m{font-size:34px}
+.win b{font-size:19px;color:var(--green)}
+.win small{display:block;color:var(--muted)}
+.shuffle{font-family:var(--serif);font-size:30px;font-weight:680;color:var(--green);text-align:center;padding:26px;background:var(--wash-g);border-radius:16px;min-height:96px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--btn-b);color:#fff;padding:12px 18px;border-radius:12px;z-index:100;box-shadow:0 10px 30px -10px rgba(0,0,0,.4);font-weight:600}
+.toast.err{background:var(--bad)}
+.mask{position:fixed;inset:0;background:rgba(15,30,24,.55);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.dlg{background:var(--card);border-radius:var(--radius);max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:24px}
+.dlg h3{margin:0 0 12px;color:var(--green);font-size:19px}
+.dlg .act{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.spin{width:34px;height:34px;border:4px solid var(--track);border-top-color:var(--green);border-radius:50%;animation:s 1s linear infinite;margin:50px auto}
+@keyframes s{to{transform:rotate(360deg)}}
+.wrap{max-width:400px;margin:-16px auto 0;padding:0 16px 40px;position:relative}
+.err{background:var(--wash-r);border:1px solid var(--wash-r-bd);color:var(--wash-r-ink);padding:12px 14px;border-radius:12px;margin-top:14px;font-size:14px}
+.muted{color:var(--muted)}
+.unit{border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;background:var(--card)}
+.statm{background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.statm .l{font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--muted)}
+.statm .v{font-family:var(--serif);font-weight:680;font-size:20px;color:var(--green);line-height:1.2;margin:2px 0}
+.statm .s{font-size:11px;color:var(--muted)}
+.statrow{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+@media(max-width:900px){.statrow{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.statrow{grid-template-columns:1fr 1fr}}
+.unit .h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.tag{font-size:12px;background:var(--wash-g);color:var(--green);padding:3px 9px;border-radius:999px;font-weight:700}
+.tag.off{background:#F3E1DC;color:var(--bad)}
+@media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}.g2,.g2eq{grid-template-columns:1fr}}
+@media(max-width:560px){.kpis{grid-template-columns:1fr}main{padding:0 14px 30px}.kpi .v{font-size:28px}}
+.dl{font-weight:700}.dl.up{color:var(--ok)}.dl.dn{color:var(--bad)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.btn.pdf{background:linear-gradient(155deg,var(--orange-2),var(--orange));color:#1b1206}
+.wdrow{display:grid;grid-template-columns:78px 1fr 92px;gap:10px;align-items:center;font-size:13.5px;margin-bottom:9px}
+.cbox{display:flex;gap:9px;align-items:center;font-size:14px;margin:6px 0}
+.cbox input{width:18px;height:18px;accent-color:var(--green)}
+.hint{font-size:13px;color:var(--muted)}
+#print-root{display:none}
+/* ---------- Relatório em PDF (impressão, tema claro) ---------- */
+@media print{
+  @page{size:A4;margin:11mm}
+  body.printing>*:not(#print-root){display:none!important}
+  html:has(body.printing),body.printing{background:#fff!important}
+  body.printing #print-root{display:block}
+  #print-root,#print-root *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+#print-root{color:#1b2a22;font-family:"Inter",system-ui,Arial,sans-serif;font-size:11.5px;line-height:1.4;background:#fff}
+.pr-head{background:#1F4E3D;color:#fff;border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.pr-logo{height:34px;width:auto;display:block}
+.pr-ht{text-align:right}
+.pr-kicker{font-size:9.5px;letter-spacing:1.3px;text-transform:uppercase;opacity:.8}
+.pr-title{font-family:"Fraunces",Georgia,serif;font-size:19px;font-weight:680;line-height:1.15}
+.pr-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 2px 10px;font-size:11.5px}
+.pr-meta b{color:#1F4E3D}
+.pr-h{font-family:"Fraunces",Georgia,serif;color:#1F4E3D;font-size:14px;font-weight:680;margin:16px 0 6px;break-after:avoid}
+.pr-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pr-k{border:1px solid #d6ddd7;border-radius:9px;padding:8px 10px;background:#f6f8f5;break-inside:avoid}
+.pr-k .l{font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#5b6b61}
+.pr-k .v{font-family:"Fraunces",Georgia,serif;font-size:21px;font-weight:680;color:#1F4E3D;line-height:1.15}
+.pr-k .s{font-size:10px;color:#5b6b61}
+.pr-img{width:100%;height:auto;display:block;break-inside:avoid}
+.pr-2{display:grid;grid-template-columns:1.1fr 1fr;gap:12px;align-items:start}
+table.pr-t{width:100%;border-collapse:collapse;font-size:11px;break-inside:auto}
+table.pr-t th{background:#eaf0ea;color:#1F4E3D;text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.3px;padding:5px 7px;border-bottom:1.5px solid #c8d3ca}
+table.pr-t td{padding:5px 7px;border-bottom:1px solid #e3e8e4}
+table.pr-t tr{break-inside:avoid}
+.pr-bar{height:7px;background:#e5ebe6;border-radius:4px;overflow:hidden;min-width:60px}
+.pr-bar i{display:block;height:100%}
+.pr-cm{break-inside:avoid;border-top:1px solid #dde4de;padding:7px 0}
+.pr-cm .t{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:#5b6b61;margin-bottom:3px}
+.pr-cm .b{white-space:pre-wrap;word-wrap:break-word}
+.pr-cm .r{margin:4px 0 0 12px;padding-left:8px;border-left:3px solid #5aa585;color:#33443a;font-size:10.5px}
+.pr-chip{display:inline-block;color:#fff;border-radius:99px;padding:1px 8px;font-weight:700;font-size:10px}
+.pr-foot{margin-top:18px;padding-top:8px;border-top:1px solid #d6ddd7;font-size:9.5px;color:#5b6b61}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="print-root"></div>
+<script>
+const SB_URL="https://yfbmpvmavjwuedphyrsa.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmYm1wdm1hdmp3dWVkcGh5cnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2MTQ0MjYsImV4cCI6MjEwNjE5MDQyNn0.2clDzH9PT4IwkUYDVc6VHH3h8Gq2mWKKw1e3d-zeaeA";
+const RATINGS=[{v:4,t:"Muito satisfeito",e:"😄",c:"#1F7A4D"},{v:3,t:"Satisfeito",e:"🙂",c:"#6BAF3F"},{v:2,t:"Insatisfeito",e:"🙁",c:"#E08A2E"},{v:1,t:"Muito insatisfeito",e:"😠",c:"#C5432F"}];
+const R=v=>RATINGS.find(r=>r.v===v);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const iso=o=>{const d=new Date();d.setDate(d.getDate()+o);return d.toLocaleDateString("sv-SE")};
+const monthStart=()=>{const d=new Date();d.setDate(1);return d.toLocaleDateString("sv-SE")};
+const fd=d=>{const[y,m,x]=String(d).slice(0,10).split("-");return`${x}/${m}/${y}`};
+const fdt=i=>new Date(i).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"});
+const pct=v=>(+v).toFixed(1).replace(".",",")+"%";
+const num2=v=>(+v).toFixed(2).replace(".",",");
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const store={get(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set(k,v){try{sessionStorage.setItem(k,v)}catch(e){}},del(k){try{sessionStorage.removeItem(k)}catch(e){}}};
+const WD=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const csatCol=c=>c>=85?"var(--ok)":c>=70?"var(--warn)":"var(--bad)";
+const csatColHex=c=>c>=85?"#1F7A4D":c>=70?"#E08A2E":"#C5432F";
+const S={token:store.get("ns_cliente"),me:null,unit:"",from:iso(-29),to:iso(0),tab:"dash",charts:{},survey:null,sf:{turno:"",q:"",from:"",to:""},cf:{rating:"",q:""},dash:null,coms:null,sd:null};
+
+async function api(fn,args={}){
+  const r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:"POST",headers:{"Content-Type":"application/json",apikey:SB_KEY,Authorization:"Bearer "+SB_KEY},body:JSON.stringify(args)});
+  const t=await r.text();let d=null;try{d=t?JSON.parse(t):null}catch(e){}
+  if(!r.ok)throw new Error((d&&d.message)||"Falha na comunicação. Tente novamente.");
+  return d;
+}
+async function C(fn,args={}){
+  try{return await api(fn,{p_token:S.token,...args})}
+  catch(e){if(/Sessão expirada/.test(e.message)){logout(true)}throw e}
+}
+function toast(m,err){const t=document.createElement("div");t.className="toast"+(err?" err":"");t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3200)}
+function dialog(html){const m=document.createElement("div");m.className="mask";m.innerHTML=`<div class="dlg">${html}</div>`;m.addEventListener("click",e=>{if(e.target===m)m.remove()});document.body.appendChild(m);return m}
+const unitArg=()=>S.unit||null;
+
+/* ---------- Login / estrutura ---------- */
+function topHeader(sub){
+  return `<header class="top"><div class="in">
+    <div class="logo-wrap">
+      <img src="logo-white.png?v=3" alt="NutriBlu Gastronomia Empresarial" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="logo-fallback" style="display:none"><i></i>NutriBlu</div>
+    </div>
+    ${sub||""}
+  </div></header>`;
+}
+function loginView(msg){
+  $("#root").innerHTML=`${topHeader()}
+  <div class="wrap">
+    <div class="card">
+      <h1>Acesso do cliente</h1>
+      <div class="unit-pill" style="color:var(--muted);margin-bottom:14px">Pesquisa de satisfação</div>
+      <p class="muted">Entre com o usuário e a senha fornecidos pela NutriBlu para acompanhar a pesquisa de satisfação das suas unidades.</p>
+      <form id="lf" novalidate>
+        <label for="us">Usuário</label>
+        <input id="us" type="text" style="width:100%;margin-bottom:12px" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" autofocus>
+        <label for="pw">Senha</label>
+        <input id="pw" type="password" style="width:100%" autocomplete="current-password">
+        <div id="lm">${msg?`<div class="err">${esc(msg)}</div>`:""}</div>
+        <button class="btn" style="width:100%;margin-top:18px" id="lb">Entrar</button>
+      </form>
+    </div>
+  </div>`;
+  $("#lf").addEventListener("submit",async e=>{
+    e.preventDefault();const b=$("#lb");
+    if(!$("#us").value.trim()||!$("#pw").value){$("#lm").innerHTML=`<div class="err">Informe o usuário e a senha.</div>`;return}
+    b.disabled=true;
+    try{const o=await api("client_login",{p_username:$("#us").value,p_pass:$("#pw").value});
+      if(!o.ok)throw new Error(o.message);
+      S.token=o.token;store.set("ns_cliente",o.token);await boot();
+    }catch(er){$("#lm").innerHTML=`<div class="err">${esc(er.message)}</div>`;b.disabled=false}
+  });
+}
+function logout(expired){
+  S.token=null;S.me=null;S.unit="";S.survey=null;S.tab="dash";killCharts();store.del("ns_cliente");
+  loginView(expired===true?"Sessão expirada. Entre novamente.":"");
+}
+
+const TABS=[["dash","Painel analítico"],["comments","Comentários"],["custom","Pesquisas personalizadas"]];
+function shell(){
+  $("#root").innerHTML=`${topHeader(`<div style="text-align:right"><div class="unit-pill">Painel do cliente</div><div style="font-weight:700;font-size:15px">${esc(S.me.name)}</div></div>`)}
+    <main>
+      <div class="navrow"><nav id="nav"></nav><button class="out" onclick="passDlg()">Alterar senha</button><button class="out" onclick="logout()">Sair</button></div>
+      <div id="flt"></div><div id="body"></div>
+    </main>`;
+  renderNav();
+}
+function renderNav(){
+  $("#nav").innerHTML=TABS.map(([k,l])=>`<button class="${S.tab===k?"on":""}" onclick="go('${k}')">${l}</button>`).join("");
+}
+function go(t){S.tab=t;S.survey=null;renderNav();render()}
+function filtersBar(){
+  const show=["dash","comments"].includes(S.tab);
+  const f=$("#flt");if(!show){f.innerHTML="";return}
+  const units=S.me.units,multi=units.length>1;
+  f.innerHTML=`<div class="filters">
+    ${multi?`<div><label>Unidade</label><select id="fu"><option value="">Todo o grupo (${units.length} unidades)</option>${units.map(x=>`<option value="${x.id}" ${x.id===S.unit?"selected":""}>${esc(x.name)}</option>`).join("")}</select></div>`:""}
+    <div><label>De</label><input type="date" id="ff" value="${S.from}"></div>
+    <div><label>Até</label><input type="date" id="ft" value="${S.to}"></div>
+    <div class="chips">${[[6,"7 dias"],[14,"15 dias"],[29,"30 dias"],[89,"90 dias"]].map(([o,l])=>`<button class="chip-b ${S.from===iso(-o)&&S.to===iso(0)?"on":""}" onclick="quick(${o})">${l}</button>`).join("")}<button class="chip-b ${S.from===monthStart()&&S.to===iso(0)?"on":""}" onclick="quickMonth()">Mês atual</button></div></div>`;
+  if(multi)$("#fu").onchange=e=>{S.unit=e.target.value;render()};
+  $("#ff").onchange=e=>{setPeriod(e.target.value,S.to)};
+  $("#ft").onchange=e=>{setPeriod(S.from,e.target.value)};
+}
+function setPeriod(a,b){
+  if(!a||!b)return;
+  if(a>b){[a,b]=[b,a];toast("Período ajustado: a data inicial era posterior à final.")}
+  S.from=a;S.to=b;render();
+}
+function quick(o){S.from=iso(-o);S.to=iso(0);render()}
+function quickMonth(){S.from=monthStart();S.to=iso(0);render()}
+
+async function boot(){
+  try{
+    S.me=await C("client_profile");
+    if(!S.me.units.length)throw new Error("Seu acesso ainda não está vinculado a nenhuma unidade. Fale com a NutriBlu.");
+    if(S.me.units.length===1)S.unit=S.me.units[0].id;
+    shell();$("#body").innerHTML=`<div class="spin"></div>`;render();
+  }catch(e){if(S.token){shell0Error(e.message)}}
+}
+function shell0Error(msg){
+  $("#root").innerHTML=`${topHeader()}<div class="wrap"><div class="card"><h1>Não foi possível abrir o painel</h1><div class="err">${esc(msg)}</div><button class="btn alt" style="width:100%;margin-top:16px" onclick="logout()">Voltar ao login</button></div></div>`;
+}
+function render(){
+  renderNav();filtersBar();
+  const fn={dash:tabDash,comments:tabComments,custom:tabCustom}[S.tab];
+  $("#body").innerHTML=`<div class="spin"></div>`;
+  fn().catch(e=>{if(S.token)$("#body").innerHTML=`<div class="err">${esc(e.message)}</div>`});
+}
+function passDlg(){
+  const m=dialog(`<h3>Alterar senha</h3><p class="muted" style="font-size:14px">A nova senha vale a partir do próximo acesso. Use pelo menos 8 caracteres.</p><div class="f"><label>Nova senha</label><input type="password" id="np" style="width:100%" autocomplete="new-password"></div><div class="f"><label>Repita a nova senha</label><input type="password" id="np2" style="width:100%" autocomplete="new-password"></div><div class="act"><button class="btn alt" id="x">Cancelar</button><button class="btn" id="ok">Salvar</button></div>`);
+  m.querySelector("#x").onclick=()=>m.remove();
+  m.querySelector("#ok").onclick=async()=>{
+    const a=m.querySelector("#np").value,b=m.querySelector("#np2").value;
+    if(a.length<8)return toast("A senha deve ter pelo menos 8 caracteres.",1);
+    if(a!==b)return toast("As senhas não conferem.",1);
+    try{await C("client_change_pass",{p_new:a});toast("Senha alterada ✓");m.remove()}catch(e){toast(e.message,1)}
+  };
+}
+
+/* ---------- Painel analítico ---------- */
+function killCharts(){Object.values(S.charts).forEach(c=>c.destroy());S.charts={}}
+function delta(cur,prev,hasPrev,kind){
+  if(!hasPrev)return `<span class="muted">sem respostas no período anterior</span>`;
+  const df=(+cur)-(+prev);
+  if(Math.abs(df)<(kind==="n"?.5:.05))return `<span class="muted">igual ao período anterior</span>`;
+  const up=df>0,v=Math.abs(df);
+  const txt=kind==="pp"?v.toFixed(1).replace(".",",")+" p.p.":kind==="n"?String(Math.round(v)):v.toFixed(2).replace(".",",");
+  return `<span class="dl ${up?"up":"dn"}">${up?"▲":"▼"} ${txt}</span> <span class="muted">vs. período anterior</span>`;
+}
+async function tabDash(){
+  killCharts();
+  const d=await C("client_panel",{p_from:S.from,p_to:S.to,p_unit:unitArg()});
+  S.dash=d;
+  const k=d.kpis,p=d.participants,pv=d.prev,hasPrev=pv.total>0;
+  const head=`<div class="toolbar" style="margin-bottom:12px"><div><h2 style="margin:0">${esc(d.scope_name)}</h2><div class="hint">${d.unit_count>1?`${d.unit_count} unidades · `:""}${fd(d.period.from)} a ${fd(d.period.to)} (${d.period.days} dia${d.period.days===1?"":"s"})</div></div><button class="btn pdf sm" onclick="pdfDialog('dash')">⬇ Exportar PDF</button></div>`;
+  if(!k.total){$("#body").innerHTML=`${head}<div class="card empty"><div style="font-size:44px">📊</div><h3>Não há respostas neste período</h3><p>Ajuste o período ou a unidade para ver os indicadores.</p></div>`;return}
+  const cls=+k.csat>=85?"ok":+k.csat>=70?"mid":"bad";
+  const withResp=d.by_unit.filter(u=>u.count>0).length;
+  const sixth=d.unit_count>1
+    ?`<div class="card kpi"><div class="l">Unidades com resposta</div><div class="v">${withResp}<span style="font-size:16px;color:var(--muted)"> de ${d.unit_count}</span></div><div class="s">no período selecionado</div></div>`
+    :`<div class="card kpi"><div class="l">Dias com resposta</div><div class="v">${d.daily.length}<span style="font-size:16px;color:var(--muted)"> de ${d.period.days}</span></div><div class="s">no período selecionado</div></div>`;
+  $("#body").innerHTML=`${head}
+  <div class="grid kpis">
+    <div class="card kpi"><div class="l">Respostas no período</div><div class="v">${k.total}</div><div class="s">${k.respondents} participantes diferentes${k.anonymous?` · ${k.anonymous} sem cadastro`:""}<br>${delta(k.total,pv.total,hasPrev,"n")}</div></div>
+    <div class="card kpi ${cls}"><div class="l">Satisfação</div><div class="v">${pct(k.csat)}</div><div class="s">Satisfeito + Muito satisfeito<br>${delta(k.csat,pv.csat,hasPrev,"pp")}</div></div>
+    <div class="card kpi"><div class="l">Nota média</div><div class="v">${num2(k.avg_score)}<span style="font-size:16px;color:var(--muted)"> / 4</span></div><div class="s">1 = muito insatisfeito · 4 = muito satisfeito<br>${delta(k.avg_score,pv.avg_score,hasPrev,"d")}</div></div>
+    <div class="card kpi"><div class="l">Comentários</div><div class="v">${k.comments}</div><div class="s">${k.total?Math.round(100*k.comments/k.total):0}% das respostas trazem comentário</div></div>
+    <div class="card kpi"><div class="l">Participantes cadastrados</div><div class="v">${p.total}</div><div class="s">${p.active} com período ativo</div></div>
+    ${sixth}
+  </div>
+  <div class="grid g2" style="margin-bottom:14px">
+    <div class="card"><h3>Evolução diária: satisfação e volume de respostas</h3><div style="height:300px"><canvas id="c1"></canvas></div></div>
+    <div class="card"><h3>Distribuição das avaliações</h3><div style="height:220px"><canvas id="c2"></canvas></div><div id="lg" style="margin-top:10px"></div></div>
+  </div>
+  <div class="grid g2eq" style="margin-bottom:14px">
+    <div class="card"><h3>Satisfação por dia da semana</h3>${weekdayHtml(d.weekday)}</div>
+    <div class="card"><h3>Resumo do período</h3>${summaryHtml(d)}</div>
+  </div>
+  ${d.by_unit.length>1?`<div class="card"><h3>Comparativo entre as unidades do grupo</h3><div class="scroll"><table><thead><tr><th>Unidade</th><th>Respostas</th><th>Participantes</th><th>Satisfação</th><th></th><th>Nota média</th><th>Comentários</th><th></th></tr></thead><tbody>
+  ${[...d.by_unit].sort((a,b)=>(b.count>0)-(a.count>0)||b.csat-a.csat).map(u=>{const c=+u.csat;return`<tr><td><b>${esc(u.name)}</b></td><td>${u.count}</td><td>${u.respondents}</td><td><b style="color:${u.count?csatCol(c):"var(--muted)"}">${u.count?pct(u.csat):"—"}</b></td><td style="width:20%"><div class="bar"><i style="width:${u.count?c:0}%;background:${csatCol(c)}"></i></div></td><td>${u.count?num2(u.avg):"—"}</td><td>${u.comments}</td><td><button class="btn alt sm" onclick="openUnit('${u.id}')">Abrir</button></td></tr>`}).join("")}</tbody></table></div></div>`:""}`;
+  const days=d.daily.map(x=>fd(x.date).slice(0,5));
+  Chart.defaults.color=css("--muted");
+  S.charts.a=new Chart($("#c1"),{data:{labels:days,datasets:[
+    {type:"bar",label:"Respostas",data:d.daily.map(x=>x.count),backgroundColor:"rgba(224,138,46,.35)",yAxisID:"y1",borderRadius:6},
+    {type:"line",label:"Satisfação (%)",data:d.daily.map(x=>+x.csat),borderColor:"#4f9a7d",backgroundColor:"#4f9a7d",tension:.3,pointRadius:3,yAxisID:"y"}]},
+    options:{maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales:{y:{min:0,max:100,ticks:{callback:v=>v+"%"},grid:{color:css("--line")}},y1:{position:"right",beginAtZero:true,grid:{display:false},ticks:{precision:0}},x:{grid:{display:false}}},plugins:{legend:{position:"bottom"}}}});
+  const dist=RATINGS.map(r=>d.distribution.find(x=>x.rating===r.v)?.count||0);
+  S.charts.b=new Chart($("#c2"),{type:"doughnut",data:{labels:RATINGS.map(r=>r.t),datasets:[{data:dist,backgroundColor:RATINGS.map(r=>r.c),borderWidth:2,borderColor:css("--card")}]},options:{maintainAspectRatio:false,cutout:"62%",plugins:{legend:{display:false}}}});
+  $("#lg").innerHTML=RATINGS.map((r,i)=>`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${r.c};margin-right:8px"></span>${r.e} ${r.t}</span><b>${dist[i]} <span class="muted" style="font-weight:500">(${k.total?Math.round(100*dist[i]/k.total):0}%)</span></b></div>`).join("");
+}
+function openUnit(id){S.unit=id;render()}
+function weekdayHtml(wd){
+  const m={};wd.forEach(x=>m[x.dow]=x);
+  return [1,2,3,4,5,6,0].map(i=>{const x=m[i];return x?`<div class="wdrow"><span>${WD[i]}</span><div class="bar"><i style="width:${x.csat}%;background:${csatCol(+x.csat)}"></i></div><span style="text-align:right"><b>${pct(x.csat)}</b> <span class="muted">· ${x.count}</span></span></div>`:`<div class="wdrow"><span class="muted">${WD[i]}</span><div class="bar"></div><span class="muted" style="text-align:right">—</span></div>`}).join("")+`<div class="hint" style="margin-top:6px">Percentual de satisfeitos · número de respostas</div>`;
+}
+function bestWorst(d){
+  const ds=d.daily.filter(x=>x.count>0);
+  if(!ds.length)return null;
+  const best=[...ds].sort((a,b)=>b.csat-a.csat||b.count-a.count)[0],worst=[...ds].sort((a,b)=>a.csat-b.csat||b.count-a.count)[0];
+  return {best,worst};
+}
+function summaryHtml(d){
+  const bw=bestWorst(d),k=d.kpis,dist=RATINGS.map(r=>d.distribution.find(x=>x.rating===r.v)?.count||0);
+  const neg=dist[2]+dist[3];
+  const rows=[
+    ["Média de respostas por dia",(k.total/d.period.days).toFixed(1).replace(".",",")],
+    ["Avaliações negativas (insatisfeito + muito insatisfeito)",`${neg} (${k.total?Math.round(100*neg/k.total):0}%)`],
+    bw?["Melhor dia",`${fd(bw.best.date)} · ${pct(bw.best.csat)} (${bw.best.count} resp.)`]:null,
+    bw?["Dia mais baixo",`${fd(bw.worst.date)} · ${pct(bw.worst.csat)} (${bw.worst.count} resp.)`]:null,
+    ["Período anterior comparado",`${fd(d.prev_period.from)} a ${fd(d.prev_period.to)}`]
+  ].filter(Boolean);
+  return `<table><tbody>${rows.map(([a,b])=>`<tr><td class="muted">${a}</td><td style="text-align:right"><b>${b}</b></td></tr>`).join("")}</tbody></table>`;
+}
+
+/* ---------- Comentários (somente leitura) ---------- */
+async function tabComments(){
+  const list=await C("client_comments",{p_from:S.from,p_to:S.to,p_rating:S.cf.rating?+S.cf.rating:null,p_unit:unitArg()});
+  S.coms=list;
+  $("#body").innerHTML=`<div class="card">
+    <div class="row" style="margin-bottom:8px">
+      <div class="f"><label>Avaliação</label><select id="cr"><option value="">Todas</option>${RATINGS.map(r=>`<option value="${r.v}">${r.e} ${r.t}</option>`).join("")}</select></div>
+      <div class="f" style="flex:1;min-width:200px"><label>Buscar</label><input type="text" id="cq" style="width:100%" placeholder="Palavra no comentário"></div>
+      <div class="muted f" id="cc"></div>
+      <div class="f"><button class="btn pdf sm" onclick="pdfDialog('comments')">⬇ Exportar PDF</button></div></div>
+    <div id="cl"></div></div>`;
+  $("#cr").value=S.cf.rating;$("#cq").value=S.cf.q;
+  $("#cr").onchange=e=>{S.cf.rating=e.target.value;render()};
+  $("#cq").oninput=e=>{S.cf.q=e.target.value;drawComments()};
+  drawComments();
+}
+function drawComments(){
+  const q=S.cf.q.trim().toLowerCase();
+  const rows=S.coms.filter(c=>!q||String(c.comment).toLowerCase().includes(q));
+  $("#cc").textContent=`${rows.length} comentário${rows.length===1?"":"s"}`;
+  $("#cl").innerHTML=rows.length?rows.map(c=>{const r=R(c.rating);return`<div class="cm">
+    <div class="top"><div class="who"><b>${esc(c.unit)}</b><span>${fd(c.date)}</span></div><span class="rchip" style="--c:${r.c}">${r.e} ${r.t}</span></div>
+    <div class="bubble">${esc(c.comment)}</div>
+    ${c.replies.map(x=>`<div class="rep"><small>Resposta da NutriBlu · ${fdt(x.created_at)}</small>${esc(x.message)}</div>`).join("")}</div>`}).join(""):`<div class="empty">Nenhum comentário para este filtro.</div>`;
+}
+
+/* ---------- Pesquisas personalizadas ---------- */
+function surveyStatus(s){const today=iso(0);return !s.active?"pausada":(today<s.opens_at?"agendada":(today>s.closes_at?"encerrada":"em andamento"))}
+const statusColor={pausada:"var(--bad)",agendada:"var(--warn)",encerrada:"var(--muted)","em andamento":"var(--ok)"};
+async function tabCustom(){
+  killCharts();
+  if(S.survey)return surveyDetail(S.survey);
+  const list=await C("client_surveys");
+  $("#body").innerHTML=`<div class="card" style="margin-bottom:14px"><h3>Pesquisas personalizadas</h3>
+    <p class="muted" style="font-size:13.5px">Pesquisas sob medida feitas para as suas unidades, fora do fluxo diário. Abra cada uma para ver o resultado, filtrar por período e exportar em PDF.</p></div>
+  ${list.length?list.map(s=>{const st=surveyStatus(s),col=statusColor[st];return `<div class="unit"><div class="h"><div><b style="font-size:17px">${esc(s.title)}</b> <span class="tag" style="background:${col}22;color:${col}">${st}</span></div>
+    <div class="muted" style="font-size:13px">${esc(s.unit_name||s.client_unit)} · ${fd(s.opens_at)} a ${fd(s.closes_at)}</div></div>
+    <div class="muted" style="font-size:13px;margin-bottom:10px">${s.total} resposta${s.total===1?"":"s"} · ${s.comments} sugestõe${s.comments===1?"":"s"}</div>
+    <button class="btn sm" onclick="openSurvey('${esc(s.slug)}')">📊 Ver resultado e comentários</button></div>`}).join(""):`<div class="empty">Nenhuma pesquisa personalizada para as suas unidades no momento.</div>`}`;
+}
+function openSurvey(slug){S.survey=slug;S.sf={turno:"",q:"",from:"",to:""};render()}
+function closeSurvey(){S.survey=null;render()}
+function barsHtml(obj){
+  const tot=Object.values(obj).reduce((a,n)=>a+n,0),max=Math.max(1,...Object.values(obj));
+  const keys=Object.keys(obj).sort((a,b)=>obj[b]-obj[a]);
+  if(!keys.length)return `<div class="muted">Sem dados.</div>`;
+  return keys.map(k=>{const n=obj[k];return `<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13.5px;margin-bottom:5px"><span>${esc(k)}</span><span class="muted">${n} · ${tot?Math.round(100*n/tot):0}%</span></div><div class="bar"><i style="width:${(100*n/max).toFixed(1)}%;background:var(--green-2)"></i></div></div>`}).join("");
+}
+function surveyPeriod(a,b){
+  if(a&&b&&a>b){[a,b]=[b,a];toast("Período ajustado: a data inicial era posterior à final.")}
+  S.sf.from=a;S.sf.to=b;render();
+}
+async function surveyDetail(slug){
+  const d=await C("client_survey_results",{p_slug:slug,p_from:S.sf.from||null,p_to:S.sf.to||null});
+  S.sd=d;
+  const sv=d.survey,st=surveyStatus(sv),col=statusColor[st],coms=d.comentarios||[];
+  const turnos=Object.keys(d.by_turno||{});
+  const draw=()=>{
+    const f=S.sf,q=f.q.trim().toLowerCase();
+    const rows=coms.filter(c=>(!f.turno||c.turno===f.turno)&&(!q||String(c.texto).toLowerCase().includes(q)));
+    $("#cl").innerHTML=rows.length?rows.map(c=>`<div class="cm"><div class="top"><div class="who"><b>${sv.ask_turno?esc(c.turno||"—"):"Comentário"}</b><span>${esc(c.frequencia||"")} · ${fd(c.data)}</span></div></div><div class="bubble">${esc(c.texto)}</div>${(c.tags||[]).length?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${c.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}</div>`).join(""):`<div class="empty">Nenhum comentário para este filtro.</div>`;
+    $("#cc").textContent=`${rows.length} comentário${rows.length===1?"":"s"}`;
+  };
+  const f=S.sf;
+  $("#body").innerHTML=`
+  <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px">
+    <div class="row" style="gap:10px;align-items:center"><button class="btn alt sm" onclick="closeSurvey()">← Todas as pesquisas</button><span class="tag" style="background:${col}22;color:${col};font-size:12.5px;padding:4px 10px">${st}</span></div>
+    <button class="btn pdf sm" onclick="pdfDialog('survey')">⬇ Exportar PDF</button></div>
+  <h2>${esc(sv.title)} · ${esc(sv.unit_name||sv.client_unit)}</h2>
+  <p class="muted" style="margin:0 0 14px">Pesquisa: ${fd(sv.opens_at)} a ${fd(sv.closes_at)}</p>
+  <div class="filters"><div><label>De</label><input type="date" id="sdf" value="${f.from}"></div><div><label>Até</label><input type="date" id="sdt" value="${f.to}"></div>
+    <div class="chips"><button class="chip-b ${!f.from&&!f.to?"on":""}" onclick="surveyPeriod('','')">Todo o período</button><button class="chip-b" onclick="surveyPeriod(iso(-6),iso(0))">Últimos 7 dias</button><button class="chip-b" onclick="surveyPeriod(iso(-2),iso(0))">Últimos 3 dias</button></div></div>
+  <div class="grid kpis">
+    <div class="card kpi"><div class="l">Respostas</div><div class="v">${d.total}</div><div class="s">${f.from||f.to?"no período filtrado":"em todo o período da pesquisa"}</div></div>
+    <div class="card kpi"><div class="l">Comentários</div><div class="v">${coms.length}</div><div class="s">${d.total?Math.round(100*coms.length/d.total):0}% das respostas</div></div>
+    <div class="card kpi"><div class="l">Dias com resposta</div><div class="v">${d.daily.length}</div></div>
+  </div>
+  ${d.daily.length?`<div class="card" style="margin-bottom:14px"><h3>Respostas por dia</h3><div style="height:240px"><canvas id="sc1"></canvas></div></div>`:""}
+  <div class="grid ${sv.ask_turno?"g2eq":""}" style="margin-bottom:14px">
+    ${sv.ask_turno?`<div class="card"><h3>Turno de trabalho</h3>${barsHtml(d.by_turno||{})}</div>`:""}
+    <div class="card"><h3>Frequência de uso do restaurante</h3>${barsHtml(d.by_frequencia||{})}</div>
+  </div>
+  <div class="card"><h3>Comentários</h3>
+    <div class="row" style="margin-bottom:8px">
+      ${sv.ask_turno?`<div class="f"><label>Turno</label><select id="sft"><option value="">Todos</option>${turnos.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join("")}</select></div>`:""}
+      <div class="f" style="flex:1;min-width:200px"><label>Buscar</label><input type="text" id="sfq" style="width:100%" placeholder="Palavra no comentário"></div>
+      <div class="muted f" style="margin-left:auto" id="cc"></div></div>
+    <div id="cl"></div></div>`;
+  $("#sdf").onchange=e=>surveyPeriod(e.target.value,S.sf.to);
+  $("#sdt").onchange=e=>surveyPeriod(S.sf.from,e.target.value);
+  if(sv.ask_turno){$("#sft").value=f.turno;$("#sft").onchange=e=>{S.sf.turno=e.target.value;draw()}}
+  $("#sfq").value=f.q;$("#sfq").oninput=e=>{S.sf.q=e.target.value;draw()};
+  if(d.daily.length){
+    Chart.defaults.color=css("--muted");
+    S.charts.s=new Chart($("#sc1"),{type:"bar",data:{labels:d.daily.map(x=>fd(x.date).slice(0,5)),datasets:[{label:"Respostas",data:d.daily.map(x=>x.count),backgroundColor:"#4f9a7d",borderRadius:6}]},options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0},grid:{color:css("--line")}},x:{grid:{display:false}}},plugins:{legend:{display:false}}}});
+  }
+  draw();
+}
+
+/* ---------- Exportar PDF ---------- */
+function pdfDialog(kind){
+  const hasCom=kind!=="comments";
+  const scope=kind==="survey"?`${S.sd.survey.title} · ${S.sd.survey.unit_name||S.sd.survey.client_unit}`:(S.unit?S.me.units.find(u=>u.id===S.unit)?.name:`Todo o grupo (${S.me.units.length} unidades)`);
+  const per=kind==="survey"?((S.sf.from||S.sf.to)?`${S.sf.from?fd(S.sf.from):"início"} a ${S.sf.to?fd(S.sf.to):"hoje"}`:"todo o período da pesquisa"):`${fd(S.from)} a ${fd(S.to)}`;
+  const m=dialog(`<h3>Exportar relatório em PDF</h3>
+    <p class="muted" style="font-size:14px;margin:0 0 10px"><b style="color:var(--ink)">${esc(scope)}</b><br>Período: ${per}</p>
+    ${hasCom?`<label class="cbox"><input type="checkbox" id="inc" checked> Incluir os comentários no relatório</label>`:""}
+    <p class="hint">Vai abrir a janela de impressão do navegador: escolha <b>Salvar como PDF</b> como destino.</p>
+    <div class="act"><button class="btn alt" id="x">Cancelar</button><button class="btn pdf" id="ok">Gerar PDF</button></div>`);
+  m.querySelector("#x").onclick=()=>m.remove();
+  m.querySelector("#ok").onclick=async()=>{
+    const b=m.querySelector("#ok");b.disabled=true;b.textContent="Gerando…";
+    try{
+      const inc=hasCom?m.querySelector("#inc").checked:true;
+      if(kind==="dash")await exportDash(inc);else if(kind==="comments")await exportComments();else await exportSurvey(inc);
+      m.remove();
+    }catch(e){toast(e.message||"Não foi possível gerar o PDF.",1);b.disabled=false;b.textContent="Gerar PDF"}
+  };
+}
+async function chartImage(cfg,w,h){
+  const host=document.createElement("div");host.style.cssText=`position:fixed;left:-99999px;top:0;width:${w}px;height:${h}px`;
+  const cv=document.createElement("canvas");cv.style.width=w+"px";cv.style.height=h+"px";host.appendChild(cv);document.body.appendChild(host);
+  cfg.options={...(cfg.options||{}),responsive:false,animation:false,devicePixelRatio:2};
+  const ch=new Chart(cv,cfg);const url=ch.toBase64Image("image/png",1);ch.destroy();host.remove();return url;
+}
+const LT="#33443a",LG="#dde4de";
+async function printReport(html,name){
+  const root=$("#print-root");root.innerHTML=html;
+  await Promise.all([...root.querySelectorAll("img")].map(i=>i.complete?Promise.resolve():new Promise(r=>{i.onload=i.onerror=r})));
+  const old=document.title;document.title=name;document.body.classList.add("printing");
+  const done=()=>{window.removeEventListener("afterprint",done);document.title=old;document.body.classList.remove("printing");root.innerHTML=""};
+  window.addEventListener("afterprint",done);
+  setTimeout(()=>window.print(),80);
+}
+const slug=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-zA-Z0-9]+/g,"-").replace(/^-|-$/g,"");
+function prHead(title,sub){
+  return `<div class="pr-head"><img class="pr-logo" src="logo-white.png?v=3" alt="NutriBlu"><div class="pr-ht"><div class="pr-kicker">${esc(sub)}</div><div class="pr-title">${esc(title)}</div></div></div>`;
+}
+function prFoot(){return `<div class="pr-foot">NutriBlu Gastronomia Empresarial · relatório gerado em ${new Date().toLocaleString("pt-BR")} para ${esc(S.me.name)}. Os comentários não identificam os participantes. Uso restrito ao cliente.</div>`}
+function prComment(date,unit,chip,text,replies){
+  return `<div class="pr-cm"><div class="t"><span>${esc(unit)} · ${fd(date)}</span>${chip||""}</div><div class="b">${esc(text)}</div>${(replies||[]).map(x=>`<div class="r"><b>Resposta da NutriBlu:</b> ${esc(x.message)}</div>`).join("")}</div>`;
+}
+const prChip=r=>`<span class="pr-chip" style="background:${r.c}">${r.t}</span>`;
+function prKpi(l,v,s){return `<div class="pr-k"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s||""}</div></div>`}
+function plainDelta(cur,prev,has,kind){
+  if(!has)return "sem respostas no período anterior";
+  const df=(+cur)-(+prev);if(Math.abs(df)<(kind==="n"?.5:.05))return "igual ao período anterior";
+  const v=Math.abs(df),txt=kind==="pp"?v.toFixed(1).replace(".",",")+" p.p.":kind==="n"?String(Math.round(v)):v.toFixed(2).replace(".",",");
+  return `${df>0?"▲":"▼"} ${txt} vs. período anterior`;
+}
+async function exportDash(inc){
+  const d=await C("client_panel",{p_from:S.from,p_to:S.to,p_unit:unitArg()});
+  const coms=inc?await C("client_comments",{p_from:S.from,p_to:S.to,p_rating:null,p_unit:unitArg()}):[];
+  const k=d.kpis,pv=d.prev,has=pv.total>0,dist=RATINGS.map(r=>d.distribution.find(x=>x.rating===r.v)?.count||0);
+  let img1="",img2="";
+  if(d.daily.length){
+    img1=await chartImage({data:{labels:d.daily.map(x=>fd(x.date).slice(0,5)),datasets:[
+      {type:"bar",label:"Respostas",data:d.daily.map(x=>x.count),backgroundColor:"rgba(224,138,46,.55)",yAxisID:"y1",borderRadius:3},
+      {type:"line",label:"Satisfação (%)",data:d.daily.map(x=>+x.csat),borderColor:"#1F4E3D",backgroundColor:"#1F4E3D",tension:.3,pointRadius:2.5,yAxisID:"y"}]},
+      options:{scales:{y:{min:0,max:100,ticks:{color:LT,callback:v=>v+"%"},grid:{color:LG}},y1:{position:"right",beginAtZero:true,grid:{display:false},ticks:{color:LT,precision:0}},x:{grid:{display:false},ticks:{color:LT}}},plugins:{legend:{position:"bottom",labels:{color:LT}}}}},760,260);
+  }
+  img2=await chartImage({type:"doughnut",data:{labels:RATINGS.map(r=>r.t),datasets:[{data:dist,backgroundColor:RATINGS.map(r=>r.c),borderWidth:2,borderColor:"#fff"}]},options:{cutout:"60%",plugins:{legend:{display:false}}}},220,220);
+  const wd={};d.weekday.forEach(x=>wd[x.dow]=x);
+  const html=`${prHead("Relatório de satisfação","Pesquisa de satisfação · "+d.client_name)}
+  <div class="pr-meta"><span><b>Escopo:</b> ${esc(d.scope_name)}${d.unit_count>1?` (${d.unit_count} unidades)`:""}</span><span><b>Período:</b> ${fd(d.period.from)} a ${fd(d.period.to)}</span></div>
+  <div class="pr-kpis">
+    ${prKpi("Respostas",k.total,`${k.respondents} participantes · ${plainDelta(k.total,pv.total,has,"n")}`)}
+    ${prKpi("Satisfação",pct(k.csat),`Satisfeito + Muito satisfeito · ${plainDelta(k.csat,pv.csat,has,"pp")}`)}
+    ${prKpi("Nota média",num2(k.avg_score)+" / 4",plainDelta(k.avg_score,pv.avg_score,has,"d"))}
+    ${prKpi("Comentários",k.comments,k.total?Math.round(100*k.comments/k.total)+"% das respostas":"")}
+    ${prKpi("Cadastrados",d.participants.total,d.participants.active+" com período ativo")}
+    ${prKpi("Dias com resposta",d.daily.length+" de "+d.period.days,"")}
+  </div>
+  ${img1?`<div class="pr-h">Evolução diária</div><img class="pr-img" src="${img1}">`:""}
+  <div class="pr-h">Distribuição das avaliações e dia da semana</div>
+  <div class="pr-2"><div style="display:flex;gap:12px;align-items:center;break-inside:avoid"><img src="${img2}" style="width:130px;height:130px"><table class="pr-t"><tbody>${RATINGS.map((r,i)=>`<tr><td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${r.c};margin-right:6px"></span>${r.t}</td><td style="text-align:right"><b>${dist[i]}</b> (${k.total?Math.round(100*dist[i]/k.total):0}%)</td></tr>`).join("")}</tbody></table></div>
+  <table class="pr-t"><thead><tr><th>Dia</th><th>Respostas</th><th>Satisfação</th></tr></thead><tbody>${[1,2,3,4,5,6,0].map(i=>`<tr><td>${WD[i]}</td><td>${wd[i]?wd[i].count:"—"}</td><td>${wd[i]?pct(wd[i].csat):"—"}</td></tr>`).join("")}</tbody></table></div>
+  ${d.by_unit.length>1?`<div class="pr-h">Comparativo entre as unidades</div><table class="pr-t"><thead><tr><th>Unidade</th><th>Respostas</th><th>Participantes</th><th>Satisfação</th><th style="width:22%"></th><th>Nota média</th><th>Coment.</th></tr></thead><tbody>${[...d.by_unit].sort((a,b)=>(b.count>0)-(a.count>0)||b.csat-a.csat).map(u=>`<tr><td><b>${esc(u.name)}</b></td><td>${u.count}</td><td>${u.respondents}</td><td><b>${u.count?pct(u.csat):"—"}</b></td><td><div class="pr-bar"><i style="width:${u.count?u.csat:0}%;background:${csatColHex(+u.csat)}"></i></div></td><td>${u.count?num2(u.avg):"—"}</td><td>${u.comments}</td></tr>`).join("")}</tbody></table>`:""}
+  ${inc?`<div class="pr-h">Comentários (${coms.length})</div>${coms.length?coms.map(c=>prComment(c.date,c.unit,prChip(R(c.rating)),c.comment,c.replies)).join(""):'<div style="color:#5b6b61">Nenhum comentário no período.</div>'}`:""}
+  ${prFoot()}`;
+  await printReport(html,`Relatorio-Satisfacao-${slug(d.client_name)}-${slug(d.scope_name)}-${d.period.from}_a_${d.period.to}`);
+}
+async function exportComments(){
+  const list=await C("client_comments",{p_from:S.from,p_to:S.to,p_rating:S.cf.rating?+S.cf.rating:null,p_unit:unitArg()});
+  const q=S.cf.q.trim().toLowerCase(),rows=list.filter(c=>!q||String(c.comment).toLowerCase().includes(q));
+  const scope=S.unit?S.me.units.find(u=>u.id===S.unit)?.name:`Todo o grupo (${S.me.units.length} unidades)`;
+  const html=`${prHead("Comentários da pesquisa","Pesquisa de satisfação · "+S.me.name)}
+  <div class="pr-meta"><span><b>Escopo:</b> ${esc(scope)}</span><span><b>Período:</b> ${fd(S.from)} a ${fd(S.to)}</span><span><b>Filtro:</b> ${S.cf.rating?R(+S.cf.rating).t:"todas as avaliações"}${q?` · busca “${esc(S.cf.q.trim())}”`:""}</span></div>
+  <div class="pr-h">${rows.length} comentário${rows.length===1?"":"s"}</div>
+  ${rows.length?rows.map(c=>prComment(c.date,c.unit,prChip(R(c.rating)),c.comment,c.replies)).join(""):'<div style="color:#5b6b61">Nenhum comentário para este filtro.</div>'}
+  ${prFoot()}`;
+  await printReport(html,`Comentarios-${slug(S.me.name)}-${S.from}_a_${S.to}`);
+}
+async function exportSurvey(inc){
+  const d=await C("client_survey_results",{p_slug:S.survey,p_from:S.sf.from||null,p_to:S.sf.to||null});
+  const sv=d.survey,coms=d.comentarios||[];
+  const tot=o=>Object.values(o).reduce((a,n)=>a+n,0);
+  const tbl=(o,h)=>{const t=tot(o),ks=Object.keys(o).sort((a,b)=>o[b]-o[a]);return ks.length?`<table class="pr-t"><thead><tr><th>${h}</th><th>Respostas</th><th>%</th><th style="width:30%"></th></tr></thead><tbody>${ks.map(k=>`<tr><td>${esc(k)}</td><td>${o[k]}</td><td>${t?Math.round(100*o[k]/t):0}%</td><td><div class="pr-bar"><i style="width:${t?100*o[k]/t:0}%;background:#4f9a7d"></i></div></td></tr>`).join("")}</tbody></table>`:'<div style="color:#5b6b61">Sem dados.</div>'};
+  let img="";
+  if(d.daily.length)img=await chartImage({type:"bar",data:{labels:d.daily.map(x=>fd(x.date).slice(0,5)),datasets:[{label:"Respostas",data:d.daily.map(x=>x.count),backgroundColor:"#4f9a7d",borderRadius:3}]},options:{scales:{y:{beginAtZero:true,ticks:{color:LT,precision:0},grid:{color:LG}},x:{grid:{display:false},ticks:{color:LT}}},plugins:{legend:{display:false}}}},760,220);
+  const per=(S.sf.from||S.sf.to)?`${S.sf.from?fd(S.sf.from):"início"} a ${S.sf.to?fd(S.sf.to):"hoje"}`:"todo o período da pesquisa";
+  const html=`${prHead(sv.title,"Pesquisa personalizada · "+(sv.unit_name||sv.client_unit))}
+  <div class="pr-meta"><span><b>Pesquisa realizada de</b> ${fd(sv.opens_at)} a ${fd(sv.closes_at)}</span><span><b>Período do relatório:</b> ${per}</span></div>
+  <div class="pr-kpis">${prKpi("Respostas",d.total,"")}${prKpi("Comentários",coms.length,d.total?Math.round(100*coms.length/d.total)+"% das respostas":"")}${prKpi("Dias com resposta",d.daily.length,"")}</div>
+  ${img?`<div class="pr-h">Respostas por dia</div><img class="pr-img" src="${img}">`:""}
+  <div class="${sv.ask_turno?"pr-2":""}" style="margin-top:6px">${sv.ask_turno?`<div><div class="pr-h">Turno de trabalho</div>${tbl(d.by_turno||{},"Turno")}</div>`:""}<div><div class="pr-h">Frequência de uso do restaurante</div>${tbl(d.by_frequencia||{},"Frequência")}</div></div>
+  ${inc?`<div class="pr-h">Comentários (${coms.length})</div>${coms.length?coms.map(c=>`<div class="pr-cm"><div class="t"><span>${sv.ask_turno?esc(c.turno||"—")+" · ":""}${esc(c.frequencia||"")} · ${fd(c.data)}</span></div><div class="b">${esc(c.texto)}</div></div>`).join(""):'<div style="color:#5b6b61">Nenhum comentário no período.</div>'}`:""}
+  ${prFoot()}`;
+  await printReport(html,`Pesquisa-${slug(sv.title)}-${slug(sv.unit_name||sv.client_unit)}`);
+}
+
+if(S.token){boot()}else loginView();
+</script>
+</body>
+</html>
