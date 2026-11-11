@@ -426,16 +426,16 @@ function drawPoster(u,cv){
   c.fillStyle="#fff";c.font="800 64px Segoe UI, Arial, sans-serif";c.textBaseline="middle";c.fillText("NutriBlu",122,150);
   c.font="500 34px Segoe UI, Arial, sans-serif";c.fillStyle="#DCEBE3";c.fillText(u.name,122,215);
   c.fillStyle="#1F4E3D";c.textAlign="center";c.font="800 74px Segoe UI, Arial, sans-serif";
-  c.fillText("Como estava",W/2,410);c.fillText("sua refeição?",W/2,495);
+  c.fillText("Como estava",W/2,385);c.fillText("sua refeição?",W/2,465);
   c.font="500 38px Segoe UI, Arial, sans-serif";c.fillStyle="#5E6F67";
-  c.fillText("Responda em 30 segundos, 1 vez por dia,",W/2,580);c.fillText("e concorra ao sorteio!",W/2,630);
-  const qs=640,qx=(W-qs)/2,qy=690;
+  c.fillText("Responda em 30 segundos, 1 vez por dia,",W/2,540);c.fillText("e concorra ao sorteio!",W/2,586);
+  const qs=600,qx=(W-qs)/2,qy=670;
   c.fillStyle="#fff";c.strokeStyle="#E6E0D2";c.lineWidth=4;c.beginPath();c.roundRect(qx-40,qy-40,qs+80,qs+80,36);c.fill();c.stroke();
   const qr=qrcode(0,"M");qr.addData(url);qr.make();const n=qr.getModuleCount(),cell=qs/n;
   c.fillStyle="#1F4E3D";
   for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(qr.isDark(r,k))c.fillRect(Math.round(qx+k*cell),Math.round(qy+r*cell),Math.ceil(cell),Math.ceil(cell));
-  c.fillStyle="#1F4E3D";c.font="700 44px Segoe UI, Arial, sans-serif";c.fillText("Aponte a câmera do celular",W/2,1420-90);
-  c.font="500 30px Segoe UI, Arial, sans-serif";c.fillStyle="#5E6F67";c.fillText(url.replace(/^https?:\/\//,""),W/2,1420-35);
+  c.fillStyle="#1F4E3D";c.font="700 44px Segoe UI, Arial, sans-serif";c.fillText("Aponte a câmera do celular",W/2,1375);
+  c.font="500 30px Segoe UI, Arial, sans-serif";c.fillStyle="#5E6F67";c.fillText(url.replace(/^https?:\/\//,""),W/2,1430);
   c.fillStyle="#E08A2E";c.fillRect(0,H-24,W,24);
 }
 function openQR(id){
