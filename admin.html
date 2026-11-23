@@ -77,6 +77,7 @@ tr:last-child td{border-bottom:0}
 .cm{border-top:1px solid var(--line);padding:16px 0}.cm:first-child{border-top:0}
 .cm .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;background:none;color:inherit;padding:0}
 .cm .who b{font-size:15px}.cm .who span{color:var(--muted);font-size:13px;margin-left:6px}
+.cph{display:block;max-width:100%;max-height:260px;border-radius:10px;margin-top:10px}
 .bubble{background:var(--cream);border-radius:12px;padding:12px 14px;word-wrap:break-word;white-space:pre-wrap}
 .rep{margin:8px 0 0 18px;border-left:4px solid var(--green-2);background:var(--wash-g);border-radius:0 12px 12px 0;padding:10px 13px;white-space:pre-wrap}
 .rep small{display:block;font-weight:700;color:var(--green);margin-bottom:3px}
@@ -270,7 +271,7 @@ async function tabComments(){
       <div class="muted f" style="margin-left:auto">${list.length} comentário${list.length===1?"":"s"}</div></div>
     ${list.length?list.map(c=>{const r=R(c.rating);return`<div class="cm" id="cm-${c.id}">
       <div class="top"><div class="who"><b>${esc(c.name)}</b><span>${c.anonymous?"Sem cadastro":"Mat. "+esc(c.matricula)} · ${esc(c.unit)} · ${fd(c.date)}</span></div><span class="rchip" style="--c:${r.c}">${r.e} ${r.t}</span></div>
-      <div class="bubble">${esc(c.comment)}</div>
+      <div class="bubble">${c.comment?esc(c.comment):`<span class="muted">(só foto)</span>`}${c.photo?`<a href="${SB_URL}/storage/v1/object/public/comment-photos/${esc(c.photo)}" target="_blank" rel="noopener"><img class="cph" src="${SB_URL}/storage/v1/object/public/comment-photos/${esc(c.photo)}" alt="Foto anexada ao comentário" loading="lazy"></a>`:""}</div>
       ${c.replies.map(x=>`<div class="rep"><small>Resposta enviada · ${fdt(x.created_at)} ${x.read?"· ✓ lida":"· não lida"}</small>${esc(x.message)}</div>`).join("")}
       <div class="rf"><textarea id="rt-${c.id}" maxlength="1000" placeholder="Escreva a resposta que o participante verá na pesquisa..."></textarea><button class="btn sm" onclick="sendReply('${c.id}')">Responder</button></div></div>`}).join(""):`<div class="empty">Nenhum comentário para este filtro. 🎉</div>`}</div>`;
   $("#cs").value=S.cf.status;$("#cr").value=S.cf.rating;

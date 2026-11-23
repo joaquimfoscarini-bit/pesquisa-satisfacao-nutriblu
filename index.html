@@ -44,6 +44,12 @@ input[type=text],input[type=password],input[type=tel],textarea{width:100%;paddin
 input:focus,textarea:focus{border-color:var(--green-2);box-shadow:0 0 0 3px rgba(43,106,83,.15)}
 textarea{min-height:110px;resize:vertical}
 .hint{font-size:12.5px;color:var(--muted);margin-top:5px}
+.phbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;margin-top:12px;border:1.5px dashed var(--green-2);border-radius:12px;background:transparent;color:var(--green);font:inherit;font-weight:600;font-size:15px;cursor:pointer}
+.phbtn .muted{font-weight:400}
+.phprev{position:relative;margin-top:12px;border-radius:12px;overflow:hidden;border:1.5px solid var(--line);background:var(--cream)}
+.phprev img{display:block;width:100%;max-height:260px;object-fit:contain}
+.phprev button{position:absolute;top:8px;right:8px;width:36px;height:36px;border:0;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;font-size:16px;cursor:pointer}
+.mine img.cph,.cph{display:block;max-width:100%;max-height:240px;border-radius:10px;margin-top:10px}
 .btn{width:100%;min-height:56px;border:0;border-radius:14px;background:linear-gradient(155deg,var(--btn-a),var(--btn-b));color:#fff;font:inherit;font-weight:700;font-size:17px;cursor:pointer;margin-top:18px;transition:transform .05s,opacity .2s;box-shadow:0 10px 20px -10px rgba(31,78,61,.55)}
 .btn:active{transform:scale(.99)}
 .btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
@@ -123,6 +129,52 @@ const codeOk = () => { try { return localStorage.getItem(CODE_MONTH_KEY) === cur
 const savedCode = () => { try { return localStorage.getItem(CODE_VAL_KEY) || ""; } catch(e){ return ""; } };
 const setCodeOk = c => { try { localStorage.setItem(CODE_MONTH_KEY, curMonth()); localStorage.setItem(CODE_VAL_KEY, c); } catch(e){} };
 const clearCode = () => { try { localStorage.removeItem(CODE_MONTH_KEY); localStorage.removeItem(CODE_VAL_KEY); } catch(e){} };
+
+/* ---------- Foto no comentário ---------- */
+const PHOTO = { blob:null, url:null };
+const photoField = () => `<input type="file" id="phf" accept="image/*" hidden>
+  <button type="button" class="phbtn" id="phb">📷 Anexar foto <span class="muted">(opcional)</span></button>
+  <div class="phprev" id="php" hidden><img id="phi" alt="Foto anexada"><button type="button" id="phx" aria-label="Remover foto">✕</button></div>
+  <div class="hint" id="phm"></div>`;
+function photoReset(){ if (PHOTO.url) URL.revokeObjectURL(PHOTO.url); PHOTO.blob = null; PHOTO.url = null; }
+async function toJpeg(file){
+  // Redimensiona (lado maior 1600px) e converte para JPEG — reduz o envio e remove dados de localização (EXIF)
+  let bmp;
+  try { bmp = await createImageBitmap(file, { imageOrientation:"from-image" }); }
+  catch(e){ bmp = await new Promise((ok,no)=>{ const im=new Image(); im.onload=()=>ok(im); im.onerror=()=>no(new Error("Não foi possível ler esta imagem.")); im.src=URL.createObjectURL(file); }); }
+  const w = bmp.width || bmp.naturalWidth, h = bmp.height || bmp.naturalHeight;
+  const k = Math.min(1, 1600 / Math.max(w, h));
+  const cv = document.createElement("canvas"); cv.width = Math.round(w*k); cv.height = Math.round(h*k);
+  const cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(bmp,0,0,cv.width,cv.height);
+  const blob = await new Promise(r => cv.toBlob(r, "image/jpeg", 0.82));
+  if (!blob) throw new Error("Não foi possível processar a foto.");
+  if (blob.size > 5*1024*1024) throw new Error("A foto ficou muito grande. Tente outra.");
+  return blob;
+}
+function bindPhoto(){
+  photoReset();
+  $("#phb").addEventListener("click", () => $("#phf").click());
+  $("#phx").addEventListener("click", () => { photoReset(); $("#phf").value = ""; $("#php").hidden = true; $("#phb").hidden = false; $("#phm").textContent = ""; });
+  $("#phf").addEventListener("change", async e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    $("#phm").textContent = "Preparando a foto…";
+    try {
+      if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(f.name)) throw new Error("Escolha um arquivo de imagem.");
+      photoReset(); PHOTO.blob = await toJpeg(f); PHOTO.url = URL.createObjectURL(PHOTO.blob);
+      $("#phi").src = PHOTO.url; $("#php").hidden = false; $("#phb").hidden = true; $("#phm").textContent = "";
+    } catch(err){ photoReset(); e.target.value = ""; $("#phm").textContent = err.message || "Não foi possível usar esta foto."; }
+  });
+}
+async function uploadPhoto(){
+  if (!PHOTO.blob) return null;
+  const name = crypto.randomUUID() + ".jpg";
+  const res = await fetch(`${SB_URL}/storage/v1/object/comment-photos/${name}`, {
+    method:"POST", headers:{ apikey:SB_KEY, Authorization:"Bearer "+SB_KEY, "Content-Type":"image/jpeg", "x-upsert":"false" }, body: PHOTO.blob
+  });
+  if (!res.ok) throw new Error("Não foi possível enviar a foto. Verifique sua conexão e tente novamente, ou remova a foto.");
+  return name;
+}
+const photoUrl = p => `${SB_URL}/storage/v1/object/public/comment-photos/${p}`;
 
 async function api(fn, args = {}) {
   const res = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
@@ -259,6 +311,7 @@ function anonView(msg){
     <label for="cm">Quer nos contar mais? <span class="muted" style="font-weight:400">(opcional)</span></label>
     <textarea id="cm" maxlength="1000" placeholder="Elogio, sugestão ou problema — a gestão lê."></textarea>
     <div class="hint" id="cnt">0/1000</div>
+    ${photoField()}
     <div id="msg">${errBox(msg)}</div>
     <button class="btn" id="send" disabled>Enviar resposta</button>
   </div>
@@ -269,10 +322,13 @@ function anonView(msg){
     $("#send").disabled = false;
   }));
   $("#cm").addEventListener("input", e => $("#cnt").textContent = e.target.value.length + "/1000");
+  bindPhoto();
   $("#send").addEventListener("click", async () => {
     const btn = $("#send"); btn.disabled = true; btn.textContent = "Enviando...";
     try {
-      await api("submit_anonymous_response",{p_slug:slug,p_rating:state.rating,p_comment:$("#cm").value,p_code:savedCode()});
+      const ph = await uploadPhoto();
+      await api("submit_anonymous_response",{p_slug:slug,p_rating:state.rating,p_comment:$("#cm").value,p_code:savedCode(),p_photo:ph});
+      photoReset();
       anonThanks();
     } catch(e){
       if (/Código de acesso inválido/.test(e.message)) { clearCode(); return codeGateView(e.message); }
@@ -336,6 +392,7 @@ function surveyTab(){
     <label for="cm">Quer nos contar mais? <span class="muted" style="font-weight:400">(opcional)</span></label>
     <textarea id="cm" maxlength="1000" placeholder="Elogio, sugestão ou problema — a gestão lê e responde."></textarea>
     <div class="hint" id="cnt">0/1000</div>
+    ${photoField()}
     <div id="msg"></div>
     <button class="btn" id="send" disabled>Enviar resposta</button>
   </div>`;
@@ -345,10 +402,13 @@ function surveyTab(){
     $("#send").disabled = false;
   }));
   $("#cm").addEventListener("input", e => $("#cnt").textContent = e.target.value.length + "/1000");
+  bindPhoto();
   $("#send").addEventListener("click", async () => {
     const btn = $("#send"); btn.disabled = true; btn.textContent = "Enviando...";
     try {
-      await api("submit_response",{p_token:token(),p_rating:state.rating,p_comment:$("#cm").value});
+      const ph = await uploadPhoto();
+      await api("submit_response",{p_token:token(),p_rating:state.rating,p_comment:$("#cm").value,p_photo:ph});
+      photoReset();
       state.justAnswered = true;
       state.status = await api("my_status",{p_token:token()});
       state.comments = null;
@@ -374,7 +434,7 @@ async function commentsTab(){
       const r = R(it.rating);
       return `<div class="item">
         <div class="meta"><span>${fmtDate(it.date)}</span><span class="chip" style="--c:${r.c}">${r.e} ${r.t}</span></div>
-        <div class="mine">${esc(it.comment)}</div>
+        <div class="mine">${it.comment?esc(it.comment):`<span class="muted">(só foto)</span>`}${it.photo?`<a href="${photoUrl(it.photo)}" target="_blank" rel="noopener"><img class="cph" src="${photoUrl(it.photo)}" alt="Foto anexada ao comentário" loading="lazy"></a>`:""}</div>
         ${it.replies.length
           ? it.replies.map(rp => `<div class="reply ${rp.unread?"new":""}"><small>Resposta da gestão · ${fmtDT(rp.created_at)}${rp.unread?" · NOVA":""}</small>${esc(rp.message)}</div>`).join("")
           : `<div class="wait">Aguardando resposta da gestão…</div>`}
